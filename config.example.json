@@ -1,0 +1,23 @@
+{
+  "title": "Kitty Office",
+  "floors": [
+    {"id": "content", "name": "글쓰기", "order": 1, "prefixes": ["~/work/blog", "~/work/newsletter"]},
+    {"id": "client", "name": "개발", "order": 0, "prefixes": ["~/work/app", "~/work/api"]},
+    {"id": "lobby", "name": "로비", "order": -1, "prefixes": []}
+  ],
+  "seats": {
+    "~/work/blog": "alice",
+    "~/work/app": "bob"
+  },
+  "names": {
+    "Alice": "alice",
+    "Bob": "bob"
+  },
+  "cats": {
+    "alice": "ginger",
+    "bob": "tuxedo"
+  },
+  "notify": true,
+  "allowedHosts": [],
+  "token": null
+}

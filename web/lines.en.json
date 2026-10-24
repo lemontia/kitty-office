@@ -1,0 +1,1172 @@
+{
+ "common": {
+  "working": [
+   "My paws are glued to the keyboard{meow}",
+   "Just this one thing, then I'm done",
+   "My coffee went cold again",
+   "Did I save? I probably saved",
+   "Don't count my open tabs",
+   "It works. No idea why",
+   "The error message is staring at me",
+   "Who wrote this? Oh. Me",
+   "Fixed one line, broke ten",
+   "Let's just run it and see",
+   "The comments are lying to me",
+   "Focusing. Please don't talk to me",
+   "Tests are green. Suspicious",
+   "Reading the docs. Third time",
+   "Where was I again{meow}",
+   "Ctrl+Z is wearing out",
+   "Done in five minutes. Or five hours",
+   "Adding one more log line. Again",
+   "Hold on, why does this work?",
+   "Today's goal: break nothing"
+  ],
+  "meeting": [
+   "We covered that already",
+   "Let me sum it up",
+   "So... what's the decision?",
+   "Great question{meow}",
+   "Let's park that for next time",
+   "Can you all see my screen?",
+   "In one sentence:",
+   "Where did that number come from?",
+   "This could've been an email",
+   "Is it my turn?",
+   "Who owns this, then?",
+   "Nodding along{meow}",
+   "Just one thing this week, then",
+   "Room's booked for five more minutes",
+   "Not against it, but...",
+   "Let's set priorities first",
+   "Silence means yes, right?",
+   "Let's wrap before lunch",
+   "I'll check and get back to you",
+   "Who's taking notes?"
+  ],
+  "waiting": [
+   "When will I get an answer...",
+   "Standing here with my papers",
+   "The approver must be busy{meow}",
+   "Is it my turn yet?",
+   "The line isn't moving",
+   "My legs are going numb",
+   "I just need a yes or no",
+   "One stamp, that's all",
+   "Waiting is work too",
+   "The corner of my paper got crumpled",
+   "Please don't forget me",
+   "Should I just come back later?",
+   "Staring at the clock",
+   "Should I knock?",
+   "My work is on hold over here",
+   "It's a one-line answer, really",
+   "Not cutting in, promise",
+   "Rereading my paper. Fifth time",
+   "I'll run the moment you answer{meow}",
+   "We need a ticket machine"
+  ],
+  "reported": [
+   "Report's in!",
+   "All done. What's next?",
+   "Compliments always welcome{meow}",
+   "Did you see the results?",
+   "Give me the next one",
+   "Catching my breath",
+   "Pretty proud of this one",
+   "Just needs your OK",
+   "Done. Actually done",
+   "Read it twice before sending",
+   "Tell me if anything's off",
+   "My paws are itching for more",
+   "To-do list: empty{meow}",
+   "That feeling won't last",
+   "Summary's at the top",
+   "Shorter report, longer work",
+   "Waiting next to the line",
+   "Hope you like it",
+   "Can I take a break now?",
+   "Ready for the next round"
+  ],
+  "resting": [
+   "Just resting my eyes{meow}",
+   "Call me and I'll get up",
+   "Resting is part of the job",
+   "The sofa won't let me go",
+   "Five more minutes...",
+   "Worked in my dream too",
+   "Recharging... 12%",
+   "Doing absolutely nothing",
+   "This cushion is the best{meow}",
+   "Practicing not thinking about work",
+   "Failed. Thought about work",
+   "Why am I tired from resting?",
+   "Nobody needs me. Nice",
+   "Nobody needs me. A little sad",
+   "Can't stop yawning",
+   "Wake me if work comes in",
+   "Nap is productivity",
+   "It's warm here{meow}",
+   "Break time goes the fastest",
+   "Don't want to get up"
+  ],
+  "outside": [
+   "Today's to-do: nothing",
+   "The fish aren't biting{meow}",
+   "Not leaving this hammock",
+   "Love the sea breeze",
+   "So this is what clocking out feels like",
+   "Watching the campfire",
+   "Not checking email",
+   "...checked email",
+   "One more lap",
+   "So many stars{meow}",
+   "Tomorrow's problems are tomorrow's",
+   "Waves sound nice",
+   "I made it through today",
+   "Marshmallows, anyone?",
+   "Work-free zone",
+   "Notifications off{meow}",
+   "Caught one! ...a leaf",
+   "Bonfire watching is free",
+   "Five more minutes out here",
+   "Don't want to go home"
+  ],
+  "enter": [
+   "Morning, everyone!",
+   "Hello{meow}",
+   "Glad to be here",
+   "Where's my seat?",
+   "Coffee first",
+   "I'm not late, right?",
+   "Here for new work",
+   "Let's do this{meow}",
+   "Clocking in",
+   "Ready!",
+   "Where should I start?",
+   "Long commute today",
+   "Gonna finish early today",
+   "Monitor on first",
+   "Picking up where I left off",
+   "New day, new bugs",
+   "Sneaking in quietly",
+   "I'm back!",
+   "Here to work{meow}",
+   "Smells like coffee in here"
+  ],
+  "leave": [
+   "Heading out!",
+   "See you tomorrow",
+   "Good work, everyone",
+   "Done for today!",
+   "I'll get the lights",
+   "Bag's packed",
+   "Leaving before more work shows up",
+   "Not running away, promise",
+   "Off I go{meow}",
+   "Did enough for today",
+   "It'll run fine without me",
+   "Have a nice evening",
+   "Clocking out",
+   "Not looking back{meow}",
+   "Desk is tidy",
+   "Going to see the sea",
+   "Saved. Definitely saved",
+   "That's my cue",
+   "Bye~",
+   "See ya"
+  ]
+ },
+ "type": {
+  "mackerel": {
+   "working": [
+    "What if this breaks tomorrow?",
+    "Did I back it up? Once more",
+    "The tests passed. Why?",
+    "What if I broke everything",
+    "Saved it three times"
+   ],
+   "meeting": [
+    "I didn't say anything wrong, right?",
+    "Is that schedule really okay...",
+    "What if it fails?",
+    "Everyone looks unhappy{meow}",
+    "Did I understand that right?"
+   ],
+   "waiting": [
+    "Was my question weird...",
+    "You're not mad, are you?",
+    "No reply. Did I mess up?",
+    "What if there's a typo",
+    "Imagining the worst while I wait"
+   ],
+   "reported": [
+    "Sent it... is it okay?",
+    "Hope I didn't miss anything",
+    "Found a typo. Too late",
+    "It's fine if it's not praise{meow}",
+    "The reaction scares me more"
+   ],
+   "resting": [
+    "Am I allowed to rest?",
+    "What if someone needs me",
+    "Set two alarms",
+    "Can't nap, too anxious",
+    "Just closing my eyes{meow}"
+   ],
+   "outside": [
+    "What if nothing bites",
+    "Did I turn off the stove?",
+    "Is this hammock rope strong enough?",
+    "Already worried about tomorrow{meow}",
+    "Did I close my laptop?"
+   ],
+   "enter": [
+    "I'm not late, am I?",
+    "My seat's still mine, right?",
+    "Please let today be uneventful{meow}",
+    "Did I miss a meeting?",
+    "Is it okay to come in?"
+   ],
+   "leave": [
+    "Really okay to leave?",
+    "Checked save three times",
+    "Left a note for what's left",
+    "Call me if anything comes up",
+    "Did I lock the door{meow}?"
+   ]
+  },
+  "tuxedo": {
+   "working": [
+    "Done.",
+    "Not a bug. A feature",
+    "Quiet, please",
+    "Easy",
+    "One shot"
+   ],
+   "meeting": [
+    "Get to the point.",
+    "No",
+    "Fine. Go ahead",
+    "Numbers?",
+    "Next item"
+   ],
+   "waiting": [
+    "...waiting",
+    "Not in a hurry. Slightly",
+    "Just answer",
+    "Slow",
+    "Hm."
+   ],
+   "reported": [
+    "Done",
+    "Check it",
+    "Next.",
+    "Skip the praise",
+    "As expected"
+   ],
+   "resting": [
+    "Resting. Do not disturb",
+    "...",
+    "Eyes closed, not asleep",
+    "Wake me at five",
+    "Hm, comfy"
+   ],
+   "outside": [
+    "The sea. Not bad",
+    "Hammock's mine",
+    "I built the fire",
+    "Off the clock. Don't follow me",
+    "That's it for today"
+   ],
+   "enter": [
+    "I'm here",
+    "Hi.",
+    "Let's start",
+    "Not late. Calculated",
+    "Where's the work"
+   ],
+   "leave": [
+    "Leaving",
+    "Later.",
+    "Tomorrow.",
+    "Lights are on you",
+    "Bye"
+   ]
+  },
+  "ginger": {
+   "working": [
+    "Feeling great today{meow}!",
+    "If it fails, try again{meow}",
+    "Bugs are friends{meow}",
+    "Almost there{meow}!",
+    "This is fun{meow}"
+   ],
+   "meeting": [
+    "Sure, let's try it{meow}!",
+    "It'll all work out{meow}",
+    "I'll do it{meow}!",
+    "Good idea{meow}!",
+    "Snacks after this{meow}?"
+   ],
+   "waiting": [
+    "Waiting is fun too{meow}",
+    "Answer's coming soon{meow}!",
+    "Making friends in line{meow}",
+    "Nice view from here{meow}",
+    "Good things come to those who wait{meow}!"
+   ],
+   "reported": [
+    "Did it{meow}!",
+    "Report done, feeling great{meow}",
+    "What's next{meow}?",
+    "Victory dance{meow}",
+    "Lucky day{meow}"
+   ],
+   "resting": [
+    "Naps are the best{meow}",
+    "So fluffy{meow}!",
+    "Dreamt of fish{meow}",
+    "Sunshine{meow}",
+    "Five more happy minutes{meow}"
+   ],
+   "outside": [
+    "Gonna catch a fish{meow}!",
+    "Fun even if I don't{meow}",
+    "Hammock time{meow}",
+    "Clock-out party{meow}!",
+    "Tomorrow'll be fun too{meow}"
+   ],
+   "enter": [
+    "Good morning{meow}!",
+    "Let's have fun today{meow}!",
+    "Brought snacks{meow}",
+    "Great weather{meow}",
+    "Hi hi{meow}!"
+   ],
+   "leave": [
+    "Clock-out time{meow}!",
+    "Today was fun{meow}",
+    "See you tomorrow{meow}!",
+    "Beach time{meow}",
+    "Bye{meow}!"
+   ]
+  },
+  "siamese": {
+   "working": [
+    "Is there a source for this number?",
+    "Docs and code disagree. Which is right?",
+    "Reproduce it first",
+    "Not measured means not known",
+    "Technically, half of it works"
+   ],
+   "meeting": [
+    "What's the evidence?",
+    "Let's define terms first",
+    "That's correlation, not cause",
+    "Sample size?",
+    "That slide says otherwise"
+   ],
+   "waiting": [
+    "I'm timing this wait too",
+    "Two options. Not hard",
+    "Longer than average",
+    "No answer, so default plan",
+    "Paper reviewed three times"
+   ],
+   "reported": [
+    "Results and evidence attached",
+    "Limitations noted",
+    "Numbers are reproducible",
+    "Rebuttals welcome",
+    "Sources cited"
+   ],
+   "resting": [
+    "Measuring rest efficiency",
+    "Twenty minutes is optimal",
+    "This sofa angle is inefficient",
+    "Counterexamples even while resting",
+    "Resting. Reason: tired"
+   ],
+   "outside": [
+    "Analyzing why the fish won't bite",
+    "It's the water temperature",
+    "Counting the wave period",
+    "One constellation is drawn wrong",
+    "If I write it down, it's work"
+   ],
+   "enter": [
+    "Arrival time logged",
+    "Checking yesterday's notes",
+    "Any changes?",
+    "Three things today",
+    "On time. Exactly"
+   ],
+   "leave": [
+    "Departure time logged",
+    "Remaining tasks listed",
+    "Two things to check tomorrow",
+    "No overtime",
+    "Leaving. End of report"
+   ]
+  },
+  "calico": {
+   "working": [
+    "So, funny story",
+    "Did you hear about that?",
+    "Hands working, mouth resting{meow}",
+    "Can't stay quiet",
+    "Working, I swear{meow}"
+   ],
+   "meeting": [
+    "Oh, I have something on that!",
+    "Quick tangent",
+    "I heard in the hallway...",
+    "Am I talking too much?",
+    "One more thing. Two"
+   ],
+   "waiting": [
+    "Made friends with the cat ahead",
+    "Lines are great for chatting",
+    "Sorting out the gossip while I wait",
+    "I'll tell everyone the answer",
+    "Chatting for an hour now"
+   ],
+   "reported": [
+    "Report's in! Listen up",
+    "Wrote three pages. That's short",
+    "Things I couldn't fit in the report{meow}",
+    "Oh, and one more thing",
+    "Anyone want to hear?"
+   ],
+   "resting": [
+    "Resting, but I thought of something",
+    "Anyone around?",
+    "I talk in my sleep, apparently",
+    "Hard to rest quietly{meow}",
+    "Talking to myself"
+   ],
+   "outside": [
+    "Talking to the fish",
+    "Seat open next to the hammock!",
+    "Venting to the sea{meow}",
+    "Off the clock, mouth still on",
+    "Today was so much fun"
+   ],
+   "enter": [
+    "Hiii! I'm here",
+    "How did that thing go?",
+    "Any news today?",
+    "Saw something funny on the way",
+    "What did I miss?"
+   ],
+   "leave": [
+    "Bye! Let's continue tomorrow",
+    "Saying bye to everyone on my way",
+    "Still have stuff to say",
+    "I'll call you on the way{meow}",
+    "Bye~ bye~"
+   ]
+  },
+  "patch": {
+   "working": [
+    "What's the margin on this fix?",
+    "Time is money. Hurry",
+    "Throwing in one extra",
+    "Twice the speed, half the cost",
+    "I don't do losing deals{meow}"
+   ],
+   "meeting": [
+    "How much is this worth?",
+    "One condition",
+    "Bundle discount available",
+    "What's in it for me?",
+    "Decide now, get a bonus{meow}"
+   ],
+   "waiting": [
+    "Waiting costs money too",
+    "Answer now, no interest",
+    "This paper is worth it",
+    "Answer and I'll add a bonus{meow}",
+    "Limited-time answer opportunity!"
+   ],
+   "reported": [
+    "Delivered",
+    "Came in under budget",
+    "Added a little extra",
+    "Receipt's at the bottom",
+    "Good deal this time{meow}"
+   ],
+   "resting": [
+    "Rest is an investment",
+    "Nap ROI is great",
+    "Free sofa. The best",
+    "Dreamt of a big deal{meow}",
+    "Wake-up fee applies"
+   ],
+   "outside": [
+    "Checking fish prices",
+    "Hammock rental business?",
+    "Walks are free{meow}",
+    "Good sales day",
+    "Tomorrow's deals are tomorrow's"
+   ],
+   "enter": [
+    "Open for business",
+    "Any orders today?",
+    "I smell a good deal",
+    "Customer already{meow}",
+    "How's the market today?"
+   ],
+   "leave": [
+    "Shop's closed",
+    "Books balanced",
+    "Selling the rest tomorrow",
+    "Decent profit today{meow}",
+    "No losses, clocking out"
+   ]
+  },
+  "gray": {
+   "working": [
+    "Eyes closed, still working",
+    "Typos from sleepiness",
+    "Third coffee, still sleepy{meow}",
+    "Almost fell asleep on the keyboard",
+    "Snap out of it{meow}"
+   ],
+   "meeting": [
+    "I'm listening. Eyes just closed",
+    "Sorry, what was that?",
+    "Warm meeting room... dangerous",
+    "Wake me when there's a decision",
+    "Holding back a yawn"
+   ],
+   "waiting": [
+    "Didn't know you could sleep standing",
+    "Napping in line",
+    "Wake me when you answer{meow}",
+    "Wish this paper was a pillow",
+    "Zzz... oh, still here"
+   ],
+   "reported": [
+    "Report done... can I sleep now?",
+    "Sleepy right after sending{meow}",
+    "Five minutes before the next one",
+    "Tired but proud",
+    "Just one yawn"
+   ],
+   "resting": [
+    "Zzz{meow}",
+    "Sleeping... don't wake me",
+    "This is my real job",
+    "One with the sofa{meow}",
+    "Sleep talk: I saved it"
+   ],
+   "outside": [
+    "The hammock is a bed",
+    "Fell asleep fishing",
+    "Nodding off by the fire{meow}",
+    "Waves sound like a lullaby",
+    "Plan after work: sleep"
+   ],
+   "enter": [
+    "Here. Still asleep",
+    "Eyes are open, at least",
+    "Where's the coffee",
+    "Snoozed five alarms",
+    "Body's here, mind's at home{meow}"
+   ],
+   "leave": [
+    "Clocking out. Bed time",
+    "Going straight to sleep{meow}",
+    "Good work... yawn",
+    "The bed is calling",
+    "See you in my dreams"
+   ]
+  },
+  "black": {
+   "working": [
+    "I could do this with my eyes closed",
+    "Actually, first time doing this",
+    "Genius takes time",
+    "Bug? I put it there on purpose{meow}",
+    "Not stuck. Getting stuck"
+   ],
+   "meeting": [
+    "I've done something similar",
+    "That term? Of course I know it",
+    "New here, but hear me out",
+    "I'll take it! Whatever it is",
+    "It was all part of my plan"
+   ],
+   "waiting": [
+    "Approval? Quick. It's me",
+    "Front of the line, I thought",
+    "Not shaking. It's cold{meow}",
+    "First time in this line",
+    "Forgot what I asked, actually"
+   ],
+   "reported": [
+    "Done. No big deal",
+    "First report. Nervous",
+    "Ready for praise",
+    "Seniors do this much, right{meow}?",
+    "Easy. Only redid it three times"
+   ],
+   "resting": [
+    "Studying while pretending to rest",
+    "Not tired. Strategic rest",
+    "This sofa is my spot{meow}",
+    "Not sleeping. Meditating",
+    "This pose is the coolest"
+   ],
+   "outside": [
+    "First time fishing, gonna crush it",
+    "Lighting fires is easy{meow}",
+    "The fish fear me",
+    "Planning my future by the sea",
+    "Shining like a star"
+   ],
+   "enter": [
+    "New hire, reporting in!",
+    "Here to take over{meow}",
+    "Not nervous at all",
+    "Good morning, seniors!",
+    "The legend begins"
+   ],
+   "leave": [
+    "First clock-out, stylishly",
+    "More heroics tomorrow",
+    "A little work left, actually{meow}",
+    "Going home to study",
+    "Newbie exits"
+   ]
+  },
+  "brown": {
+   "working": [
+    "Snack after this",
+    "Hunger makes bugs visible",
+    "Crumbs on the keyboard",
+    "Brain work makes me hungry{meow}",
+    "Sugar crash"
+   ],
+   "meeting": [
+    "Are there snacks?",
+    "We'll be done before lunch, right?",
+    "Decide after we eat",
+    "Passing around chips",
+    "Stomach says the meeting's over"
+   ],
+   "waiting": [
+    "Standing in line makes me hungry",
+    "Snack once it's approved",
+    "Picking dinner while I wait",
+    "Did the approver eat lunch{meow}?",
+    "Got candy in my pocket"
+   ],
+   "reported": [
+    "Done! Lunch now?",
+    "Snack as a reward{meow}",
+    "One bite before the next task",
+    "Can we order chicken?",
+    "Cake for me"
+   ],
+   "resting": [
+    "Full and sleepy",
+    "Snacking on the sofa",
+    "Dreamt of grilled fish{meow}",
+    "Full and warm",
+    "Patting my belly{meow}"
+   ],
+   "outside": [
+    "Grilling whatever I catch",
+    "Sweet potatoes in the fire",
+    "Third marshmallow{meow}",
+    "The sea makes me think of sashimi",
+    "Is there a shop out here?"
+   ],
+   "enter": [
+    "Had breakfast",
+    "Brought snacks{meow}",
+    "Lunch menu first",
+    "Coffee and donuts",
+    "What's for lunch?"
+   ],
+   "leave": [
+    "Off to dinner!",
+    "Clock-out equals food{meow}",
+    "What's the late-night snack?",
+    "Ordering chicken",
+    "Ate well, worked well"
+   ]
+  },
+  "cream": {
+   "working": [
+    "I can do it{meow}!",
+    "Go, everyone{meow}!",
+    "Line by line, you're doing great{meow}",
+    "Best team ever{meow}",
+    "Doing great, me{meow}"
+   ],
+   "meeting": [
+    "Great idea{meow}!",
+    "We can do it together{meow}",
+    "Let's clap{meow}",
+    "Nice presentation{meow}",
+    "Thanks, everyone{meow}"
+   ],
+   "waiting": [
+    "You got this, front of the line{meow}!",
+    "Hang in there, everyone{meow}",
+    "Answer's coming soon{meow}",
+    "Go, approver{meow}",
+    "Applause for the whole line{meow}"
+   ],
+   "reported": [
+    "Did it! Thanks, all{meow}",
+    "Report done, applause{meow}!",
+    "Praise goes to the team{meow}",
+    "Results look great{meow}",
+    "Best day{meow}"
+   ],
+   "resting": [
+    "Cheering for resting too{meow}",
+    "Get some rest, everyone{meow}",
+    "Recharge and go again{meow}",
+    "Cheering in my sleep{meow}",
+    "We survived today{meow}"
+   ],
+   "outside": [
+    "Go, fish{meow}!",
+    "Cheers by the fire{meow}",
+    "Thanks, ocean{meow}",
+    "Let's walk together{meow}",
+    "Happy clock-out{meow}"
+   ],
+   "enter": [
+    "Morning! Go team{meow}",
+    "Here to cheer{meow}",
+    "Hi, everyone{meow}!",
+    "Let's do great today{meow}",
+    "Sharing snacks{meow}"
+   ],
+   "leave": [
+    "Great work, everyone{meow}!",
+    "We did it today{meow}",
+    "Rest up, see you tomorrow{meow}",
+    "Get home safe{meow}",
+    "Thanks for today{meow}"
+   ]
+  }
+ },
+ "situ": {
+  "wait": {
+   "mackerel": [
+    "{wait} now... did you forget my question?",
+    "{wait} of waiting. Did I do something wrong{meow}?"
+   ],
+   "tuxedo": [
+    "{wait}. Long",
+    "{wait}. Still fine"
+   ],
+   "ginger": [
+    "{wait} in, still fine{meow}!",
+    "{wait} of waiting, almost there{meow}"
+   ],
+   "siamese": [
+    "Waited {wait}. Above average",
+    "{wait} passed. Go with the default?"
+   ],
+   "calico": [
+    "{wait} of chatting in line",
+    "Heard the whole life story in {wait}"
+   ],
+   "patch": [
+    "{wait} of waiting. Charging interest",
+    "{wait} in. This time costs money"
+   ],
+   "gray": [
+    "{wait}... napped standing up",
+    "{wait} gone. Two dreams{meow}"
+   ],
+   "black": [
+    "{wait}. Acting relaxed",
+    "{wait}... is it always this slow{meow}?"
+   ],
+   "brown": [
+    "{wait}. Ate all my snacks",
+    "{wait} of waiting. Hungry{meow}"
+   ],
+   "cream": [
+    "{wait}, hang in there{meow}",
+    "Made it {wait}! We're amazing{meow}"
+   ]
+  },
+  "partner": {
+   "mackerel": [
+    "{partner} doesn't look happy...",
+    "{partner}, was that okay?"
+   ],
+   "tuxedo": [
+    "{partner}, the point",
+    "Against {partner}'s plan"
+   ],
+   "ginger": [
+    "With {partner}, anything works{meow}!",
+    "{partner}, great idea{meow}"
+   ],
+   "siamese": [
+    "{partner}, show me the evidence",
+    "{partner}, are your numbers reproducible?"
+   ],
+   "calico": [
+    "Talking with {partner} never ends",
+    "{partner}, let's finish that story"
+   ],
+   "patch": [
+    "{partner}, one condition",
+    "Good deal with {partner}"
+   ],
+   "gray": [
+    "{partner}'s voice is a lullaby",
+    "{partner}, wake me at the end{meow}"
+   ],
+   "black": [
+    "Got it all, {partner}{meow}",
+    "{partner}, leave it to me!"
+   ],
+   "brown": [
+    "{partner}, lunch after this?",
+    "{partner}'s snack looks good{meow}"
+   ],
+   "cream": [
+    "{partner}, great talk{meow}!",
+    "Feels safe with {partner}{meow}"
+   ]
+  },
+  "ctx": {
+   "mackerel": [
+    "Context {ctx} full. Memory overflowing",
+    "{ctx} full. Should I clean up?"
+   ],
+   "tuxedo": [
+    "{ctx}. Time to compact",
+    "Head's full"
+   ],
+   "ginger": [
+    "Head {ctx} full! Still fine{meow}",
+    "Memory almost full{meow}"
+   ],
+   "siamese": [
+    "Context {ctx}. Recommend summarizing",
+    "Beyond this, I forget the start"
+   ],
+   "calico": [
+    "{ctx} full of stories",
+    "Head full of chatter"
+   ],
+   "patch": [
+    "Memory at {ctx}. Upgrade quote?",
+    "Full. Cleanup pays off"
+   ],
+   "gray": [
+    "Head {ctx} full... sleepy",
+    "Memory overflow makes me yawn{meow}"
+   ],
+   "black": [
+    "{ctx} full. Still room. Probably",
+    "Full head means I learned a lot{meow}"
+   ],
+   "brown": [
+    "Head and belly both {ctx} full",
+    "Full. Need time to digest"
+   ],
+   "cream": [
+    "{ctx}! Tidy up a bit and go on{meow}",
+    "Worked hard enough to fill my head{meow}"
+   ]
+  },
+  "steps": {
+   "mackerel": [
+    "Step {steps} already... on track?",
+    "Changed it {steps} times. Nervous"
+   ],
+   "tuxedo": [
+    "{steps} steps. Nearly there",
+    "Number {steps}. No problem"
+   ],
+   "ginger": [
+    "{steps} steps cleared{meow}!",
+    "Try {steps}, this one works{meow}"
+   ],
+   "siamese": [
+    "Step {steps}. Half of it is verification",
+    "{steps} runs, narrowed to two causes"
+   ],
+   "calico": [
+    "{steps} steps, {steps} stories",
+    "Number {steps} already, want to hear?"
+   ],
+   "patch": [
+    "Step {steps}. Over the estimate",
+    "{steps} tries, I owe a discount"
+   ],
+   "gray": [
+    "Step {steps}... eyes closing",
+    "Number {steps}, working half asleep{meow}"
+   ],
+   "black": [
+    "{steps} steps, all planned. Not really",
+    "Number {steps}, I know what I'm doing{meow}"
+   ],
+   "brown": [
+    "Step {steps}. {steps} snacks eaten",
+    "{steps} done, I earned dinner{meow}"
+   ],
+   "cream": [
+    "{steps} steps! Doing great{meow}",
+    "Number {steps}, keep going{meow}!"
+   ]
+  },
+  "night": {
+   "mackerel": [
+    "Still up... will tomorrow be okay?",
+    "It's late. Afraid of mistakes"
+   ],
+   "tuxedo": [
+    "Night. Quiet. Good",
+    "Overtime. Used to it"
+   ],
+   "ginger": [
+    "Still fun at night{meow}!",
+    "Working under the stars{meow}"
+   ],
+   "siamese": [
+    "Night error rate is higher. Careful",
+    "Recheck tonight's decisions tomorrow"
+   ],
+   "calico": [
+    "Quiet night. Nobody to talk to",
+    "Talking to myself on overtime"
+   ],
+   "patch": [
+    "Night shift rates apply",
+    "Night prices are higher"
+   ],
+   "gray": [
+    "Night... I should be asleep",
+    "Eyelids weigh a ton{meow}"
+   ],
+   "black": [
+    "All-nighter? Easy. First one, though",
+    "Newbie on overtime, cool{meow}"
+   ],
+   "brown": [
+    "Late-night snack time",
+    "Night means ramen{meow}"
+   ],
+   "cream": [
+    "Thanks for staying late{meow}!",
+    "Cheering even at night{meow}"
+   ]
+  },
+  "stale_report": {
+   "mackerel": [
+    "Reported {ago} ago... something wrong?",
+    "{ago} and no reply. Rewrite it?"
+   ],
+   "tuxedo": [
+    "{ago}. They'll read it eventually",
+    "Waiting is work too. Lying down"
+   ],
+   "ginger": [
+    "{ago} of waiting, still fine{meow}",
+    "Floor's cool{meow}. Take your time"
+   ],
+   "siamese": [
+    "{ago} since report. Unread",
+    "No read receipt. Noted"
+   ],
+   "calico": [
+    "Reported {ago} ago, nobody reads it?",
+    "Talking to myself about the report"
+   ],
+   "patch": [
+    "Delivered {ago} ago. No inspection yet",
+    "{ago} unpaid. Counting interest"
+   ],
+   "gray": [
+    "Reported {ago} ago... lay down a bit",
+    "Became friends with the floor{meow}"
+   ],
+   "black": [
+    "{ago}. Lying down on purpose",
+    "Too perfect to read, probably{meow}"
+   ],
+   "brown": [
+    "Reported {ago} ago... hungry",
+    "Thinking about snacks{meow}"
+   ],
+   "cream": [
+    "{ago}, no rush, take your time{meow}",
+    "We're amazing for waiting{meow}"
+   ]
+  },
+  "wait_bored_yarn": {
+   "mackerel": [
+    "{wait} in... too worried, so yarn time",
+    "I'll run the second approval comes...",
+    "The yarn's tangled. Like my nerves"
+   ],
+   "tuxedo": [
+    "{wait}. Done waiting. Yarn",
+    "Yarn. Not bad",
+    "Tap. It rolls. Done"
+   ],
+   "ginger": [
+    "{wait} in! Yarn time{meow}",
+    "The yarn's having more fun than me{meow}",
+    "One more round before approval{meow}!"
+   ],
+   "siamese": [
+    "Waited {wait}. Measuring yarn trajectory",
+    "Yarn bounce coefficient measured",
+    "Rolled it 37 times. Approved: 0"
+   ],
+   "calico": [
+    "{wait} in line, chatting with the yarn",
+    "Yarn, how was your day?",
+    "Venting to the yarn"
+   ],
+   "patch": [
+    "Lost {wait}. Might as well roll some yarn",
+    "Whoever's late pays for the yarn",
+    "One ball of yarn, one hour"
+   ],
+   "gray": [
+    "One swat at the yarn... back to sleep?",
+    "{wait} in. Too lazy to even roll it",
+    "Tap... it rolled... too lazy to chase"
+   ],
+   "black": [
+    "{wait} in, but my yarn skills improved{meow}",
+    "Practicing yarn tricks. All planned",
+    "This is how pros play"
+   ],
+   "brown": [
+    "{wait} in... the yarn looks like a snack",
+    "Wish this yarn were a dumpling",
+    "Rolling it makes me hungry"
+   ],
+   "cream": [
+    "{wait} in, cheering for yarn time{meow}",
+    "Cheering with every roll{meow}",
+    "Roll on, yarn and us{meow}"
+   ]
+  },
+  "wait_bored_doze": {
+   "mackerel": [
+    "Shouldn't nap... nod",
+    "Dozed off... did you call me?",
+    "Waited for approval in my dream too"
+   ],
+   "tuxedo": [
+    "{wait}. Sleeping. Wake me if needed",
+    "Don't wake me. Unless it's approval",
+    "...zzz"
+   ],
+   "ginger": [
+    "{wait} in, napping through it{meow}",
+    "Naps make time fly{meow}",
+    "Got approved in my dream{meow}!"
+   ],
+   "siamese": [
+    "Waited {wait}. Switching to power save",
+    "Sleeping while waiting. Efficient",
+    "Awake within 3 seconds of approval"
+   ],
+   "calico": [
+    "Ran out of things to say. Sleeping",
+    "Chatting in my sleep",
+    "Asking for approval in my sleep"
+   ],
+   "patch": [
+    "{wait} in. At least I'll bank some sleep",
+    "Waiting time is nap time. No loss",
+    "Interest keeps piling up while I sleep"
+   ],
+   "gray": [
+    "{wait} in... just sleeping{meow}",
+    "Zzz... approval... zzz",
+    "Mastered sleeping while standing{meow}"
+   ],
+   "black": [
+    "Not sleeping. Waiting with eyes closed",
+    "{wait} in. Acting sleepy{meow}",
+    "Meditating. Not sleeping"
+   ],
+   "brown": [
+    "Hungry, so sleepy{meow}",
+    "Grilling fish in my dream{meow}",
+    "Hope it's snack time when I wake"
+   ],
+   "cream": [
+    "We can nap a bit while we wait{meow}",
+    "{wait} in, cheering for naps too{meow}",
+    "Nodding off, still waiting{meow}"
+   ]
+  },
+  "wait_bored_groom": {
+   "mackerel": [
+    "No answer. Grooming out of nerves",
+    "If I look neat, maybe I'll get approved",
+    "Not one hair out of place"
+   ],
+   "tuxedo": [
+    "{wait}. Tidying my fur meanwhile",
+    "Neat is the baseline",
+    "Tidy fur. Tidy wait"
+   ],
+   "ginger": [
+    "Might as well wash my face{meow}",
+    "{wait} in, fur all shiny now{meow}",
+    "Face washed! Sparkly{meow}"
+   ],
+   "siamese": [
+    "Waited {wait}. Productivity zero. Grooming",
+    "Grooming round 3. Approvals: 0",
+    "Aligning fur direction"
+   ],
+   "calico": [
+    "Washing my face, talking to myself",
+    "Sorting gossip while I wash",
+    "Picking words while I pick fur"
+   ],
+   "patch": [
+    "{wait} in. Grooming to raise my value",
+    "Grooming is marketing",
+    "Shiny fur raises my price"
+   ],
+   "gray": [
+    "Washing my face makes me sleepy{meow}",
+    "{wait} in... might fall asleep mid-lick",
+    "Fell asleep mid-lick... zzz"
+   ],
+   "black": [
+    "Grooming like I'm totally relaxed",
+    "{wait} in, not bored at all{meow}",
+    "This much grooming is basic{meow}"
+   ],
+   "brown": [
+    "Licking my paw, I'm that hungry{meow}",
+    "My paw smells like fish{meow}",
+    "Thinking about snacks while washing"
+   ],
+   "cream": [
+    "Getting pretty while we wait{meow}",
+    "{wait} in, let's all wash up{meow}",
+    "Everyone waiting looks lovely{meow}"
+   ]
+  }
+ }
+}
