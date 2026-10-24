@@ -1,4 +1,6 @@
 """세션 끝내기(term.exit_session) — subprocess 를 가짜로 바꿔 부르는 순서만 본다. 실제 터미널은 건드리지 않는다."""
+import ctypes  # noqa: F401 — os.name 을 nt 로 바꾸기 전에 미리 불러 둔다
+import os
 import unittest
 from unittest import mock
 
@@ -14,7 +16,7 @@ class TestExitSession(unittest.TestCase):
             if any(f in args for f in fail):
                 raise RuntimeError("live process")
             return ""
-        with mock.patch.object(term, "_run", fake_run), mock.patch.object(term, "_alive", lambda pid: alive), \
+        with mock.patch.object(term, "_run", fake_run), mock.patch.object(term, "alive", lambda pid: alive), \
              mock.patch.object(term.time, "sleep", lambda s: None), mock.patch.object(term, "CMUX", "cmux"), \
              mock.patch.object(term, "ORCA", "orca"), mock.patch.object(term, "HERDR", "herdr"):
             note = term.exit_session(tab, pid=4242, wait=0.01)
@@ -52,3 +54,25 @@ class TestAnswer(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class AliveTest(unittest.TestCase):
+    def test_windows_never_calls_os_kill(self):
+        # 윈도우에서 os.kill(pid, 0) 은 그 프로세스를 끈다 — 살아 있나 볼 때 절대 부르지 않는다
+        k = mock.Mock()
+        k.OpenProcess.return_value = 7
+        k.GetExitCodeProcess.side_effect = lambda h, ref: (setattr(ref._obj, "value", 259), 1)[1]
+        boom = mock.Mock(side_effect=AssertionError("os.kill called"))
+        with mock.patch.object(term.os, "name", "nt"), mock.patch.object(term.os, "kill", boom), \
+                mock.patch("ctypes.windll", mock.Mock(kernel32=k), create=True):
+            self.assertTrue(term.alive(1234))
+            k.GetExitCodeProcess.side_effect = lambda h, ref: (setattr(ref._obj, "value", 0), 1)[1]
+            self.assertFalse(term.alive(1234))
+            k.OpenProcess.return_value = 0
+            k.GetLastError.return_value = 87  # 그런 pid 없음
+            self.assertFalse(term.alive(1234))
+        boom.assert_not_called()
+
+    def test_posix_checks_without_killing(self):
+        self.assertTrue(term.alive(os.getpid()))
+        self.assertFalse(term.alive("x"))

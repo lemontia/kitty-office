@@ -379,16 +379,6 @@ def assign_characters(sessions, home, cfg):
     return out
 
 
-def _alive(pid):
-    try:
-        os.kill(int(pid), 0)
-    except PermissionError:
-        return True  # 남의 프로세스지만 살아 있다
-    except (OSError, ValueError, TypeError):
-        return False
-    return True
-
-
 def load_sessions(home):
     out = []
     for f in sorted((home / ".claude/sessions").glob("*.json")):
@@ -396,7 +386,7 @@ def load_sessions(home):
             s = json.loads(f.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             continue
-        if not isinstance(s, dict) or s.get("entrypoint") == "sdk-cli" or not _alive(s.get("pid")):
+        if not isinstance(s, dict) or s.get("entrypoint") == "sdk-cli" or not term.alive(s.get("pid")):
             continue
         s["name"] = _nfc(s.get("name") or Path(s.get("cwd") or "?").name)
         s["cwd"] = _nfc(s.get("cwd"))

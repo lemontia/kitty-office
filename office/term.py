@@ -99,15 +99,28 @@ def stop(tab):
         _run(HERDR, "pane", "send-keys", tab[1], "esc")
 
 
-def _alive(pid):
+def alive(pid):
+    """그 pid 의 프로세스가 살아 있나. 윈도우에선 os.kill(pid, 0) 이 확인이 아니라 그 프로세스를 끈다 — OpenProcess 로 본다."""
     try:
-        os.kill(int(pid), 0)
-    except ProcessLookupError:
-        return False
+        pid = int(pid)
     except (TypeError, ValueError):
         return False
+    if os.name == "nt":
+        import ctypes
+        k = ctypes.windll.kernel32
+        h = k.OpenProcess(0x1000, False, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
+        if not h:
+            return k.GetLastError() == 5  # 접근 거부 = 남의 프로세스지만 살아 있다
+        code = ctypes.c_ulong()
+        ok = k.GetExitCodeProcess(h, ctypes.byref(code))
+        k.CloseHandle(h)
+        return bool(ok) and code.value == 259  # STILL_ACTIVE
+    try:
+        os.kill(pid, 0)
     except PermissionError:
-        return True
+        return True  # 남의 프로세스지만 살아 있다
+    except OSError:
+        return False
     return True
 
 
@@ -117,9 +130,9 @@ def exit_session(tab, pid=None, wait=8.0):
     /exit 가 안 들어가면 예외. 탭까지 닫았으면 None, 세션이 안 끝났으면 "still_running", 탭을 못 닫았으면 ("close_failed", 오류) — 문구는 서버가 언어에 맞춰 붙인다."""
     answer(tab, "/exit")
     end = time.monotonic() + wait
-    while pid and _alive(pid) and time.monotonic() < end:
+    while pid and alive(pid) and time.monotonic() < end:
         time.sleep(0.3)
-    if not pid or _alive(pid):
+    if not pid or alive(pid):
         return "still_running"
     try:
         if tab[0] == "cmux":
