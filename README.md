@@ -123,6 +123,8 @@ OFFICE_PORT=5499 ./restart.sh   # 다른 포트
 | `floors` | 층 목록 `{id, name, order, prefixes}` | 로비 하나 |
 | `seats` | 폴더 → 캐릭터 | `{}` |
 | `names` | 세션 이름 앞부분 → 캐릭터. 거꾸로 캐릭터 → 표시 이름으로도 쓴다 | `{}` |
+| `seatNamesAll` | `true` 면 `seats` 폴더 세션은 직접 붙인 이름이 있어도 화면에서 'Alice-1'처럼 바꿔 보여 준다(진짜 이름은 그대로 — 메시지 주소에 쓴다) | `false` |
+| `workingShells` | 턴은 끝났는데 뒤에서 셸만 도는(`shell`) 세션 밑에서 이 글자가 든 명령이 돌면 '일하는 중'으로 본다(예: `["render.sh"]`). 서버만 켜 둔 세션은 그대로 보고 | `[]` |
 | `notify` | 새 기다림이 생기면 맥 알림 | `true` |
 | `allowedHosts` | 원격으로 열 때 받을 Host(예: `myhost.example.com:8444`). `127.0.0.1`·`localhost` 는 늘 허용. **적으면 `token` 필수**(없으면 서버가 뜨지 않는다) | `[]` |
 | `token` | 있으면 로컬까지 잠금(아래). 16자 이상 | `null` |
@@ -171,4 +173,4 @@ python3 -m unittest discover -s tests -v
 
 MIT — [LICENSE](LICENSE) 를 본다.
 
-지금은 macOS 전용이다. Linux·Windows 는 아직 안 된다 — 기여 환영.
+macOS 에서 만들었다. Windows 는 herdr 안에서 띄운 세션이면 답하기·중단·끝내기까지 된다(알림은 없음). Linux 는 아직 안 된다 — 기여 환영.

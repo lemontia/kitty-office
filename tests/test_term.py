@@ -76,3 +76,38 @@ class AliveTest(unittest.TestCase):
     def test_posix_checks_without_killing(self):
         self.assertTrue(term.alive(os.getpid()))
         self.assertFalse(term.alive("x"))
+
+
+class TestWindows(unittest.TestCase):
+    """윈도우 — ps eww 대신 세션 파일의 sessionId 를 herdr pane list 와 맞춘다. herdr 는 가짜로."""
+    def setUp(self):
+        term._herdr_cache[:] = [0.0, {}]
+
+    def test_tab_from_herdr_pane_list(self):
+        import json, tempfile
+        from pathlib import Path
+        home = Path(tempfile.mkdtemp())
+        (home / ".claude/sessions").mkdir(parents=True)
+        (home / ".claude/sessions/4242.json").write_text(json.dumps({"pid": 4242, "sessionId": "abc"}), encoding="utf-8")
+        listing = {"result": {"panes": [{"pane_id": "w1:p2", "agent_session": {"value": "abc"}},
+                                        {"pane_id": "w1:p3", "agent_session": None}]}}
+        done = mock.Mock(stdout=json.dumps(listing))
+        with mock.patch.object(term, "HERDR", "herdr"), mock.patch.object(term.Path, "home", lambda: home), \
+             mock.patch.object(term.subprocess, "run", lambda *a, **kw: done):
+            self.assertEqual(term._tab_of_nt(4242), ("herdr", "w1:p2"))
+            self.assertIsNone(term._tab_of_nt(9999))  # 세션 파일 없음
+
+    def test_no_herdr_no_tab(self):
+        with mock.patch.object(term, "HERDR", None):
+            self.assertIsNone(term._tab_of_nt(4242))
+
+
+
+class TestRunsAny(unittest.TestCase):
+    PROCS = {10: (1, "claude"), 11: (10, "bash -c ..."), 12: (11, "bash rotate.sh 1"), 20: (1, "claude"), 21: (20, "yadam-studio.exe")}
+
+    def test_finds_grandchild(self):
+        with mock.patch.object(term, "_procs", lambda: self.PROCS):
+            self.assertTrue(term.runs_any(10, ["rotate.sh"]))
+            self.assertFalse(term.runs_any(20, ["rotate.sh"]))  # 서버만 도는 세션
+            self.assertFalse(term.runs_any(10, []))

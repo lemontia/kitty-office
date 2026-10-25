@@ -123,6 +123,8 @@ Copy `config.example.json` and edit it. `restart.sh` restarts by itself when you
 | `floors` | floor list `{id, name, order, prefixes}` | lobby only |
 | `seats` | folder → character | `{}` |
 | `names` | session-name prefix → character. Read backwards, character → display name | `{}` |
+| `seatNamesAll` | When `true`, sessions in a `seats` folder are shown as "Alice-1" even if you named them (the real name is kept for messaging) | `false` |
+| `workingShells` | A session whose turn ended but still runs a background shell (`shell`) counts as working when a command under it contains one of these strings (e.g. `["render.sh"]`). A session that only keeps a server running still shows as reported | `[]` |
 | `notify` | macOS notification when a new wait appears | `true` |
 | `allowedHosts` | Host values accepted when opened remotely (e.g. `myhost.example.com:8444`). `127.0.0.1`/`localhost` are always allowed. **Requires `token`** (the server will not start without one) | `[]` |
 | `token` | if set, the page is locked, locally too (below). At least 16 characters | `null` |
@@ -171,4 +173,4 @@ python3 -m unittest discover -s tests -v
 
 MIT — see [LICENSE](LICENSE).
 
-macOS only for now. Linux and Windows don't work yet — contributions are welcome.
+Built on macOS. On Windows, sessions started inside herdr can be answered, stopped and ended (no notifications). Linux doesn't work yet — contributions are welcome.

@@ -3,6 +3,7 @@ import json
 import os
 import tempfile
 import unittest
+from unittest import mock
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -87,6 +88,14 @@ class TestState(Base):
             s = self.one("w" + wf[:3])
             self.assertEqual((s["state"], s["stale"]), ("waiting", False))
             self.assertIn(wf, s["lastText"])
+
+    def test_background_shell_listed_is_working(self):
+        self.add("a", [human("그려 줘", minutes=30), said("7번까지 나왔어요.", minutes=29)], status="shell")
+        self.assertEqual(self.one("a")["state"], "reported")
+        # 설정 workingShells 에 적은 일이 그 세션 밑에서 돌면 일하는 중
+        with mock.patch("office.term.runs_any", lambda pid, words: words == ["rotate.sh"]):
+            got = build_state(self.home, NOW, {**CFG, "workingShells": ["rotate.sh"]})["sessions"][0]["state"]
+        self.assertEqual(got, "working")
 
     def test_background_shell_is_not_working(self):
         self.add("a", [human("올려 둘까?", minutes=30), said("1과 2는 진행할까요?", minutes=29)], status="shell")
@@ -275,6 +284,15 @@ class TestState(Base):
         self.one("내가붙인이름")
         self.one("hq-a1")
         self.assertEqual(self.one("총괄-1")["realName"], "hq-0b")
+
+    def test_seat_names_all(self):
+        hq = str(self.home / "work/hq")
+        self.add("내가붙인이름", cwd=hq, started=1)
+        self.add("hq-0b", cwd=hq, started=10)
+        sessions = build_state(self.home, NOW, {**CFG, "seatNamesAll": True})["sessions"]
+        got = {s["name"]: s["realName"] for s in sessions}
+        # 붙인 이름도 자리 주인 이름-번호로 — 진짜 이름은 realName 에 남는다
+        self.assertEqual(got, {"총괄-1": "내가붙인이름", "총괄-2": "hq-0b"})
 
     def test_empty(self):
         st = self.state()

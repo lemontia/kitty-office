@@ -15,6 +15,8 @@ DEFAULT = {
     "floors": [LOBBY],   # 결재실(boss)은 코드에 고정 — 여기 적지 않는다
     "seats": {},         # 폴더 → 캐릭터
     "names": {},         # 세션 이름 앞부분 → 캐릭터. 거꾸로 캐릭터 → 표시 이름으로도 쓴다
+    "workingShells": [],  # 「뒤에서 셸만 도는」 세션 밑에 이 글자가 든 명령이 돌면 일하는 중(예: "rotate.sh"). 서버만 켠 세션은 그대로 보고
+    "seatNamesAll": False,  # 참이면 자리 주인 폴더 세션은 붙인 이름이 있어도 화면에 「주인이름-번호」로 보인다
     "notify": True,      # 새 기다림이 생기면 맥 알림
     "allowedHosts": [],  # 원격으로 열 때 받을 Host(예: "myhost.example.com:8444"). 127.0.0.1·localhost 는 늘 허용. 적으면 token 필수
     "token": None,       # 있으면 로컬까지 쿠키·X-Token 없는 요청을 막는다. 16자 이상
