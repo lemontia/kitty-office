@@ -53,14 +53,15 @@ WRAP_RE = re.compile(r"수고(했|햇|하셨|많)|세션\s*(닫|끝)|닫(는다|
 
 def seat_names(sessions, home, cfg):
     """이름을 안 붙인 세션(Claude Code 자동 이름 「폴더명-두자리」)이 자리 주인 폴더에서 떴으면
-    「주인이름-번호」로 바꾼다. 번호는 시작한 순서. {옛 이름: 새 이름} 을 돌려준다."""
+    「주인이름-번호」로 바꾼다. 설정 seatNamesAll 이면 붙인 이름도 바꾼다(화면에서만 — 진짜 이름은 realName).
+    번호는 시작한 순서. {옛 이름: 새 이름} 을 돌려준다."""
     display = {ch: ko for ko, ch in cfg["names"].items()}  # 캐릭터 → 표시 이름
     seats = {_expand(p, home): display[ch] for p, ch in cfg["seats"].items() if ch in display}
     alias, count = {}, {}
     # ponytail: 앞 번호 세션이 꺼지면 뒤 번호가 당겨진다. 고정 번호가 필요하면 sessionId→번호를 파일에 남긴다
     for s in sorted(sessions, key=lambda s: s.get("startedAt") or 0):
-        who = seats.get(s["cwd"])
-        if who and re.fullmatch(re.escape(Path(s["cwd"]).name) + r"-[0-9a-f]{2}", s["name"]):
+        who = seats.get(_expand(s["cwd"], home))
+        if who and (cfg.get("seatNamesAll") or re.fullmatch(re.escape(Path(s["cwd"]).name) + r"-[0-9a-f]{2}", s["name"])):
             count[who] = count.get(who, 0) + 1
             s["realName"] = s["name"]
             alias[s["name"]] = f"{who}-{count[who]}"
@@ -76,6 +77,8 @@ def _expand(p, home):
     p = _nfc(p)
     if p == "~" or p.startswith("~/"):
         p = str(home) + p[1:]
+    if os.name == "nt":  # 윈도우 cwd·홈은 \ — 설정의 ~/... 와 맞추려고 / 로 통일
+        p = p.replace("\\", "/")
     return p.rstrip("/") or "/"
 
 
@@ -305,13 +308,16 @@ def parse_tail(lines):
     }
 
 
-def classify(status, tail, now, waiting_since=None):
+def classify(status, tail, now, waiting_since=None, bg_work=False):
     """(state, stale). 판정 규칙은 여기 한 곳에 모은다.
-    status "waiting" 은 Claude Code 가 승인·질문 창으로 사용자를 기다린다고 직접 적은 것 — 기록과 무관하게 waiting."""
+    status "waiting" 은 Claude Code 가 승인·질문 창으로 사용자를 기다린다고 직접 적은 것 — 기록과 무관하게 waiting.
+    bg_work 는 뒤에서 도는 셸이 설정 workingShells 에 적은 일(예: rotate.sh)을 하고 있다는 뜻 — 그땐 shell 도 일하는 중."""
     if status == "waiting":
         at = waiting_since or tail.get("question_at")
         return "waiting", bool(at and at < now - timedelta(hours=STALE_HOURS))
     # "shell" 은 턴이 끝났는데 뒤에서 셸만 도는 상태(10-22 실물: turn_duration 과 같은 순간에 shell 로 바뀜) — 일하는 중이 아니라 기록으로 가른다
+    if status == "shell" and bg_work:
+        return "working", False
     if status == "busy":
         recent = now - timedelta(minutes=MEETING_MINUTES)
         if any(m["at"] and m["at"] >= recent for m in tail.get("messages", [])):
@@ -442,7 +448,8 @@ def build_state(home, now, cfg=None):
                 m["peer"] = "서브에이전트"
         ms = s.get("statusUpdatedAt")
         since_f = datetime.fromtimestamp(ms / 1000, now.tzinfo) if isinstance(ms, (int, float)) else None
-        state, stale = classify(s.get("status"), tail, now, since_f)
+        bg = s.get("status") == "shell" and term.runs_any(s.get("pid"), cfg.get("workingShells"))
+        state, stale = classify(s.get("status"), tail, now, since_f, bg)
         partner = None
         if state == "meeting":
             partner = max((m for m in tail["messages"] if m["at"]), key=lambda m: m["at"])["peer"]

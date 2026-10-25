@@ -1,6 +1,7 @@
 """기다림 감시 — 10초마다 상태를 읽어 요약 파일(입력창 띠가 읽는다)을 쓰고, 새 기다림이 생기면 맥 알림을 띄운다."""
 import json
 import shutil
+import os
 import subprocess
 from datetime import datetime
 from pathlib import Path
@@ -49,6 +50,8 @@ class Watcher:
 
 
 def notify(title, message, sid, port, app="Kitty Office"):
+    if os.name == "nt":
+        return  # 맥 알림 도구가 없다 — 브라우저 탭 제목·소리로 대신
     tn = shutil.which("terminal-notifier") or "/opt/homebrew/bin/terminal-notifier"
     url = f"http://127.0.0.1:{port}/#s={sid}"
     try:

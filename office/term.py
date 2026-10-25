@@ -5,11 +5,13 @@ claude 프로세스 환경 변수로 어느 터미널의 어느 창인지 안다
   herdr HERDR_PANE_ID                         — 답하기만(창을 앞으로 띄우는 명령이 탭 안에서만 된다)
 iTerm 등 나머지, 또는 명령을 못 찾은 터미널은 None."""
 import functools
+import json
 import os
 import re
 import shutil
 import subprocess
 import time
+from pathlib import Path
 
 
 def _find(name, *fallbacks):
@@ -22,8 +24,88 @@ ORCA = _find("orca", "/usr/local/bin/orca", "/opt/homebrew/bin/orca")
 HERDR = _find("herdr", "~/.local/bin/herdr", "/opt/homebrew/bin/herdr", "/usr/local/bin/herdr")
 
 
-@functools.lru_cache(maxsize=256)  # ponytail: pid 가 재사용되면 옛 창을 가리킬 수 있다 — 서버 재시작으로 비워진다
+_herdr_cache = [0.0, {}]
+
+
+def _herdr_panes():
+    """윈도우용 — herdr pane list 의 agent_session(=Claude Code sessionId) → pane_id. 3초 동안 재사용."""
+    if time.monotonic() - _herdr_cache[0] < 3:
+        return _herdr_cache[1]
+    out = {}
+    try:
+        r = subprocess.run([HERDR, "pane", "list"], capture_output=True, encoding="utf-8", errors="replace", timeout=5)
+        for p in json.loads(r.stdout)["result"]["panes"]:
+            sid = (p.get("agent_session") or {}).get("value")
+            if sid:
+                out[sid] = p["pane_id"]
+    except (OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError):
+        pass
+    _herdr_cache[:] = [time.monotonic(), out]
+    return out
+
+
+def _tab_of_nt(pid):
+    """윈도우엔 ps eww 가 없다 — 세션 파일에서 sessionId 를 읽고 herdr 창 목록과 맞춘다."""
+    if not HERDR:
+        return None
+    try:
+        sid = json.loads((Path.home() / ".claude/sessions" / f"{int(pid)}.json").read_text(encoding="utf-8")).get("sessionId")
+    except (OSError, ValueError, TypeError):
+        return None
+    pane = _herdr_panes().get(sid)
+    return ("herdr", pane) if pane else None
+
+
+_procs_cache = [0.0, {}]
+
+
+def _procs():
+    """모든 프로세스의 {pid: (부모 pid, 명령줄)}. 5초 동안 재사용 — 윈도우는 한 번 묻는 데 1초쯤 걸린다."""
+    if time.monotonic() - _procs_cache[0] < 5:
+        return _procs_cache[1]
+    out = {}
+    try:
+        if os.name == "nt":
+            ps = ("[Console]::OutputEncoding=[Text.Encoding]::UTF8; Get-CimInstance Win32_Process | "
+                  "Select-Object ProcessId,ParentProcessId,CommandLine | ConvertTo-Json -Compress")
+            r = subprocess.run(["powershell", "-NoProfile", "-Command", ps], capture_output=True, encoding="utf-8", errors="replace", timeout=10)
+            for p in json.loads(r.stdout):
+                out[p["ProcessId"]] = (p["ParentProcessId"], p.get("CommandLine") or "")
+        else:
+            r = subprocess.run(["ps", "-axo", "pid=,ppid=,command="], capture_output=True, encoding="utf-8", errors="replace", timeout=10)
+            for line in r.stdout.splitlines():
+                pid, ppid, cmd = (line.split(None, 2) + [""])[:3]
+                out[int(pid)] = (int(ppid), cmd)
+    except (OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError):
+        pass
+    _procs_cache[:] = [time.monotonic(), out]
+    return out
+
+
+def runs_any(pid, words):
+    """pid 아래(자식·손자…)에서 도는 명령줄에 words 중 하나가 들어 있나 — 「뒤에서 셸만 도는」 세션이 실제로 일하는지 가른다."""
+    if not words or not pid:
+        return False
+    procs, todo, seen = _procs(), [int(pid)], set()
+    while todo:
+        cur = todo.pop()
+        for p, (ppid, cmd) in procs.items():
+            if ppid == cur and p not in seen:
+                seen.add(p)
+                if any(w in cmd for w in words):
+                    return True
+                todo.append(p)
+    return False
+
+
 def tab_of(pid):
+    if os.name == "nt":
+        return _tab_of_nt(pid)
+    return _tab_of_ps(pid)
+
+
+@functools.lru_cache(maxsize=256)  # ponytail: pid 가 재사용되면 옛 창을 가리킬 수 있다 — 서버 재시작으로 비워진다
+def _tab_of_ps(pid):
     try:
         env = subprocess.run(["ps", "eww", "-o", "command=", "-p", str(int(pid))],
                              capture_output=True, text=True, timeout=5).stdout
@@ -44,7 +126,7 @@ def can_focus(tab):
 
 
 def _run(*args):
-    r = subprocess.run(list(args), capture_output=True, text=True, timeout=15)
+    r = subprocess.run(list(args), capture_output=True, encoding="utf-8", errors="replace", timeout=15)
     if r.returncode:
         raise RuntimeError((r.stderr or r.stdout).strip() or f"{args[0]} 실패({r.returncode})")
     return r.stdout + r.stderr

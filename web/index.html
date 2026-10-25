@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <title>Kitty Office</title>
 <link rel="icon" href="data:,">
+<link rel="manifest" href="manifest.json"> <!-- 브라우저 「앱으로 설치」 — 작업 표시줄에 고양이 아이콘으로 따로 뜬다 -->
 <style>
   :root {
     --paper: #fbf5ea; --paper2: #f3e8d6; --ink: #3b2a1e; --muted: #8a7563; --line: #e4d4bd;
@@ -490,7 +491,7 @@ const T = {
     exitBusy: '일하는 중에는 끝낼 수 없습니다 — 먼저 「하던 일 중단하기」', exitDialog: '승인·선택 창이 떠 있어 끝낼 수 없습니다 — 탭에서 먼저 고르세요',
     exitTitle: '/exit 로 세션을 끝내고 터미널 탭을 닫습니다', taBusy: '일하는 중에도 보낼 수 있습니다 — 하던 일 사이에 읽습니다',
     ctxFull: (n) => `대화 ${n}% 찼음`, readOnly: 'cmux·Orca·herdr 밖에서 띄운 세션이라 여기서는 읽기만 됩니다', dialogOpen: '승인·선택 창이 떠 있습니다 — 탭으로 가서 골라 주세요',
-    failed: '안 됐습니다: ', remove: '빼기', uploading: (n) => `올리는 중… ${n}`, image: '이미지', attachFailed: '첨부 안 됐습니다: ',
+    failed: '안 됐습니다: ', remove: '빼기', uploading: (n) => `올리는 중… ${n}`, image: '이미지', attachFailed: '첨부 안 됐습니다: ', attachBig: (n) => `${n} 은 20MB 가 넘어 첨부하지 않았습니다 — 경로를 넣으려면 탐색기에서 「경로로 복사」(Ctrl+Shift+C)로 복사해 붙여 주세요`,
     attachedNote: '첨부한 파일을 열어서 봐 주세요: ', sendingDots: '보내는 중…', sent: '보냈습니다', newName: '새 세션 이름',
     renameSent: '이름 바꾸기를 보냈습니다 — 몇 초 뒤 화면에 반영됩니다', thisSession: '이 세션', stopAsk: (n) => `${n}의 하던 일을 중단할까요?`,
     stopping: '중단하는 중…', stopped: '중단했습니다',
@@ -527,7 +528,7 @@ const T = {
     exitBusy: "Can't end while working — press Stop first", exitDialog: "Can't end while an approval prompt is open — answer it in the tab first",
     exitTitle: 'Send /exit to end the session and close its terminal tab', taBusy: 'You can send while it works — it reads between steps',
     ctxFull: (n) => `Context ${n}% full`, readOnly: 'Started outside cmux, Orca or herdr — read only here', dialogOpen: 'An approval prompt is open — go to the tab to answer it',
-    failed: 'Failed: ', remove: 'Remove', uploading: (n) => `Uploading… ${n}`, image: 'image', attachFailed: 'Attach failed: ',
+    failed: 'Failed: ', remove: 'Remove', uploading: (n) => `Uploading… ${n}`, image: 'image', attachFailed: 'Attach failed: ', attachBig: (n) => `${n} is over 20 MB, so it was not attached — to paste its path, use "Copy as path" (Ctrl+Shift+C) in Explorer`,
     attachedNote: 'Please open and look at the attached files: ', sendingDots: 'Sending…', sent: 'Sent', newName: 'New session name',
     renameSent: 'Rename sent — it shows up in a few seconds', thisSession: 'this session', stopAsk: (n) => `Stop what ${n} is doing?`,
     stopping: 'Stopping…', stopped: 'Stopped',
@@ -2518,6 +2519,8 @@ function drawAtts() {
 async function addFiles(files) {
   const note = msg.querySelector('.note');
   for (const f of files) {
+    // 탐색기에서 Ctrl+C 한 큰 파일(영상 등)을 통째로 읽으면 탭 메모리가 터진다 — 서버 한도(20MB)를 넘으면 읽지 않는다
+    if (f.size > 20 * 1024 * 1024) { note.textContent = t('attachBig', f.name); continue; }
     note.textContent = t('uploading', f.name);
     const data = await new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = no; r.readAsDataURL(f); });
     try {
