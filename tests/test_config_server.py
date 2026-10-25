@@ -209,6 +209,11 @@ class TestLock(unittest.TestCase):
             p.start()
             self.addCleanup(p.stop)
 
+        self.todo_file = Path(tempfile.mkdtemp()) / "todo.json"  # 진짜 설정 폴더의 todo.json 을 읽지도 쓰지도 않게
+        p = mock.patch.object(server.todo, "path", lambda: self.todo_file)
+        p.start()
+        self.addCleanup(p.stop)
+
     def req(self, method, path, headers=None, body=None, host=None):
         c = http.client.HTTPConnection("127.0.0.1", self.port, timeout=5)
         h = {"Host": host or f"127.0.0.1:{self.port}", **(headers or {})}
@@ -265,6 +270,26 @@ class TestLock(unittest.TestCase):
         code, _, body = self.req("POST", "/api/nope", {**h, "X-Lang": "en"}, "{}")
         self.assertEqual((code, json.loads(body)["error"]), (404, "Not found"))
         self.assertEqual(json.loads(self.req("POST", "/api/nope", h, "{}")[2])["error"], "없는 주소")
+
+    def test_todo_api(self):
+        """할 일 — 추가·체크·고치기·지우기, 잘못된 글은 400, 기존 POST 보호(Origin·Content-Type)를 그대로 탄다, /api/state 에 요약."""
+        self.start()
+        h = {"Origin": f"http://127.0.0.1:{self.port}", "Content-Type": "application/json"}
+        post = lambda b, hh=h: self.req("POST", "/api/todo", hh, json.dumps(b))
+        code, _, body = post({"op": "add", "text": "  우유 사기  "})
+        items = json.loads(body)["items"]
+        self.assertEqual((code, items[0]["text"], items[0]["done"]), (200, "우유 사기", False))
+        tid = items[0]["id"]
+        self.assertTrue(json.loads(post({"op": "toggle", "id": tid})[2])["items"][0]["done"])
+        self.assertEqual(json.loads(post({"op": "edit", "id": tid, "text": "두유 사기"})[2])["items"][0]["text"], "두유 사기")
+        self.assertEqual(json.loads(self.req("GET", "/api/todo")[2])["items"][0]["text"], "두유 사기")
+        self.assertEqual(json.loads(self.req("GET", "/api/state")[2])["todo"], {"done": 1, "total": 1, "late": 0, "past": 0})
+        self.assertEqual(post({"op": "add", "text": ""})[0], 400)
+        self.assertEqual(post({"op": "toggle", "id": "nope"})[0], 400)
+        self.assertEqual(post({"op": "add", "text": "x"}, {**h, "Origin": "http://evil.example.com"})[0], 403)
+        self.assertEqual(post({"op": "add", "text": "x"}, {"Origin": h["Origin"], "Content-Type": "text/plain"})[0], 403)
+        self.assertEqual(json.loads(post({"op": "delete", "id": tid})[2])["items"], [])
+        self.assertEqual(json.loads(self.todo_file.read_text(encoding="utf-8")), {"items": []})
 
     def test_no_token_is_open(self):
         self.start()

@@ -16,7 +16,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
-from office import config, term, watch
+from office import config, term, todo, watch
 from office.state import build_state, folders, load_sessions
 
 PORT = int(os.environ.get("OFFICE_PORT", "5430"))
@@ -43,6 +43,11 @@ MSG = {
     "busy": ("일하는 중에는 끝낼 수 없습니다 — 먼저 「하던 일 중단하기」", "Can't end while working — press Stop first"),
     "renameRule": ("이름은 1~40자, 줄바꿈·/ 없이", "Name: 1–40 characters, no line breaks or /"),
     "empty": ("빈 답", "Empty reply"),
+    "todoEmpty": ("할 일을 적어 주세요", "Write something first"),
+    "todoLong": ("할 일은 200자까지", "Up to 200 characters"),
+    "todoFull": ("할 일은 100개까지", "Up to 100 items"),
+    "todoGone": ("이미 없는 항목이다", "That item is gone"),
+    "todoOp": ("모르는 요청", "Unknown request"),
     "stillRunning": ("세션이 아직 안 끝났습니다 — 탭은 직접 닫으세요", "The session hasn't ended yet — close the tab yourself"),
     "closeFailed": ("세션은 끝났지만 탭을 닫지 못했습니다({e}) — 탭은 직접 닫으세요", "The session ended but its tab didn't close ({e}) — close it yourself"),
 }
@@ -194,6 +199,8 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         if self._blocked():
             return
+        if self.path.split("?")[0] == "/api/todo":  # 오늘 할 일 칠판
+            return self._json(200, {"items": todo.load()})
         if self.path.split("?")[0] != "/api/state":
             return super().do_GET()
         try:
@@ -207,6 +214,7 @@ class Handler(SimpleHTTPRequestHandler):
                 cfg["colors"] = config.assign_colors(fds)
                 self.server.seen_day[1].update(fds)
             code, body = 200, build_state(home, datetime.now().astimezone(), cfg)
+            body["todo"] = todo.summary()  # 칠판·목록 줄용 요약만 — 항목은 /api/todo
         except Exception as e:  # 한 번 실패해도 서버는 계속 산다
             code, body = 500, {"error": f"{type(e).__name__}: {e}"}
         data = json.dumps(body, ensure_ascii=False).encode("utf-8")
@@ -223,7 +231,7 @@ class Handler(SimpleHTTPRequestHandler):
         if self._blocked():
             return
         path = self.path.split("?")[0]
-        if path not in ("/api/focus", "/api/answer", "/api/rename", "/api/upload", "/api/island", "/api/stop", "/api/exit"):
+        if path not in ("/api/focus", "/api/answer", "/api/rename", "/api/upload", "/api/island", "/api/stop", "/api/exit", "/api/todo"):
             return self._json(404, {"error": self._m("noPath")})
         # 다른 웹페이지가 브라우저를 통해 127.0.0.1 로 보내는 요청을 막는다(이 화면에서 온 것만)
         ok = {f"{scheme}://{h}" for h in self._hosts() for scheme in ("http", "https")}
@@ -239,6 +247,11 @@ class Handler(SimpleHTTPRequestHandler):
                     return self._json(200, {"path": save_upload(body.get("name"), body.get("data"))})
                 except ValueError:  # 빈 파일이거나 너무 크다
                     return self._json(413, {"error": self._m("tooBig")})
+            if path == "/api/todo":  # 할 일 추가·체크·고치기·지우기 — 설정 폴더 todo.json
+                try:
+                    return self._json(200, {"items": todo.act(body)})
+                except todo.TodoError as e:
+                    return self._json(400, {"error": self._m(str(e))})
             if path == "/api/island":  # 섬 이름 바꾸기·합치기 — 설정 파일 islands 에 쓰고 바로 반영
                 folders, name = body.get("folders"), str(body.get("name") or "").strip()
                 if (not isinstance(folders, list) or not folders or len(folders) > 50

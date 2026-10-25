@@ -17,13 +17,15 @@ Everything runs on this Mac. It reads Claude Code's own session files and never 
 
 ## Features
 
-- **A seat for every state** — waiting for you (approvals line), working (desks), talking to another session (meeting room), reported back (blue rug), resting (lounge sofa), finished for the day (outside by the sea)
+- **A seat for every state** — waiting for you (approvals line), working (desks), talking to another session (meeting room), reported back (blue rug), resting (lounge cushions, cat tower, boxes, kotatsu), finished for the day (outside by the sea)
 - **Reply from the popup** — click a cat or a list row, read the recent conversation and type an answer. It is pasted into that session's real terminal input (cmux, Orca or herdr)
 - **Never miss a wait** — a knock sound, a macOS notification, a count in the browser tab title and a red dot on the tab icon
 - **End a session** from the popup (`/exit`, then only that terminal tab closes) — blocked while it is working
 - **Ten cat personalities** — each coat has its own way of talking in speech bubbles that follow the real situation (waiting for an hour, context almost full, working late)
 - **List your way** — urgent first, or grouped by project with a color per folder. Pin sessions to the top
 - **On your phone** — open it remotely through a proxy, locked with a token
+- **Stare at the fire** — click the campfire outside, the lounge fireplace or 🔥 in the header: the camera drifts to the fire, the page goes quiet, nearby cats doze around it and logs crackle softly (sound made in the browser, mute with 🔇). New approvals still show up in a corner. Esc or a click brings you back
+- **Today's to-do board** — a chalkboard on the office wall. Write and tick tasks right on the page, no file to edit; everyone cheers when you finish them all
 - **Korean and English** — follows the browser language
 
 ## Quick start
@@ -56,6 +58,8 @@ Sessions started in other terminals (iTerm, Terminal.app) show up too, but read-
 - The list: **Default** shows waiting → reported → working → resting → off; **By project** groups by folder (click a group header to fold it). Pin a session with 📌 in the popup and drag ⠿ to reorder pinned ones
 - Keyboard: **⌘F** (Ctrl+F) finds a session by name (↑ ↓ to choose, Enter to open), **]** folds the list away on a computer, **Esc** closes the popup
 - A cat that has waited over an hour gets bored and plays in line; a report nobody read for an hour ends up lying on the floor watching videos. They are still counted as waiting and reported
+
+- **Today's to-do**: use the panel at the top left (on a phone, tap the 📝 chip or the chalkboard to open it). Type and press Enter to add, tick the box when done, click a task to edit it, × to delete. From the next day, finished tasks fold into 'done earlier' at the bottom and are kept for 30 days (untick to bring one back); unfinished ones stay (red after 3 days, folded into 'overdue' after 7)
 
 <img src="assets/phone.en.png" width="260" alt="The popup on a phone">
 
@@ -125,6 +129,7 @@ Copy `config.example.json` and edit it. `restart.sh` restarts by itself when you
 | `lang` | language of macOS notifications (`ko`, `en`) | macOS language (Korean → `ko`, anything else → `en`) |
 | `weather` | set like `{"lat": 37.57, "lon": 126.98}` to ask `api.open-meteo.com` for that spot's weather and draw rain or snow outside the window. Unset means no external request | `null` (off) |
 | `cats` | character → cat coat (`mackerel`, `tuxedo`, `ginger`, `siamese`, `calico`, `patch`, `gray`, `black`, `brown`, `cream`). Each coat has its own personality (way of talking). Characters not listed get one by name hash | `{}` |
+| `todo.json` (next to `config.json`) | today's to-do items, written by the page — no need to edit by hand | — |
 | `colors` · `colors_seen` | folder → list color, and the day it was last seen. Written by the server (folders unseen for 30 days are dropped) | — |
 
 ### Floors

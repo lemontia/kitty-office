@@ -92,7 +92,7 @@
    "Just resting my eyes{meow}",
    "Call me and I'll get up",
    "Resting is part of the job",
-   "The sofa won't let me go",
+   "The cushion won't let me go",
    "Five more minutes...",
    "Worked in my dream too",
    "Recharging... 12%",
@@ -384,7 +384,7 @@
    "resting": [
     "Measuring rest efficiency",
     "Twenty minutes is optimal",
-    "This sofa angle is inefficient",
+    "This cat tower angle is inefficient",
     "Counterexamples even while resting",
     "Resting. Reason: tired"
    ],
@@ -500,7 +500,7 @@
    "resting": [
     "Rest is an investment",
     "Nap ROI is great",
-    "Free sofa. The best",
+    "Free kotatsu. The best",
     "Dreamt of a big deal{meow}",
     "Wake-up fee applies"
    ],
@@ -559,7 +559,7 @@
     "Zzz{meow}",
     "Sleeping... don't wake me",
     "This is my real job",
-    "One with the sofa{meow}",
+    "One with the cushion{meow}",
     "Sleep talk: I saved it"
    ],
    "outside": [
@@ -616,7 +616,7 @@
    "resting": [
     "Studying while pretending to rest",
     "Not tired. Strategic rest",
-    "This sofa is my spot{meow}",
+    "This cushion is my spot{meow}",
     "Not sleeping. Meditating",
     "This pose is the coolest"
    ],
@@ -673,7 +673,7 @@
    ],
    "resting": [
     "Full and sleepy",
-    "Snacking on the sofa",
+    "Eating a tangerine at the kotatsu",
     "Dreamt of grilled fish{meow}",
     "Full and warm",
     "Patting my belly{meow}"
@@ -1166,6 +1166,48 @@
     "Getting pretty while we wait{meow}",
     "{wait} in, let's all wash up{meow}",
     "Everyone waiting looks lovely{meow}"
+   ]
+  },
+  "fire": {
+   "mackerel": [
+    "Watching the fire melts my worries a bit",
+    "Those sparks are fine, right?"
+   ],
+   "tuxedo": [
+    "Fire. Good",
+    "No need to talk"
+   ],
+   "ginger": [
+    "Crackle crackle, so nice{meow}",
+    "One marshmallow{meow}?"
+   ],
+   "siamese": [
+    "Counting flame cycles. Can't stop",
+    "Decisions on hold for now"
+   ],
+   "calico": [
+    "Even I go quiet by the fire",
+    "Fireside chats are the best"
+   ],
+   "patch": [
+    "Staring at fire is free",
+    "Firewood costs are tomorrow's problem"
+   ],
+   "gray": [
+    "Too warm, eyes closing{meow}",
+    "Best nap spot is right here"
+   ],
+   "black": [
+    "I lit this fire. Probably",
+    "Staring at fire like a pro{meow}"
+   ],
+   "brown": [
+    "Smells like roasted sweet potatoes{meow}",
+    "The fire makes me hungry"
+   ],
+   "cream": [
+    "Let's all just watch the fire{meow}",
+    "We made it through today{meow}"
    ]
   }
  }
