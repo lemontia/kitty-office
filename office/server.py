@@ -231,7 +231,7 @@ class Handler(SimpleHTTPRequestHandler):
         if self._blocked():
             return
         path = self.path.split("?")[0]
-        if path not in ("/api/focus", "/api/answer", "/api/rename", "/api/upload", "/api/island", "/api/stop", "/api/exit", "/api/todo"):
+        if path not in ("/api/focus", "/api/answer", "/api/rename", "/api/upload", "/api/island", "/api/stop", "/api/exit", "/api/todo", "/api/clippaths"):
             return self._json(404, {"error": self._m("noPath")})
         # 다른 웹페이지가 브라우저를 통해 127.0.0.1 로 보내는 요청을 막는다(이 화면에서 온 것만)
         ok = {f"{scheme}://{h}" for h in self._hosts() for scheme in ("http", "https")}
@@ -247,6 +247,9 @@ class Handler(SimpleHTTPRequestHandler):
                     return self._json(200, {"path": save_upload(body.get("name"), body.get("data"))})
                 except ValueError:  # 빈 파일이거나 너무 크다
                     return self._json(413, {"error": self._m("tooBig")})
+            if path == "/api/clippaths":  # 붙여넣은 파일의 원래 경로 — 서버 컴퓨터의 클립보드라 이 컴퓨터에서 연 화면에만 준다
+                local = self._who() in ("127.0.0.1", "::1") and not self.headers.get("X-Forwarded-For")
+                return self._json(200, {"paths": term.clipboard_paths() if local else []})
             if path == "/api/todo":  # 할 일 추가·체크·고치기·지우기 — 설정 폴더 todo.json
                 try:
                     return self._json(200, {"items": todo.act(body)})

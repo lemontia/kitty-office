@@ -1,5 +1,6 @@
 """세션 끝내기(term.exit_session) — subprocess 를 가짜로 바꿔 부르는 순서만 본다. 실제 터미널은 건드리지 않는다."""
 import ctypes  # noqa: F401 — os.name 을 nt 로 바꾸기 전에 미리 불러 둔다
+import json
 import os
 import unittest
 from unittest import mock
@@ -111,3 +112,18 @@ class TestRunsAny(unittest.TestCase):
             self.assertTrue(term.runs_any(10, ["rotate.sh"]))
             self.assertFalse(term.runs_any(20, ["rotate.sh"]))  # 서버만 도는 세션
             self.assertFalse(term.runs_any(10, []))
+
+
+class TestClipboardPaths(unittest.TestCase):
+    def ps(self, out):
+        return mock.patch.object(term.subprocess, "run", lambda *a, **kw: mock.Mock(stdout=out))
+
+    def test_reads_file_drop_list_on_windows(self):
+        paths = [r"C:.png", r"C:older"]
+        with mock.patch.object(term.os, "name", "nt"):
+            with self.ps(json.dumps(paths)):
+                self.assertEqual(term.clipboard_paths(), paths)
+            with self.ps(json.dumps(paths[0])):  # 하나여도 목록으로
+                self.assertEqual(term.clipboard_paths(), paths[:1])
+            with self.ps(""):  # 파일 복사가 아님(캡처 이미지·글자)
+                self.assertEqual(term.clipboard_paths(), [])

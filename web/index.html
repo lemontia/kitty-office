@@ -2535,7 +2535,16 @@ async function addFiles(files) {
 }
 {
   const ta = msg.querySelector('textarea');
-  ta.addEventListener('paste', (e) => { const fs = [...(e.clipboardData?.files || [])]; if (fs.length) { e.preventDefault(); addFiles(fs); } });
+  // 탐색기에서 복사한 파일·폴더는 원래 경로를 글자로 넣는다(서버가 클립보드를 읽는다). 캡처 이미지처럼 경로가 없으면 사본을 올린다
+  ta.addEventListener('paste', async (e) => {
+    const fs = [...(e.clipboardData?.files || [])]; if (!fs.length) return;
+    e.preventDefault();
+    let paths = [];
+    try { paths = (await (await fetch('api/clippaths', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Lang': LANG }, body: '{}' })).json()).paths || []; } catch {}
+    if (!paths.length) return addFiles(fs);
+    ta.setRangeText(paths.map((p) => `"${p}"`).join(' '), ta.selectionStart, ta.selectionEnd, 'end');
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+  });
   ta.addEventListener('dragover', (e) => { e.preventDefault(); ta.classList.add('drop'); });
   ta.addEventListener('dragleave', () => ta.classList.remove('drop'));
   ta.addEventListener('drop', (e) => { e.preventDefault(); ta.classList.remove('drop'); addFiles([...e.dataTransfer.files]); });

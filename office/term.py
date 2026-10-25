@@ -98,6 +98,21 @@ def runs_any(pid, words):
     return False
 
 
+def clipboard_paths():
+    """탐색기에서 Ctrl+C 한 파일·폴더의 원래 경로들. 브라우저는 파일 내용만 받고 경로는 모른다 — 같은 컴퓨터의 서버가 클립보드를 읽는다.
+    윈도우만. 파일 복사가 아니거나(캡처 이미지·글자) 못 읽으면 []."""
+    if os.name != "nt":
+        return []
+    ps = ("[Console]::OutputEncoding=[Text.Encoding]::UTF8; "
+          "ConvertTo-Json -Compress @(Get-Clipboard -Format FileDropList | ForEach-Object { $_.FullName })")
+    try:
+        r = subprocess.run(["powershell", "-NoProfile", "-STA", "-Command", ps], capture_output=True, encoding="utf-8", errors="replace", timeout=5)
+        out = json.loads(r.stdout or "[]")
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return []
+    return [p for p in (out if isinstance(out, list) else [out]) if isinstance(p, str)]
+
+
 def tab_of(pid):
     if os.name == "nt":
         return _tab_of_nt(pid)
