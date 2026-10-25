@@ -48,6 +48,7 @@ class TestWatcher(unittest.TestCase):
 
 
 class TestNotify(unittest.TestCase):
+    @unittest.skipIf(watch.os.name == "nt", "윈도우는 알림을 건너뛴다")
     def test_osascript_keeps_korean(self):
         """terminal-notifier 가 없을 때 — AppleScript 는 \\uXXXX 를 모른다(그대로 넣으면 문법 오류로 알림이 안 뜬다)."""
         calls = []
