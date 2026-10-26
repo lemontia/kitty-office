@@ -181,7 +181,11 @@ def answer(tab, text):
     elif tab[0] == "orca":
         _run(ORCA, "terminal", "send", "--terminal", tab[1], "--text", text, "--enter")
     else:
-        _run(HERDR, "pane", "run", tab[1], text)
+        # pane run 은 글과 Enter 를 한꺼번에 보낸다 — 파일 경로가 들어 있으면 Claude Code 가 그 파일을 붙이는 동안
+        # Enter 를 삼켜서 한 번 더 눌러야 했다(2026-10-26). 글을 먼저 넣고 잠깐 기다렸다 Enter 를 따로 누른다
+        _run(HERDR, "pane", "send-text", tab[1], text)
+        time.sleep(1.0 if re.search(r"[\\/:]", text) else 0.3)
+        _run(HERDR, "pane", "send-keys", tab[1], "enter")
 
 
 def stop(tab):
