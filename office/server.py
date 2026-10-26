@@ -201,7 +201,12 @@ class Handler(SimpleHTTPRequestHandler):
             return
         if self.path.split("?")[0] == "/api/todo":  # 오늘 할 일 칠판
             return self._json(200, {"items": todo.load()})
-        if self.path.split("?")[0] != "/api/state":
+        path = self.path.split("?")[0]
+        if path.startswith("/sounds/") and ".." not in path and not (WEB / path.lstrip("/")).is_file():  # 아직 안 넣은 소리 파일 — 404 대신 빈 204(브라우저 콘솔에 빨간 줄이 안 남고, 화면은 소리 없이 넘어간다)
+            self.send_response(204)
+            self.end_headers()
+            return
+        if path != "/api/state":
             return super().do_GET()
         try:
             home, cfg = Path.home(), self.server.cfg

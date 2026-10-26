@@ -1209,6 +1209,48 @@
     "Let's all just watch the fire{meow}",
     "We made it through today{meow}"
    ]
+  },
+  "fish": {
+   "mackerel": [
+    "What if the float never moves",
+    "I'll miss the bite, I just know it"
+   ],
+   "tuxedo": [
+    "Waiting is fishing too",
+    "...Not yet"
+   ],
+   "ginger": [
+    "Big catch today, I can feel it{meow}",
+    "Sea breeze is the best{meow}"
+   ],
+   "siamese": [
+    "Analyzing the float's bob cycle",
+    "The current is all wrong"
+   ],
+   "calico": [
+    "Heard about the fish next door?",
+    "They say this is the best spot"
+   ],
+   "patch": [
+    "Half of whatever I catch is mine",
+    "Calculating bait vs. catch"
+   ],
+   "gray": [
+    "Watching the float makes me sleepy{meow}",
+    "Wake me if something bites"
+   ],
+   "black": [
+    "I'm actually great at fishing",
+    "Using a secret technique right now"
+   ],
+   "brown": [
+    "Grill it the moment we catch it{meow}",
+    "Nothing's biting{meow}"
+   ],
+   "cream": [
+    "Let's all fish together{meow}",
+    "Doing great even with no fish{meow}"
+   ]
   }
  }
 }

@@ -59,6 +59,13 @@
   #gazeUI .row { position: absolute; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom)); display: flex; gap: 8px; }
   #gazeUI .wait { position: absolute; right: 18px; top: 18px; background: var(--red); color: #fff; }
   body:not(.gaze) #gazeUI button { pointer-events: none; }
+  /* 머리줄 🔥 메뉴 — 불멍 · 낚시멍 */
+  .mungw { position: relative; display: inline-flex; }
+  #mungMenu { position: absolute; top: calc(100% + 6px); right: 0; z-index: 300; display: flex; flex-direction: column; min-width: 128px; padding: 4px; border-radius: 12px; background: var(--paper); box-shadow: 0 6px 20px rgba(60,30,10,.25); }
+  #mungMenu[hidden] { display: none; }
+  #mungMenu button { all: unset; cursor: pointer; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  #mungMenu button:hover, #mungMenu button:focus-visible { background: var(--paper2); }
+  @media (max-width: 759px), (orientation: portrait) { #mungMenu button { min-height: 44px; box-sizing: border-box; display: flex; align-items: center; } }
   @media (prefers-reduced-motion: reduce) { #top, #todoPane, #side, #gazeUI { transition: none; } }
   /* 왼쪽 위 오늘 할 일 — 3D 사무실 위에 떠 있는 반투명 패널(PC). 휴대폰은 칩 하나 */
   #todoPane { position: fixed; left: 12px; top: 60px; z-index: 20; width: 240px; max-height: 50vh; display: flex; flex-direction: column;
@@ -189,22 +196,28 @@
   }
   #set, #logDlg { width: min(380px, 92vw); padding: 0; border: 0; border-radius: 16px; background: #fff; color: var(--ink); box-shadow: 0 20px 60px rgba(60,30,10,.35); }
   /* 오늘 할 일 창 — 설정 창과 같은 모양. 휴대폰은 전체 화면 */
-  #todoDlg { width: min(420px, 92vw); max-height: 80vh; padding: 0; border: 0; border-radius: 16px; background: #fff; color: var(--ink); box-shadow: 0 20px 60px rgba(60,30,10,.35); }
-  #todoDlg[open] { display: flex; flex-direction: column; }
-  #todoDlg::backdrop { background: rgba(40,25,10,.35); }
-  #todoDlg header { display: flex; align-items: center; gap: 8px; padding: 14px 18px; border-bottom: 1px dashed var(--line); }
-  #todoDlg header b { font-size: 16px; } #todoDlg header .cnt { flex: 1; color: var(--muted); font-size: 13px; font-weight: 700; }
-  #todoDlg header .x { border: 0; background: none; font-size: 22px; cursor: pointer; color: var(--muted); }
+  #todoDlg, #boardDlg { width: min(420px, 92vw); max-height: 80vh; padding: 0; border: 0; border-radius: 16px; background: #fff; color: var(--ink); box-shadow: 0 20px 60px rgba(60,30,10,.35); }
+  #todoDlg[open], #boardDlg[open] { display: flex; flex-direction: column; }
+  #todoDlg::backdrop, #boardDlg::backdrop { background: rgba(40,25,10,.35); }
+  #todoDlg header, #boardDlg header { display: flex; align-items: center; gap: 8px; padding: 14px 18px; border-bottom: 1px dashed var(--line); }
+  #todoDlg header b, #boardDlg header b { font-size: 16px; } #todoDlg header .cnt, #boardDlg header .cnt { flex: 1; color: var(--muted); font-size: 13px; font-weight: 700; }
+  #todoDlg header .x, #boardDlg header .x { border: 0; background: none; font-size: 22px; cursor: pointer; color: var(--muted); }
   #todoDlg .add { padding: 12px 18px 6px; } #todoDlg .add input { width: 100%; box-sizing: border-box; font: inherit; font-size: 15px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
   #todoDlg .todos { list-style: none; margin: 0; padding: 4px 10px 10px; overflow-y: auto; flex: 1; min-height: 0; }
-  #todoDlg li { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 10px; min-height: 40px; }
-  #todoDlg li:hover { background: #fbf7f0; }
+  #todoDlg li, #boardDlg li { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 10px; min-height: 40px; }
+  #todoDlg li:hover, #boardDlg li:hover { background: #fbf7f0; }
   #todoDlg li input[type=checkbox] { width: 20px; height: 20px; accent-color: #3f8f5f; flex: none; cursor: pointer; }
   #todoDlg li .tx { flex: 1; font-size: 15px; cursor: text; word-break: break-word; }
   #todoDlg li.done .tx { text-decoration: line-through; color: var(--muted); }
   #todoDlg li.old .tx { color: var(--red); font-weight: 700; }
   #todoDlg li .ed { flex: 1; font: inherit; font-size: 15px; padding: 4px 8px; border: 1px solid var(--line); border-radius: 8px; }
   #todoDlg li .del { border: 0; background: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 0 4px; }
+  #boardDlg ul { list-style: none; margin: 0; padding: 6px 10px 12px; overflow-y: auto; flex: 1; min-height: 0; }
+  #boardDlg li { cursor: pointer; flex-direction: column; align-items: stretch; gap: 2px; }
+  #boardDlg li .r { display: flex; gap: 8px; align-items: baseline; } #boardDlg li b { font-size: 15px; } #boardDlg li i { flex: 1; font-style: normal; font-size: 12px; color: var(--muted); }
+  #boardDlg li .t { font-size: 12px; font-weight: 700; color: #8a6a4a; white-space: nowrap; }
+  #boardDlg li .q { font-size: 13px; color: var(--ink); opacity: .8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tag.prop.click .nm, .tag.more.click .nm { pointer-events: auto; cursor: pointer; }
   #todoDlg .note { margin: 0; padding: 0 18px 12px; font-size: 13px; color: var(--muted); }
   #todoDlg .note:empty { display: none; }
   .todoln { all: unset; box-sizing: border-box; display: none; /* PC 에선 왼쪽 패널이 있어 숨기고 휴대폰에서만 */ align-items: center; gap: 8px; width: 100%; margin-top: 10px; padding: 8px 12px; cursor: pointer;
@@ -372,8 +385,8 @@
     #side.drag { transition: none; }
     #sideGrip { display: none; }
     #sideFold { display: none; }
-    #todoDlg { inset: var(--vvt, 0px) 0 auto 0; width: 100%; max-width: none; height: var(--vvh, 100dvh); max-height: none; margin: 0; border-radius: 0; } /* 휴대폰은 대화 팝업처럼 전체 화면 */
-    #todoDlg header { min-height: 52px; padding: 0 2px 0 14px; } #todoDlg header .x { min-width: 44px; min-height: 44px; }
+    #todoDlg, #boardDlg { inset: var(--vvt, 0px) 0 auto 0; width: 100%; max-width: none; height: var(--vvh, 100dvh); max-height: none; margin: 0; border-radius: 0; } /* 휴대폰은 대화 팝업처럼 전체 화면 */
+    #todoDlg header, #boardDlg header { min-height: 52px; padding: 0 2px 0 14px; } #todoDlg header .x, #boardDlg header .x { min-width: 44px; min-height: 44px; }
     #todoDlg .add input { font-size: 16px; } #todoDlg li { min-height: 48px; }
     body.side-fold #side { transform: none; } /* 휴대폰은 바텀시트 그대로 */
     body.gaze #side { transform: translateY(100%); } body.gaze-full { grid-template-rows: 0 100dvh 0; } /* 불멍 — 시트를 아래로 빼고 캔버스를 화면 전체로 */
@@ -411,9 +424,9 @@
       #msg.nav-push { animation: navPush 200ms cubic-bezier(0.2, 0, 0, 1); }
       #msg.nav-push::backdrop { animation: scrimIn 200ms cubic-bezier(0.2, 0, 0, 1); }
       #msg.nav-pop { animation: navPop 200ms cubic-bezier(0.2, 0, 0, 1) forwards; }
-      #todoDlg.nav-push { animation: navPush 200ms cubic-bezier(0.2, 0, 0, 1); }
-      #todoDlg.nav-push::backdrop { animation: scrimIn 200ms cubic-bezier(0.2, 0, 0, 1); }
-      #todoDlg.nav-pop { animation: navPop 200ms cubic-bezier(0.2, 0, 0, 1) forwards; }
+      #todoDlg.nav-push, #boardDlg.nav-push { animation: navPush 200ms cubic-bezier(0.2, 0, 0, 1); }
+      #todoDlg.nav-push::backdrop, #boardDlg.nav-push::backdrop { animation: scrimIn 200ms cubic-bezier(0.2, 0, 0, 1); }
+      #todoDlg.nav-pop, #boardDlg.nav-pop { animation: navPop 200ms cubic-bezier(0.2, 0, 0, 1) forwards; }
       .content-in { animation: contentIn 200ms cubic-bezier(0.2, 0, 0, 1); }
     }
   }
@@ -432,7 +445,8 @@
   <span class="conn" id="conn" data-t="disconnected">연결 끊김</span>
   <span class="topwait" id="topwait"></span>
   <button class="bell" id="findBtn" aria-label="이름 찾기" data-t-aria="find">🔍</button><div class="find"><input id="find" type="search" placeholder="이름 찾기" data-t-ph="find" autocomplete="off"><ul id="found"></ul></div>
-  <button class="bell" id="fireBtn" data-t-title="fireStare" data-t-aria="fireStare" title="불멍하기" aria-label="불멍하기">🔥</button>
+  <span class="mungw"><button class="bell" id="fireBtn" data-t-title="mungTitle" data-t-aria="mungTitle" title="멍 때리기" aria-label="멍 때리기" aria-haspopup="menu">🔥</button>
+    <span id="mungMenu" role="menu" hidden><button role="menuitem" data-m="fire" data-t="mungFire">🔥 불멍</button><button role="menuitem" data-m="fishing" data-t="mungFish">🎣 낚시멍</button></span></span>
   <button class="bell" id="setBtn" title="설정" aria-label="설정" data-t-title="settings" data-t-aria="settings">⚙️</button>
 </header>
 <aside id="todoPane"></aside>
@@ -447,6 +461,7 @@
   <p class="setnote"><span data-t="setNote">설정은 이 브라우저에만 저장됩니다.</span><span id="ver"></span></p></dialog>
 <dialog id="todoDlg"><header><b data-t="todoTitle">오늘 할 일</b><span class="cnt"></span><button class="x" aria-label="닫기" data-t-aria="close">×</button></header>
   <form class="add"><input maxlength="200" data-t-ph="todoPh" placeholder="할 일을 적고 Enter" autocomplete="off"></form><ul class="todos"></ul><p class="note"></p></dialog>
+<dialog id="boardDlg"><header><b></b><span class="cnt"></span><button class="x" aria-label="닫기" data-t-aria="close">×</button></header><ul></ul></dialog>
 <dialog id="logDlg"><header><b data-t="activityLog">활동 로그</b><button class="x" aria-label="닫기" data-t-aria="close">×</button></header>
   <ul class="log" id="log"></ul><p class="setnote" data-t="logNote">승인·질문 창 대기도 잡는다. 3초마다 다시 읽는다.</p></dialog>
 <dialog id="msg"><header><b></b><span class="fl"></span><span class="t"></span><span class="ctx" hidden></span><button class="pin" title="오른쪽 목록 맨 위에 고정" data-t-title="pinTitle">📌</button><button class="ren" title="세션 이름 바꾸기" data-t-title="renameTitle">✎</button><button class="x" aria-label="닫기" data-t-aria="close">×</button></header><div class="body"></div>
@@ -478,10 +493,10 @@ const T = {
     sideGrip: '끌어서 너비 조절 · 두 번 누르면 원래대로', sheetGrip: '목록 펼치기·접기', sideFold: '오른쪽 목록 접기·펼치기 (])',
     now: '방금', min: (n) => `${n}분`, hour: (n) => `${n}시간`, day: (n) => `${n}일`, ago: (d) => `${d} 전`,
     signWork: '작업실', signMeet: '회의', signBoss: '결재실', signBossPlate: '결재', signReport: '보고', signReportN: (n) => `보고 (${n})`, signStale: '묵은 질문', signLounge: '휴게실', signTodo: '오늘의 할 일: 없음', stamp: '완료',
-    more: (n) => `+${n}명 더`, propStale: (n) => `묵은 질문 ${n}`, propQueue: (n) => `결재 대기 ${n}명`,
+    more: (n) => `+${n}명 더`, propStale: (n) => `묵은 질문 ${n}`, staleNote: '하루 넘게 답을 기다리는 중', boardQueue: '결재 대기', propQueue: (n) => `결재 대기 ${n}명`,
     lastRead: (t) => `마지막으로 읽은 시각 ${t}`, bossWaiting: '결재 기다림',
     navBoss: '결재실',
-    foldTitle: '접기·펴기', fireStare: '불멍하기', fireBack: '돌아가기', fireSoundOn: '장작 소리 끄기', fireSoundOff: '장작 소리 켜기', fireWait: (n) => `결재 ${n}`,
+    foldTitle: '접기·펴기', fireStare: '불멍하기', fireBack: '돌아가기', fireSoundOn: '소리 끄기', fireSoundOff: '소리 켜기', fishStare: '낚시멍', mungFire: '🔥 불멍', mungFish: '🎣 낚시멍', mungTitle: '멍 때리기', fireWait: (n) => `결재 ${n}`,
     st: { waiting: '결재 기다림', reported: '보고', working: '일하는 중', meeting: '회의 중', off: '쉬는 중', done: '퇴근' },
     stPop: { working: '일하는 중', meeting: '회의 중', reported: '보고 올림', off: '쉬는 중', done: '퇴근' },
     me: '나', meSaid: (t, a) => `나: ${t} · ${a} 전`, dragOrder: '끌어서 순서 바꾸기', basic: '기본', byProject: '프로젝트별',
@@ -515,10 +530,10 @@ const T = {
     sideGrip: 'Drag to resize · double-click to reset', sheetGrip: 'Expand or collapse the list', sideFold: 'Collapse or expand the list (])',
     now: 'now', min: (n) => `${n}m`, hour: (n) => `${n}h`, day: (n) => `${n}d`, ago: (d) => d === 'now' ? 'just now' : `${d} ago`,
     signWork: 'Workroom', signMeet: 'Meeting', signBoss: 'Approvals', signBossPlate: 'Desk', signReport: 'Reports', signReportN: (n) => `Reports (${n})`, signStale: 'Old questions', signLounge: 'Lounge', signTodo: "Today's to-do: nothing", stamp: 'DONE',
-    more: (n) => `+${n} more`, propStale: (n) => `Old questions ${n}`, propQueue: (n) => `Waiting ${n}`,
+    more: (n) => `+${n} more`, propStale: (n) => `Old questions ${n}`, staleNote: 'waiting over a day', boardQueue: 'Waiting for you', propQueue: (n) => `Waiting ${n}`,
     lastRead: (t) => `Last read ${t}`, bossWaiting: 'Waiting for you',
     navBoss: 'Approvals',
-    foldTitle: 'Collapse or expand', fireStare: 'Stare at the fire', fireBack: 'Back', fireSoundOn: 'Mute the crackle', fireSoundOff: 'Play the crackle', fireWait: (n) => `${n} waiting`,
+    foldTitle: 'Collapse or expand', fireStare: 'Stare at the fire', fireBack: 'Back', fireSoundOn: 'Mute', fireSoundOff: 'Unmute', fishStare: 'Gone fishing', mungFire: '🔥 Fire', mungFish: '🎣 Fishing', mungTitle: 'Zone out', fireWait: (n) => `${n} waiting`,
     st: { waiting: 'Waiting', reported: 'Reported', working: 'Working', meeting: 'Meeting', off: 'Resting', done: 'Off' },
     stPop: { working: 'Working', meeting: 'Meeting', reported: 'Reported', off: 'Resting', done: 'Off' },
     me: 'Me', meSaid: (t, a) => `Me: ${t} · ${a === 'now' ? 'just now' : a + ' ago'}`, dragOrder: 'Drag to reorder', basic: 'Default', byProject: 'By project',
@@ -822,6 +837,7 @@ const flameTex = [0, 1, 2, 3].map((k) => canvasTex(128, 192, (q) => {
 const sparkTex = canvasTex(32, 32, (q) => { const gr = q.createRadialGradient(16, 16, 1, 16, 16, 14); gr.addColorStop(0, 'rgba(255,240,180,1)'); gr.addColorStop(0.4, 'rgba(255,150,60,.9)'); gr.addColorStop(1, 'rgba(255,120,40,0)'); q.fillStyle = gr; q.fillRect(0, 0, 32, 32); });
 const warmTex = canvasTex(128, 128, (q) => { const gr = q.createRadialGradient(64, 64, 2, 64, 64, 62); gr.addColorStop(0, 'rgba(255,170,80,.75)'); gr.addColorStop(1, 'rgba(255,140,60,0)'); q.fillStyle = gr; q.fillRect(0, 0, 128, 128); });
 const fires = []; // {kind, pos, base, flames, sparks, warm, hit}
+const mungs = []; // 누르면 「멍」에 드는 곳 — 불 둘 + 낚시 부두. {mung(MUNG 키), pos, base, sc, hit}
 const flameGeo = new THREE.PlaneGeometry(1, 1).translate(0, 0.46, 0); // 스프라이트 center(0.5, 0.04) 와 같은 밑동
 function makeFire(g, kind, x, base, z, sc) {
   const f = { kind, pos: new THREE.Vector3(x, base, z), base, sc, flames: [], sparks: [] };
@@ -837,7 +853,7 @@ function makeFire(g, kind, x, base, z, sc) {
   f.warm.rotation.x = -Math.PI / 2; f.warm.position.set(x, base + 0.02, z + 0.3 * sc); g.add(f.warm);
   f.hit = new THREE.Mesh(new THREE.BoxGeometry(1.4 * sc, 1.6 * sc, 1.4 * sc), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })); // 누르는 자리(보이지 않음)
   f.hit.position.set(x, base + 0.8 * sc, z); g.add(f.hit);
-  fires.push(f); return f;
+  f.mung = kind === 'camp' ? 'campfire' : 'fireplace'; fires.push(f); mungs.push(f); return f;
 }
 const RM = matchMedia('(prefers-reduced-motion: reduce)');
 function firesTick(t, near) {
@@ -859,11 +875,11 @@ function firesTick(t, near) {
   }
 }
 function fireAt(x, y) {
-  if (!fires.length) return null;
+  if (!mungs.length) return null;
   const r = renderer.domElement.getBoundingClientRect();
   ndc.set((x - r.left) / r.width * 2 - 1, -(y - r.top) / r.height * 2 + 1); ray.setFromCamera(ndc, camera);
-  const h = ray.intersectObjects(fires.map((f) => f.hit))[0];
-  return h ? fires.find((f) => f.hit === h.object) : null;
+  const h = ray.intersectObjects(mungs.map((f) => f.hit))[0];
+  return h ? mungs.find((f) => f.hit === h.object) : null;
 }
 // ───────── 도형 도우미 ─────────
 function rbox(w, h, d, color, x, y, z, r = 0.06, o) {
@@ -1113,11 +1129,14 @@ function planLayout() {
   // 2026-10-22 「대표 사무실이 너무 커」·「사이에 통로가 있어야」 — 구역 사이 통로(GAPW)로 뒤 줄과 곧장 오간다(cbGaps)
   const boss = { x: cb.x, z: cb.z, w: BOSSW, d: CD }, repA = { x: boss.x + BOSSW + GAPW, z: cb.z, w: REPW, d: CD }, meet = { x: repA.x + REPW + GAPW, z: cb.z, w: MEETW, d: CD };
   const cbGaps = [boss.x + BOSSW + GAPW / 2, repA.x + REPW + GAPW / 2];
-  const pz = cb.z + CD, doorX = boss.x + 1.8, q1 = pz + 2.8, q2 = pz + 5.9, QX = 4.4; // 3.4 로 좁혔다가 멀리서 이름표가 겹쳐 되돌림(보고 깔개를 0.8 넓혀 덩어리 안에 든다)
-  // 대표실 문 앞 줄 8 — 문에서 가까운 쪽이 먼저, 은행 줄처럼 두 줄로 꺾어 이름표가 안 겹치게
-  const queue = Array.from({ length: 8 }, (_, i) => i < 4 ? { x: doorX + 0.4 + i * QX, z: q1 } : { x: doorX + 0.4 + QX / 2 + (7 - i) * QX, z: q2 });
-  const staleBox = { x: doorX + 18.8, z: q1 - 0.6 }; // 묵은 질문 — 결재 줄 끝 오른쪽
-  const stale = [0, 1, 2].map((i) => ({ x: doorX + 20.0 + i * 1.6, z: q1 + 0.6 }));
+  const pz = cb.z + CD, doorX = boss.x + 1.8, q1 = pz + 1.3;
+  // 대표실 문 앞 줄 8 — 문에서 가까운 쪽이 먼저. 앞뒤 두 줄을 번갈아(지그재그) 1.1 씩, 줄마다 0.5 씩 앞으로 비스듬히 —
+  // 2026-10-26 「깔개가 너무 길다」로 간격을 반으로(전엔 같은 줄 4.4, 70% 판도 해 봤으나 반이 낫다는 판정). 기본 보기(26px)에서 한 줄 이름표(이름+기다린 시간,
+  // 9자 이름이면 약 165px)끼리 안 겹치는 가장 짧은 모양을 따져 고른 값(앞뒤 엇갈림 4.8 · 비스듬 0.5). 묵은 질문도 같은 규칙
+  const zig = (x0, n, z0 = q1) => Array.from({ length: n }, (_, i) => ({ x: x0 + i * 1.1, z: z0 + (i % 2) * 4.8 + (i >> 1) * 0.5 }));
+  const queue = zig(doorX + 0.4, 8);
+  const sx = doorX + 0.4 + 10.8, staleBox = { x: sx + 5.6, z: q1 + 0.4 }; // 묵은 질문 — 결재 줄 끝 오른쪽(한 칸 아래로 내려 결재 줄 끝 이름표와 안 겹치게), 상자는 오른쪽 뒤 끝(상자 수 표가 이름표들에 닿지 않게 — 이름표 사각형으로 재서 고른 자리)
+  const stale = zig(sx, 3, q1 + 1.2);
   const meetSlots = [];
   for (const tz of [meet.z + CD * 0.3, meet.z + CD * 0.7]) for (let k = 0; k < 2; k++) {
     const x = meet.x + MEETW * (k + 0.5) / 2;
@@ -1152,7 +1171,7 @@ function planLayout() {
   // 동물 자리 — 휴게실 오른쪽 작은 정원(분수·어항), 강아지 밥그릇
   const gx = [at(6.2, 0).x, at(lg.w - 0.5, 0).x], garden = { x0: Math.min(...gx), x1: Math.max(...gx), z0: lg.z + 4.6, z1: lg.z + lg.d - 0.7 };
   L = { title: S.title || '', work, blocks: [cb, lounge, work], lanes, xL, xR, W: P.Wt, D: P.Dt, x0, z0, pz, cb, cbGaps, repA, meet, boss, lounge, doorX, queue, stale, staleBox, meetSlots, report, sprawl, rest, hearth: { x: at(kx, 0).x, z: z0 }, tower: at(tx, 0.8), lat: at,
-    queueMore: { x: doorX - 1.8, z: q2 }, staleMore: { x: doorX + 21.6, z: q2 }, meetMore: { x: meet.x + MEETW - 0.8, z: meet.z + 0.6 },
+    queueMore: { x: doorX - 1.6, z: q1 + 4.8 }, staleMore: { x: sx + 4.0, z: q1 + 6.4 }, meetMore: { x: meet.x + MEETW - 0.8, z: meet.z + 0.6 },
     restMore: at(5.4, 7.4),
     // 정문 — 뒷벽(밖 오솔길과 이어진다)
     door: { x: x0 + P.Wt / 2, z: z0 - 0.2 }, pets: { garden, bowl: at(6.9, 4.2), tank: at(7.9, 3.3), fount: at(7.4, 5.9) },
@@ -1285,14 +1304,14 @@ function buildBoss(g, r) {
   const pile = new THREE.Group(); g.add(pile);
   bookshelf(g, r.x + r.w - 1.6, r.z + 0.45, 2.0, 12); plant(g, r.x + 0.8, r.z + 0.8, 1.0, 21); floorLamp(g, r.x + r.w - 0.7, r.z + 3.6);
   // 문 앞 줄 서는 카펫 + 줄 기둥, 묵은 질문 상자
-  const qz = (L.queue[0].z + L.queue[4].z) / 2;
-  const qx0 = L.queue[0].x, qx1 = L.queue[4].x;
-  g.add(plane(qx1 - qx0 + 4, (L.queue[4].z - L.queue[0].z) + 3, new THREE.MeshStandardMaterial({ map: rugTex('#c0563b', '#f1c27d'), roughness: 1 }), (qx0 + qx1) / 2, 0.02, qz));
-  for (let i = 0; i < 5; i++) {
-    const x = qx0 + i * (qx1 - qx0) / 4;
-    g.add(cyl(0.06, 0.06, 0.95, 0xc9a14a, x, 0, qz)); g.add(cyl(0.2, 0.22, 0.06, 0xc9a14a, x, 0, qz));
-    if (i < 4) { const rope = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, (qx1 - qx0) / 4, 8), mat(0xb03030)); rope.rotation.z = Math.PI / 2; rope.position.set(x + (qx1 - qx0) / 8, 0.85, qz); g.add(rope); }
-  }
+  const Q = L.queue, qx0 = Q[0].x, qx1 = Q[7].x, qz0 = Q[0].z, qz1 = Q[7].z;
+  g.add(plane(qx1 - qx0 + 3, qz1 - qz0 + 3, new THREE.MeshStandardMaterial({ map: rugTex('#c0563b', '#f1c27d'), roughness: 1 }), (qx0 + qx1) / 2, 0.02, (qz0 + qz1) / 2));
+  // 줄 기둥 — 앞뒤 두 줄 사이 가운데 선(비스듬)을 따라 넷, 사이를 빨간 줄로
+  const posts = [0, 1, 2, 3].map((i) => new THREE.Vector3(qx0 + i * (qx1 - qx0) / 3, 0, (Q[0].z + Q[1].z) / 2 + i * (Q[6].z - Q[0].z) / 3));
+  posts.forEach((p, i) => {
+    g.add(cyl(0.06, 0.06, 0.95, 0xc9a14a, p.x, 0, p.z)); g.add(cyl(0.2, 0.22, 0.06, 0xc9a14a, p.x, 0, p.z));
+    if (i < 3) { const q = posts[i + 1], d = q.clone().sub(p), rope = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, d.length(), 8), mat(0xb03030)); rope.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().normalize()); rope.position.copy(p).add(q).multiplyScalar(0.5).setY(0.85); g.add(rope); }
+  });
   // 보고 자리 깔개 — 결재 줄(빨강)과 나란히, 덜 급한 파랑
   { const r0 = L.report[0], r9 = L.report[L.report.length - 1];
     g.add(plane(r9.x - r0.x + 1.8, r9.z - r0.z + 1.8, new THREE.MeshStandardMaterial({ map: rugTex('#3f6fa8', '#cfe0f2'), roughness: 1 }), (r0.x + r9.x) / 2, 0.02, (r0.z + r9.z) / 2));
@@ -1301,8 +1320,8 @@ function buildBoss(g, r) {
   g.add(rbox(1.3, 0.9, 1.0, 0xc8a06a, sb.x, 0, sb.z, 0.04)); g.add(rbox(1.32, 0.1, 0.25, 0xe8d2a6, sb.x, 0.9, sb.z, 0.01));
   const box = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.3), new THREE.MeshBasicMaterial({ map: signTex(t('signStale'), '#fff6e0', '#7a4b26') }));
   box.position.set(sb.x, 0.5, sb.z + 0.51); g.add(box);
-  const staleA = { pos: new THREE.Vector3(sb.x, 1.6, sb.z), el: tagEl('prop') };
-  const queueA = { pos: new THREE.Vector3(dx, 3.65, fz), el: tagEl('prop') };
+  const staleA = { pos: new THREE.Vector3(sb.x, 1.6, sb.z), el: tagEl('prop') }; staleA.el.dataset.board = 'stale';
+  const queueA = { pos: new THREE.Vector3(dx, 3.65, fz), el: tagEl('prop') }; queueA.el.dataset.board = 'queue';
   props.push(staleA, queueA);
   g.userData.boss = { pile, staleA, queueA, pileAt: [bx - 1.3, 1.06, bz + 0.1] };
 }
@@ -1610,16 +1629,37 @@ function buildForest(g) {
     m.scale.set(4.5 + k * 0.6, 1, 1.4 - k * 0.06); m.position.set(shore + 5 + k * 5.2, GY + 0.26, (z0 + z1) / 2 - k * 1.8); m.userData.ph = k; g.add(m); seaGlints.push(m);
   }
   const zDock = L.pz + 2, bed = { x: x1 + 3.6, z: zDock - 5.5 }, castle = { x: shore - 2.4, z: zDock + 5 };
-  // 바다 낚시 선착장 — 낚싯대만 꽂혀 있고 사람은 없다. 찌가 가끔 까딱(waterTick)
-  const dock = grp(g, shore - 1.6, zDock, Math.PI, GY); // 모래에서 바다 쪽(+x)으로
-  for (let i = 0; i < 9; i++) dock.add(rbox(0.36, 0.1, 1.3, i % 2 ? 0xc8955f : 0xb98552, -i * 0.38, 0.22, 0, 0.02));
-  for (const dx of [0.05, -1.5, -3.0]) for (const dz of [-0.55, 0.55]) dock.add(cyl(0.06, 0.06, 0.36, 0x8a5e3a, dx, -0.04, dz, 6));
-  const rod = cyl(0.025, 0.035, 2.4, 0x5a3d28, 0, 0, 0, 6); rod.position.set(-2.9, 1.25, 0.35); rod.rotation.z = 0.75; dock.add(rod);
-  const bob = new THREE.Group(); bob.position.set(shore + 4.6, GY + 0.15, zDock - 0.9); g.add(bob);
-  const b1 = new THREE.Mesh(new THREE.SphereGeometry(0.1, 10, 8), mat(0xe8504a)); b1.position.y = 0.06; bob.add(b1);
-  const b2 = new THREE.Mesh(new THREE.SphereGeometry(0.1, 10, 8, 0, 6.3, 0, 1.4), mat(0xffffff)); b2.position.y = 0.07; bob.add(b2);
-  const tip = new THREE.Vector3(-2.9 - Math.sin(0.75) * 1.2, 1.25 + Math.cos(0.75) * 1.2, 0.35); dock.updateMatrixWorld(true); dock.localToWorld(tip);
-  g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([tip, bob.position.clone().setY(GY + 0.16)]), new THREE.LineBasicMaterial({ color: 0xfff6e0, transparent: true, opacity: 0.7 })));
+  // 바다 낚시 부두 — 모래에서 바다 쪽(+x)으로 나온 나무 데크. 평소엔 낚싯대만 꽂혀 있고(찌가 가끔 까딱, waterTick), 낚시멍 땐 셋이 카메라 쪽 가장자리에 나란히 앉는다
+  const dock = grp(g, shore - 1.6, zDock, Math.PI, GY);
+  for (let i = 0; i < 14; i++) dock.add(rbox(0.36, 0.1, 1.5, i % 2 ? 0xc8955f : 0xb98552, -i * 0.38, 0.22, 0, 0.02));
+  for (const dx of [0.05, -1.7, -3.4, -5.0]) for (const dz of [-0.65, 0.65]) dock.add(cyl(0.06, 0.06, 0.36, 0x8a5e3a, dx, -0.04, dz, 6));
+  const rod = cyl(0.025, 0.035, 2.4, 0x5a3d28, 0, 0, 0, 6); rod.position.set(-2.9, 1.25, 0.45); rod.rotation.z = 0.75; dock.add(rod); // 아무도 없을 때 꽂아 둔 낚싯대(낚시멍 땐 숨긴다)
+  const bob = new THREE.Group(); bob.position.set(shore + 4.6, GY + 0.15, zDock - 1.0); g.add(bob);
+  const bobGeo = [new THREE.SphereGeometry(0.1, 10, 8), new THREE.SphereGeometry(0.1, 10, 8, 0, 6.3, 0, 1.4)];
+  const bobber = (gr) => { const b1 = new THREE.Mesh(bobGeo[0], mat(0xe8504a)); b1.position.y = 0.06; const b2 = new THREE.Mesh(bobGeo[1], mat(0xffffff)); b2.position.y = 0.07; gr.add(b1, b2); return gr; };
+  bobber(bob);
+  const tip = new THREE.Vector3(-2.9 - Math.sin(0.75) * 1.2, 1.25 + Math.cos(0.75) * 1.2, 0.45); dock.updateMatrixWorld(true); dock.localToWorld(tip);
+  const idleLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints([tip, bob.position.clone().setY(GY + 0.16)]), new THREE.LineBasicMaterial({ color: 0xfff6e0, transparent: true, opacity: 0.7 })); g.add(idleLine);
+  { // 낚시멍 — 앉을 자리 둘, 자리마다 낚싯대·줄·찌·물결(평소엔 숨김). 누르는 자리는 데크 전체
+    const seats = [-2.0, -3.9].map((lx, k) => { const v = dock.localToWorld(new THREE.Vector3(lx, 0, -0.55)); return { x: v.x, y: GY + 0.32, z: v.z, pose: 'fish', seat: k }; });
+    const fg = new THREE.Group(); fg.visible = false; g.add(fg);
+    const rodMat = new THREE.MeshBasicMaterial({ color: 0x5a3d28, depthTest: false }), lineMat = new THREE.LineBasicMaterial({ color: 0xfff6e0, transparent: true, opacity: 0.8 }), ringGeo = new THREE.RingGeometry(0.12, 0.15, 24).rotateX(-Math.PI / 2);
+    const rigs = seats.map((st, k) => {
+      // 고양이가 보는 쪽(화면 오른쪽 앞)으로 드리운다 — 카메라 쪽으로만 뻗으면 낚싯대가 고양이 그림에 가려 안 보였다
+      const base = new THREE.Vector3(st.x + 0.35, st.y + 0.55, st.z + 0.1), at = new THREE.Vector3(st.x + 1.4, GY + 0.13, st.z + 2.0 + (k % 2) * 0.35);
+      const tp = new THREE.Vector3(st.x + 1.55, GY + 1.95, st.z + 0.9), len = base.distanceTo(tp);
+      const r = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.032, len, 6).translate(0, len / 2, 0), rodMat); r.renderOrder = 13; r.position.copy(base); r.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tp.clone().sub(base).normalize()); fg.add(r); // 고양이 그림 위에 — 앞발로 쥔 것처럼(뒤에 두면 그림에 가려 안 보였다)
+      const ln = new THREE.Line(new THREE.BufferGeometry().setFromPoints([tp, at]), lineMat); fg.add(ln);
+      const b = bobber(new THREE.Group()); b.position.copy(at); fg.add(b);
+      const rip = [0, 1].map((i) => { const m = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, depthWrite: false })); m.position.set(at.x, GY + 0.14, at.z); m.userData.ph = i / 2; fg.add(m); return m; });
+      return { rod: r, line: ln, bob: b, rip, tip: tp, at, ph: k * 2.3 + Math.random() };
+    });
+    const fish = new THREE.Sprite(new THREE.SpriteMaterial({ map: fishTex[0], transparent: true, depthTest: false })); fish.scale.set(0.55, 0.28, 1); fish.renderOrder = 12; fish.visible = false; fg.add(fish);
+    const c = dock.localToWorld(new THREE.Vector3(-3.1, 0, -0.55)), hit = new THREE.Mesh(new THREE.BoxGeometry(5.8, 1.4, 3.6), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
+    hit.position.set(c.x, GY + 0.7, zDock + 0.9); g.add(hit); // 데크 + 앞의 찌 자리까지
+    const pier = g.userData.pier = { mung: 'fishing', pos: new THREE.Vector3(c.x + 0.6, GY, c.z + 0.7), base: GY + 0.3, sc: 1, hit, seats, rigs, fish, fg, idle: [rod, bob, idleLine] };
+    mungs.push(pier);
+  }
   // 빈 선베드 + 파라솔
   const sb = grp(g, bed.x, bed.z, 0.4, GY);
   sb.add(rbox(0.75, 0.22, 1.9, 0xffffff, 0, 0, 0.15, 0.04)); sb.add(rbox(0.68, 0.08, 1.2, 0x7fc3d9, 0, 0.22, 0.45, 0.03));
@@ -1677,7 +1717,7 @@ function buildForest(g) {
   const busy = [bed, castle, { x: 0, z: zDock }];
   for (let z = z0 - 3; z < z1 + 12; z += 3.4) if (busy.every((q) => Math.abs(z - q.z) > 3)) walk.push({ x: beachX(z), z, y: GY, kind: 'beach' });
   for (let z = z0 - 6; z > z0 - 30; z -= 4.5) walk.push({ x: pathX(z), z, y: GY, kind: 'trail' });
-  const fp = new THREE.Vector3(-2.08, 0, 0.35); dock.localToWorld(fp);
+  const fp = new THREE.Vector3(0, 0, 0.45); dock.localToWorld(fp); // 부두 뭍 쪽 끝 — 낚시멍 자리(앞 가장자리 셋)와 겹치지 않게
   L.out = { fish: { x: fp.x, z: fp.z, y: GY + 0.32 }, ham: { x: ham.x, z: ham.z, y: GY + 0.82 },
     chairs: [{ x: fire.x + 0.2, z: fire.z + 1.6, y: GY + 0.42 }, { x: fire.x + 1.5, z: fire.z + 0.55, y: GY + 0.42 }], walk, beachX, pathX,
     moreAt: { x: x1 + 3, z: z1 + 13 }, box: [Math.min(fire.x - 3, x1 - 3), z0 - 4, shore + 5, z1 + 10] };
@@ -1732,7 +1772,7 @@ function buildFloor() {
   if (floorG) { scene.remove(floorG); disposeTree(floorG); }
   forestMats.length = 0; seaGlints.length = 0; puffs.length = 0; lamps.length = 0; sunPatches.length = 0; glows.length = 0;
   for (const a of props.splice(0)) a.el.remove();
-  fires.length = 0;
+  fires.length = 0; mungs.length = 0;
   const g = floorG = new THREE.Group(), { W, D, x0, z0 } = L;
   g.add(rbox(W + 0.8, 0.6, D + 0.8, 0x7a5236, 0, -0.6, 0, 0.2));
   const fm = floorMat(marbleTex(3), W, D, 10); fm.roughness = 0.35;
@@ -1880,6 +1920,14 @@ function kittyTex(kt, pose, flip) {
       q.fillStyle = '#c9c9c9'; q.fillRect(-30, 34, 60, 5); q.fillStyle = '#ff2b2b'; q.fillRect(-30, 34, f ? 26 : 24, 5); // 재생 막대
       q.restore(); return;
     }
+    if (pose === 'fish' || pose === 'fishUp') { // 낚시멍 — 부두에 앉아 낚싯대(3D)를 쥐고 찌를 본다 · 입질에 번쩍 들어 올림
+      const up = pose === 'fishUp';
+      tail([[190, 470], [170, 505], [290, 506], [330, 492]]);
+      body(262, 430, 86, 70);
+      head(282, 330, up ? 'open' : 'dot', up ? -0.12 : 0.05);
+      paw(300, 488); paw(up ? 380 : 352, up ? 372 : 440); // 낚싯대를 쥔 앞발
+      return;
+    }
     if (pose === 'peek' || pose === 'kot') { // 상자·고타츠 이불 밖으로 머리와 앞발만 — 몸은 그 안이라 그리지 않는다
       const kot = pose === 'kot', hy = kot ? 400 : 438;
       head(270, hy, 'sleep', 0.05);
@@ -2023,6 +2071,8 @@ function setMore(key, n, p) {
   let m = moreTags.get(key);
   if (!m) { m = { el: tagEl('more'), pos: new THREE.Vector3() }; moreTags.set(key, m); }
   m.pos.set(p.x, 0.6, p.z); m.seen = true;
+  const bk = { stale: 'stale', queue: 'queue', report: 'report', sprawl: 'report' }[key]; // 오래 쉬는 보고 고양이(sprawl)도 보고 목록
+  if (bk) { m.el.dataset.board = bk; m.el.classList.add('click'); }
   setHTML(m.el, `<span class="nm">${esc(t('more', n))}</span>`);
 }
 
@@ -2091,11 +2141,10 @@ function placements() {
     done.slice(0, spots.length).forEach((s, i) => put(s, spots[i], spots[i].kind ? { stroll: spots[i].kind, sk: i, sz: spots[i].z } : {}));
     if (done.length > spots.length) setMore('done', done.length - spots.length, O.moreAt);
   }
-  if (gaze) { // 불멍 — 들어갈 때 고른 셋(gaze.pick)이 불 옆에 둘러앉아 존다. 벽난로면 그 앞 고타츠로 모인다. 결재 수·목록은 그대로
-    const f = gaze.fire, k = f.sc / 1.6, g0 = f.kind === 'camp' ? FOREST_GY : 0;
-    const spots = f.kind === 'hearth' ? L.rest.filter((r) => r.kot) : [[-2.1, 0.7], [2.1, 0.7], [-1.3, 2.0]].map(([dx, dz]) => ({ x: f.pos.x + dx * Math.max(k, 0.75), y: g0, z: f.pos.z + dz * Math.max(k, 0.75), pose: 'resting', flip: dx > 0 }));
+  if (gaze) { // 멍 — 들어갈 때 고른 셋(gaze.pick)이 그 자리에 모인다(모닥불 둘레·벽난로 앞 고타츠·부두 가장자리). 결재 수·목록은 그대로
+    const spots = gaze.M.seats(gaze.o);
     const pk = gaze.pick.map((k) => out.find((p) => p.key === k)).filter(Boolean), on = (p, r) => p.x === r.x && p.z === r.z, at = (r) => out.find((p) => on(p, r));
-    const seat = (p, r) => Object.assign(p, { x: r.x, y: r.y || 0, z: r.z, pose: r.pose, kot: r.kot, flip: !!r.flip });
+    const seat = (p, r) => Object.assign(p, { x: r.x, y: r.y || 0, z: r.z, pose: r.pose, kot: r.kot, flip: !!r.flip, seat: r.seat });
     let n = 0;
     for (const p of pk) {
       if (n >= spots.length) break;
@@ -2143,8 +2192,9 @@ function syncScene() {
     }
     pile.userData.n = nRep; shadowDirty();
   }
-  setHTML(staleA.el, `<span class="nm">${t('propStale', nStale)}</span>`); staleA.el.className = 'tag prop' + (nStale ? ' hot' : ''); staleA.el.style.visibility = nStale ? '' : 'hidden'; // 없으면 줄 앞을 가리지 않게 숨긴다
-  setHTML(queueA.el, `<span class="nm">${t('propQueue', nQ)}</span>`); queueA.el.className = 'tag prop big' + (nQ ? ' hot' : '');
+  setHTML(staleA.el, `<span class="nm">${t('propStale', nStale)}</span>`); staleA.el.className = 'tag prop click' + (nStale ? ' hot' : ''); staleA.el.style.visibility = nStale ? '' : 'hidden'; // 없으면 줄 앞을 가리지 않게 숨긴다
+  if ($('#boardDlg').open) drawList();
+  setHTML(queueA.el, `<span class="nm">${t('propQueue', nQ)}</span>`); queueA.el.className = 'tag prop big click' + (nQ ? ' hot' : '');
   if (rebuilt === 'full') fitAfterBuild();
   firstPaint = false;
 }
@@ -2344,7 +2394,7 @@ function applyState2() {
   if (msg.open && msgSid) { const s = S.sessions.find((x) => x.id === msgSid); if (s) refreshBody(s); }
 }
 window.applyState = applyState; // 콘솔에서 빈 상태 등을 넣어 볼 수 있게
-window.__fire = (k) => { const f = floorG?.userData[k === 'camp' ? 'campFire' : 'hearth']; if (!f) return null; v.copy(f.pos).setY(f.base + 0.5 * f.sc).project(camera); const r = renderer.domElement.getBoundingClientRect(); return [r.left + (v.x + 1) / 2 * r.width, r.top + (1 - v.y) / 2 * r.height]; }; // 확인용: 불의 화면 위치
+window.__fire = (k) => { const f = floorG?.userData[k === 'camp' ? 'campFire' : k === 'pier' ? 'pier' : 'hearth']; if (!f) return null; v.copy(f.pos).setY(f.base + 0.5 * f.sc).project(camera); const r = renderer.domElement.getBoundingClientRect(); return [r.left + (v.x + 1) / 2 * r.width, r.top + (1 - v.y) / 2 * r.height]; }; // 확인용: 불의 화면 위치
 window.__cam = () => [controls.target.x, controls.target.z, camera.zoom].map((n) => Math.round(n * 100) / 100); // 확인용: 카메라
 
 // 목록·이름표를 누르면 그 사람에게 다가가 전체 메시지를 팝업으로 띄운다(× · 바깥 · Esc 로 닫힘 — 닫으면 카메라가 돌아간다)
@@ -2632,7 +2682,7 @@ for (const b of msg.querySelectorAll('.cmp')) b.addEventListener('click', async 
 msg.querySelector('.go').addEventListener('click', async () => { if (await act('api/focus', {})) closeMsg(); });
 const sessionOf = (k) => (S.sessions || []).find((s) => keyOf(s) === k);
 // 이름표·메모지를 누르면 그 사람에게 다가가 팝업
-$('#labels').addEventListener('click', (e) => { const s = sessionOf(e.target.closest('.tag[data-k]')?.dataset.k); if (s) focusPerson(s); });
+$('#labels').addEventListener('click', (e) => { const bd = e.target.closest('[data-board]'); if (bd) return openList(bd.dataset.board); const s = sessionOf(e.target.closest('.tag[data-k]')?.dataset.k); if (s) focusPerson(s); });
 // 캐릭터를 누르면 — 드래그(회전)와 헷갈리지 않게 거의 안 움직였을 때만 클릭으로 친다
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(); let downAt = null;
 // solid: 그림의 빈(투명한) 곳은 안 맞은 것으로 — 불 앞(고타츠)에 누운 고양이의 그림 칸이 벽난로를 덮어 불을 못 누르던 것
@@ -2666,6 +2716,7 @@ renderer.domElement.addEventListener('pointerup', (e) => {
   if (s) focusPerson(s);
   else if (fire) enterGaze(fire);
   else if (!pet && boardAt(e.clientX, e.clientY)) openTodo(); // 칠판을 누르면 할 일 창
+  else if (!pet && repSignAt(e.clientX, e.clientY)) openList('report'); // 보고 팻말을 누르면 보고 목록
   else if (pet) pet.love = tick.t ?? 0; // 동물을 누르면 폴짝 · 하트
   else if (msg.open && !isPhone()) closeMsg();  // 빈 곳을 누르면 창을 닫는다(끌기는 이동이라 닫지 않음)
 });
@@ -2758,33 +2809,46 @@ function knock() {
   });
   grip.addEventListener('dblclick', () => setW(0));
 }
-// ───────── 불멍 — 불을 누르면(또는 머리줄 🔥) 카메라가 불 앞으로 가고 화면이 조용해진다. 타이머 없음 ─────────
-const fireTip = tagEl('prop'); fireTip.style.display = 'none'; setHTML(fireTip, `<span class="nm">🔥 ${esc(t('fireStare'))}</span>`);
+// ───────── 멍 — 불(모닥불·벽난로)이나 부두를 누르면(또는 머리줄 🔥 메뉴) 카메라가 그 앞으로 가고 화면이 조용해진다. 타이머 없음 ─────────
+// 자리마다 설정 하나(MUNG) — 카메라·모일 자리·소리·대사·그 자리 움직임. 패널 흐리기·비네트·무작위 셋·구석 결재 표·나가기·폰 전체 화면은 모두 같은 틀
+const FIRE_RATE = 0.8; // 느긋하게 — 1 이면 녹음 그대로, 낮출수록 느리고 소리도 조금 낮아진다
+const FIRE_SND = { src: 'sounds/fire.mp3', rate: FIRE_RATE, gain: 0.8 }, WAVE_SND = { src: 'sounds/waves.mp3', rate: 1, gain: 0.8 }; // 출처 sounds/README.md. 파일이 없으면 소리 없이
+const MUNG = {
+  campfire: { zoom: 2.5, lines: 'fire', sound: FIRE_SND, tip: () => `🔥 ${t('fireStare')}`,
+    seats: (o) => { const k = Math.max(o.sc / 1.6, 0.75); return [[-2.1, 0.7], [2.1, 0.7], [-1.3, 2.0]].map(([dx, dz]) => ({ x: o.pos.x + dx * k, y: FOREST_GY, z: o.pos.z + dz * k, pose: 'resting', flip: dx > 0 })); } },
+  fireplace: { zoom: 3, lines: 'fire', sound: FIRE_SND, tip: () => `🔥 ${t('fireStare')}`, seats: () => L.rest.filter((r) => r.kot) },
+  fishing: { zoom: 2.4, lines: 'fish', sound: WAVE_SND, tip: () => `🎣 ${t('fishStare')}`, seats: (o) => o.seats, tick: (t, o) => fishTick(t, o) },
+};
+const mungAim = (o) => new THREE.Vector3(o.pos.x, 0, o.pos.z + 0.6 * o.sc); // 카메라가 볼 곳
+const fireTip = tagEl('prop'); fireTip.style.display = 'none';
 const gazeUI = $('#gazeUI');
 let gazeFull = 0, fireSound = true; try { fireSound = localStorage.getItem('knock.fireSound') !== 'off'; } catch {}
-function enterGaze(f) {
-  if (!f || gaze) return;
+function enterGaze(o) {
+  if (!o || gaze) return;
+  const M = MUNG[o.mung];
   clearTimeout(gazeFull); if (isPhone()) gazeFull = setTimeout(() => document.body.classList.add('gaze-full'), RM.matches ? 0 : 220); // 폰 — 목록 시트가 내려간 뒤 캔버스를 화면 전체로
   if (msg.open) closeMsg();
   if (todoDlg.open) todoDlg.close();
-  gaze = { fire: f, saved: { t: controls.target.clone(), z: camera.zoom }, seen: new Set((S.sessions || []).filter((s) => s.state === 'waiting').map(keyOf)),
-    // 불 옆에 모일 후보 순서 — 들어갈 때 한 번 섞는다(불멍 동안 고정). 회의·일하는 중은 빼고 결재 기다림·보고·쉬는·퇴근 중, 그림이 있는 사람만. 앉힐 수 있는 앞의 셋이 간다
+  gaze = { o, M, fire: fires.includes(o) ? o : null, saved: { t: controls.target.clone(), z: camera.zoom }, seen: new Set((S.sessions || []).filter((s) => s.state === 'waiting').map(keyOf)),
+    // 모일 후보 순서 — 들어갈 때 한 번 섞는다(멍 동안 고정). 회의·일하는 중은 빼고 결재 기다림·보고·쉬는·퇴근 중, 그림이 있는 사람만. 앉힐 수 있는 앞의 셋이 간다
     pick: (S.sessions || []).filter((s) => ['waiting', 'reported', 'off', 'done'].includes(s.state) && actors.has(keyOf(s))).map(keyOf).sort(() => Math.random() - 0.5) };
   focusKey = null; saved = null;
-  fly(new THREE.Vector3(f.pos.x, 0, f.pos.z + 0.6 * f.sc), f.kind === 'camp' ? 2.5 : 3, RM.matches ? 0.01 : 1.2);
-  document.body.classList.add('gaze'); fireTip.style.display = 'none';
+  fly(mungAim(o), M.zoom, RM.matches ? 0.01 : 1.2);
+  document.body.classList.add('gaze'); fireTip.style.display = 'none'; mungMenu(false);
   gazeUI.querySelector('.wait').hidden = true; drawSnd();
+  if (o.fg) { o.fg.visible = true; o.idle.forEach((m) => { m.visible = false; }); }
   if (S.sessions) syncScene();
-  if (fireSound) crackle(true);
+  if (fireSound) mungSound(true);
 }
 function exitGaze() {
   if (!gaze) return;
   const g = gaze; gaze = null;
+  if (g.o.fg) { g.o.fg.visible = false; g.o.idle.forEach((m) => { m.visible = true; }); }
   fly(g.saved.t, g.saved.z, RM.matches ? 0.01 : 1.0);
-  clearTimeout(gazeFull); document.body.classList.remove('gaze', 'gaze-full'); crackle(false);
+  clearTimeout(gazeFull); document.body.classList.remove('gaze', 'gaze-full'); mungSound(false);
   if (S.sessions) syncScene();
 }
-function gazeWait() { // 불멍 중 새로 온 결재 — 구석 작은 표(누르면 불멍을 나가 그 고양이로)
+function gazeWait() { // 멍 중 새로 온 결재 — 구석 작은 표(누르면 멍을 나가 그 고양이로)
   const fresh = (S.sessions || []).filter((s) => s.state === 'waiting' && !gaze.seen.has(keyOf(s)));
   const b = gazeUI.querySelector('.wait'); b.hidden = !fresh.length;
   if (fresh.length) { b.textContent = `🔔 ${t('fireWait', fresh.length)}`; b.dataset.k = keyOf(fresh[fresh.length - 1]); }
@@ -2792,33 +2856,82 @@ function gazeWait() { // 불멍 중 새로 온 결재 — 구석 작은 표(누�
 function drawSnd() { const b = gazeUI.querySelector('.snd'); b.textContent = fireSound ? '🔈' : '🔇'; b.title = b.ariaLabel = t(fireSound ? 'fireSoundOn' : 'fireSoundOff'); }
 gazeUI.addEventListener('click', (e) => {
   if (e.target.closest('.back')) return exitGaze();
-  if (e.target.closest('.snd')) { fireSound = !fireSound; try { localStorage.setItem('knock.fireSound', fireSound ? 'on' : 'off'); } catch {} drawSnd(); return crackle(fireSound && !!gaze); }
+  if (e.target.closest('.snd')) { fireSound = !fireSound; try { localStorage.setItem('knock.fireSound', fireSound ? 'on' : 'off'); } catch {} drawSnd(); return mungSound(fireSound && !!gaze); }
   const w = e.target.closest('.wait');
   if (w) { const s = sessionOf(w.dataset.k); exitGaze(); if (s) setTimeout(() => focusPerson(s), RM.matches ? 0 : 1050); }
 });
-$('#fireBtn').addEventListener('click', () => enterGaze(floorG?.userData.campFire || floorG?.userData.hearth));
-// 장작 타는 소리 — 소리 파일 없이: 낮은 쉬익(잡음 저역) + 무작위 짧은 「탁」. 브라우저가 막으면 조용히 넘어간다
+// 머리줄 🔥 — 작은 메뉴(불멍 · 낚시멍). 바깥이 없는 배치면 낚시멍은 숨긴다. 바깥 클릭·Esc 로 닫힌다
+const mungMenuEl = $('#mungMenu');
+function mungMenu(open) { mungMenuEl.hidden = !open; if (open) mungMenuEl.querySelector('[data-m="fishing"]').hidden = !floorG?.userData.pier; }
+$('#fireBtn').addEventListener('click', (e) => { e.stopPropagation(); mungMenu(mungMenuEl.hidden); });
+mungMenuEl.addEventListener('click', (e) => {
+  const m = e.target.closest('[data-m]')?.dataset.m; if (!m) return;
+  mungMenu(false); const u = floorG?.userData;
+  enterGaze(m === 'fishing' ? u?.pier : u?.campFire || u?.hearth);
+});
+addEventListener('click', (e) => { if (!mungMenuEl.hidden && !e.target.closest('#mungMenu')) mungMenu(false); });
+addEventListener('keydown', (e) => { if (e.key === 'Escape' && !mungMenuEl.hidden) mungMenu(false); });
+// 낚시멍 — 찌가 둥실(사람마다 박자 다르게), 둘레에 작은 물결. 30~60초에 한 번 한 마리가 입질: 찌가 두세 번 까딱 → 쏙 → 낚싯대를 들고 작은 물고기가 퐁 → 하트
+function fishTick(t, o) {
+  const G = gaze, sp = RM.matches ? 0.35 : 1;
+  G.bite ||= { at: t + 30 + Math.random() * 30, k: -1, n: 0 };
+  const B = G.bite, cats = [...actors.values()].filter((a) => a.p?.gaze && a.p.seat != null && !a.walk);
+  if (t > B.at + 3.2) Object.assign(B, { at: t + 30 + Math.random() * 30, k: -1, done: false });
+  const e = t - B.at;
+  if (e >= 0 && B.k < 0 && cats.length) B.k = cats[Math.random() * cats.length | 0].p.seat; // 입질할 한 마리 // 0~1.2 까딱 · 1.2~1.5 쏙 · 1.5 들어 올림·물고기·하트 · 3.2 다시 드리움
+  o.rigs.forEach((r, k) => {
+    const on = cats.some((a) => a.p.seat === k); r.rod.visible = r.line.visible = r.bob.visible = on; r.rip.forEach((m) => { m.visible = on; });
+    if (!on) return;
+    const me = k === B.k && e > 0 && e < 3.2;
+    let y = r.at.y + Math.sin(t * 1.6 * sp + r.ph) * 0.02; // 둥실
+    if (me && e < 1.2) y -= Math.max(0, Math.sin(e / 1.2 * 3 * Math.PI)) * 0.06; // 까딱 셋
+    else if (me && e < 1.5) y -= (e - 1.2) / 0.3 * 0.22; // 쏙
+    r.bob.position.y = y; r.bob.visible = !(me && e > 1.5 && e < 2.8);
+    const pa = r.line.geometry.attributes.position; pa.setXYZ(1, r.at.x, me && e > 1.5 ? r.tip.y - 0.4 : y + 0.06, me && e > 1.5 ? r.at.z - 0.8 : r.at.z); pa.needsUpdate = true;
+    r.rip.forEach((m) => { const u = (t * 0.45 * sp + m.userData.ph + (me && e > 1.2 && e < 1.6 ? 0.5 : 0)) % 1; m.scale.setScalar(1 + u * 4); m.material.opacity = 0.5 * (1 - u); });
+    const a = cats.find((c) => c.p.seat === k); if (a) setTex(a, me && e > 1.5 && e < 3.0 ? 'fishUp' : 'fish', a.p.flip);
+    if (me && e > 1.5 && !B.done) { B.done = true; B.n++; if (a) a.cheer = t + 0.2; }
+    if (me && e > 1.5 && e < 2.5) { const u = (e - 1.5) / 1.0, s0 = o.seats[k]; o.fish.visible = true; o.fish.position.set(r.at.x + (s0.x + 0.2 - r.at.x) * u, FOREST_GY + 0.4 + Math.sin(u * Math.PI) * 1.6 + u * 0.6, r.at.z + (s0.z + 0.3 - r.at.z) * u); }
+  });
+  if (!(e > 1.5 && e < 2.5)) o.fish.visible = false;
+}
+window.__fish = () => gaze?.bite ? { n: gaze.bite.n, at: +(gaze.bite.at - tick.t).toFixed(1) } : null; // 확인용: 입질 수·다음 입질까지
+window.__fishNow = () => { if (gaze?.bite) gaze.bite.at = tick.t + 0.1; }; // 확인용: 바로 입질
+// 멍 소리 — 실제 녹음을 이어 붙여 되풀이(받아 두기·이음매 다듬기·페이드 인/아웃). 처음 한 번만 받고, 실패하거나 파일이 없으면 조용히 소리 없이
+const sndCache = new Map(); // src → { buf, load }
+const sndAudio = (src) => { let c = sndCache.get(src); if (!c) sndCache.set(src, c = {});
+  return c.load ||= fetch(src).then((r) => r.ok && r.status !== 204 ? r.arrayBuffer() : Promise.reject(r.status))
+    .then((a) => actx.decodeAudioData(a)).then((b) => { c.buf = seamless(b); }).catch(() => { c.load = null; }); };
+// MP3 앞뒤 무음(인코더 지연·패딩)을 자르고, 끝 0.3초를 앞머리에 겹쳐(같은 힘 크로스페이드) 되풀이 이음매에 「툭」·빈틈이 없게
+function seamless(b) {
+  const sr = b.sampleRate, X = Math.round(sr * 0.3), chs = [...Array(b.numberOfChannels)].map((_, c) => b.getChannelData(c));
+  const loud = (i) => chs.some((d) => Math.abs(d[i]) > 1e-3);
+  let a = 0, z = b.length - 1; while (a < z && !loud(a)) a++; while (z > a && !loud(z)) z--;
+  const n = z + 1 - a - X, out = actx.createBuffer(chs.length, n, sr);
+  chs.forEach((d, c) => {
+    const o = out.getChannelData(c);
+    for (let i = 0; i < n; i++) o[i] = d[a + i];
+    for (let i = 0; i < X; i++) { const k = i / X; o[i] = d[a + i] * Math.sqrt(k) + d[a + n + i] * Math.sqrt(1 - k); } // 앞머리 = 뒤꼬리에서 이어지듯
+  });
+  return out;
+}
+window.__sndBuf = (src) => sndCache.get(src)?.buf; // 확인용: 다듬은 소리 버퍼
 let crk = null;
-function crackle(on) {
-  if (!on) { if (crk) { clearTimeout(crk.timer); try { crk.src.stop(); } catch {} crk.out.disconnect(); crk = null; } return; }
-  if (crk) return;
+function mungSound(on) {
+  if (!on) { // 0.5초 페이드아웃
+    if (!crk) return; const c = crk, t = actx.currentTime; crk = null;
+    c.out.gain.cancelScheduledValues(t); c.out.gain.setValueAtTime(c.out.gain.value, t); c.out.gain.linearRampToValueAtTime(0, t + 0.5);
+    setTimeout(() => { try { c.src?.stop(); } catch {} c.out.disconnect(); }, 600); return;
+  }
+  if (crk || !gaze) return;
   try { actx ||= new AudioContext(); if (actx.state === 'suspended') actx.resume(); } catch { return; }
-  const sr = actx.sampleRate, buf = actx.createBuffer(1, sr * 2, sr), d = buf.getChannelData(0);
-  let b = 0; for (let i = 0; i < d.length; i++) { b = b * 0.97 + (Math.random() * 2 - 1) * 0.03; d[i] = b * 4; }
-  const out = actx.createGain(); out.gain.value = 0.0001; out.connect(actx.destination); out.gain.exponentialRampToValueAtTime(1, actx.currentTime + 1.2);
-  const src = actx.createBufferSource(), lp = actx.createBiquadFilter(), bg = actx.createGain();
-  src.buffer = buf; src.loop = true; lp.type = 'lowpass'; lp.frequency.value = 700; bg.gain.value = 0.05; src.connect(lp).connect(bg).connect(out); src.start();
-  const pop = actx.createBuffer(1, sr * 0.03 | 0, sr), pd = pop.getChannelData(0);
-  for (let i = 0; i < pd.length; i++) pd[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / pd.length, 3);
-  crk = { src, out, timer: 0 };
-  const tickPop = () => {
-    if (!crk) return;
-    const n = actx.createBufferSource(), hp = actx.createBiquadFilter(), g = actx.createGain();
-    n.buffer = pop; n.playbackRate.value = 0.6 + Math.random() * 1.2; hp.type = 'highpass'; hp.frequency.value = 900 + Math.random() * 2500;
-    g.gain.value = 0.04 + Math.random() * (Math.random() < 0.15 ? 0.35 : 0.12); n.connect(hp).connect(g).connect(out); n.start();
-    crk.timer = setTimeout(tickPop, 60 + Math.random() * (Math.random() < 0.3 ? 900 : 260));
-  };
-  tickPop();
+  const snd = gaze.M.sound, c = crk = { out: actx.createGain(), src: null }; c.out.gain.value = 0; c.out.connect(actx.destination);
+  sndAudio(snd.src).then(() => {
+    const buf = sndCache.get(snd.src)?.buf;
+    if (crk !== c || !buf) return; // 받는 사이 나갔거나 실패·파일 없음
+    const s = c.src = actx.createBufferSource(), t = actx.currentTime; s.buffer = buf; s.loop = true; s.playbackRate.value = snd.rate; s.connect(c.out); s.start();
+    c.out.gain.setValueAtTime(0, t); c.out.gain.linearRampToValueAtTime(snd.gain, t + 0.8); // 0.8초 페이드인
+  });
 }
 // 오른쪽 목록 접기·펼치기(PC 만) — 손잡이 또는 ] 키. 이 브라우저에 기억. 휴대폰은 바텀시트 그대로(CSS 가 접힘을 무시)
 {
@@ -2893,6 +3006,12 @@ function drawBoard() {
   const sg = g.todoSign; // 바깥 표지판 — 다 했거나 없으면 「없음」, 남았으면 「N개」
   if (sg) { const sk = LANG + left; if (sg.userData.k !== sk) { sg.userData.k = sk; sg.material.map?.dispose(); sg.material.map = signTex(left ? t('signTodoN', left) : t('signTodo'), '#8a5e3a', '#fff3e0'); sg.material.needsUpdate = true; } }
 }
+function repSignAt(x, y) {
+  const m = floorG?.userData.repSign; if (!m) return false;
+  const r = renderer.domElement.getBoundingClientRect();
+  ndc.set((x - r.left) / r.width * 2 - 1, -(y - r.top) / r.height * 2 + 1); ray.setFromCamera(ndc, camera);
+  return ray.intersectObject(m).length > 0;
+}
 function boardAt(x, y) {
   const b = floorG?.userData.board; if (!b) return false;
   const r = renderer.domElement.getBoundingClientRect();
@@ -2962,6 +3081,32 @@ pane.addEventListener('submit', (e) => {
   if (v) { inp.value = ''; todoAct({ op: 'add', text: v }); }
 });
 drawPane();
+// 줄 보드 — 묵은 질문·결재 대기·보고 표를 누르면 거기 누가 있는지 목록으로. 누르면 그 고양이로
+const boardDlg = $('#boardDlg');
+const BOARDS = {
+  stale: { title: 'signStale', note: 'staleNote', of: (s) => s.state === 'waiting' && s.stale, sort: (a, b) => waitSort(b, a), when: (s) => t('waitingFor', ago(s.waitingSince)) },
+  queue: { title: 'boardQueue', of: (s) => s.state === 'waiting' && !s.stale, sort: (a, b) => waitSort(b, a), when: (s) => t('waitingFor', ago(s.waitingSince)) },
+  report: { title: 'signReport', of: (s) => s.state === 'reported', sort: byRecent, when: (s) => t('ago', ago(s.lastActivity)) },
+};
+let boardKind = 'stale';
+function drawList() {
+  const B = BOARDS[boardKind], ss = (S.sessions || []).filter(B.of).sort(B.sort);
+  boardDlg.querySelector('header b').textContent = t(B.title);
+  boardDlg.querySelector('.cnt').textContent = ss.length ? (B.note ? `${ss.length} · ${t(B.note)}` : String(ss.length)) : '';
+  setHTML(boardDlg.querySelector('ul'), ss.length ? ss.map((s) => `<li data-id="${esc(s.id)}"><div class="r"><b>${esc(s.name)}</b><i>${esc(zoneOf(s))}</i><span class="t">${B.when(s)}</span></div>${s.lastText ? `<div class="q">${esc(lastLine(s.lastText))}</div>` : ''}</li>`).join('')
+    : `<li><i>${t('none')}</i></li>`);
+}
+function openList(kind) {
+  if (boardDlg.open || !BOARDS[kind]) return;
+  boardKind = kind; drawList(); boardDlg.classList.remove('nav-pop'); boardDlg.showModal(); motion(boardDlg, 'nav-push');
+}
+function closeList(then) { if (!boardDlg.open || boardDlg.classList.contains('nav-pop')) return; motion(boardDlg, 'nav-pop', () => { boardDlg.close(); then?.(); }); }
+boardDlg.addEventListener('cancel', (e) => { e.preventDefault(); closeList(); });
+boardDlg.addEventListener('click', (e) => {
+  if (e.target === boardDlg || e.target.closest('header .x')) return closeList();
+  const s = (S.sessions || []).find((x) => x.id === e.target.closest('li[data-id]')?.dataset.id);
+  if (s) closeList(() => focusPerson(s));
+});
 function openTodo() {
   if (todoDlg.open) return;
   todoDlg.classList.remove('nav-pop'); todoDlg.showModal(); motion(todoDlg, 'nav-push');
@@ -3438,7 +3583,7 @@ function actorFx(a, t) {
     m.scale.setScalar(0.32 + p * 0.42); m.material.opacity = 0.95 * Math.sin(p * Math.PI);
   });
   // 퇴근한 사람 — 머리 오른쪽으로 z 셋이 커지며 떠오른다(이름표 아래·옆이라 안 겹친다)
-  const P = a.p || {}, zz = (!!a.off && !P.kot && (P.ri == null || ((P.ri - Math.floor(t / 4) * 3) % P.rn + P.rn) % P.rn < 3)) || (a.pose === 'bored' && P.bored === 'doze'); // 휴게실 Zzz 는 한 번에 셋만, 4초마다 교대. 고타츠는 그림 속 작은 z 하나
+  const P = a.p || {}, zz = (!!a.off && !P.kot && P.seat == null && (P.ri == null || ((P.ri - Math.floor(t / 4) * 3) % P.rn + P.rn) % P.rn < 3)) || (a.pose === 'bored' && P.bored === 'doze'); // 휴게실 Zzz 는 한 번에 셋만, 4초마다 교대. 고타츠는 그림 속 작은 z 하나
   if (zz && !a.zzz) a.zzz = [0, 1, 2].map(() => { const m = new THREE.Sprite(new THREE.SpriteMaterial({ map: zTex, transparent: true, depthTest: false, depthWrite: false })); m.renderOrder = 11; a.group.add(m); return m; });
   if (a.zzz) a.zzz.forEach((m, i) => {
     m.visible = zz && !a.walk && a.near;
@@ -3533,7 +3678,7 @@ let nextSay = 4, lastSaid = '';
 function lineFor(a, kind, s) {
   const T = LINES.type?.[a.kt] || {};
   let pool = null;
-  if (a.p?.gaze && LINES.situ?.fire?.[a.kt]) pool = LINES.situ.fire[a.kt]; // 불 옆에 둘러앉은 고양이
+  if (a.p?.gaze && LINES.situ?.[gaze?.M.lines]?.[a.kt]) pool = LINES.situ[gaze.M.lines][a.kt]; // 멍 자리에 모인 고양이 — 불멍·낚시멍 대사
   else if (s && kind !== 'enter' && kind !== 'leave' && a.p?.pose === 'bored') pool = LINES.situ?.['wait_bored_' + a.p.bored]?.[a.kt]; // 결재 기다리다 딴짓 중 — 그 딴짓(털실·졸기·그루밍) 칸 대사만
   else if (s && kind !== 'enter' && kind !== 'leave') { // 실제 상황이 맞으면 그 틀을 먼저
     const fr = [], h = hourNow(), cr = ctxOf(s);
@@ -3590,11 +3735,11 @@ function tick() {
     renderer.domElement.style.cursor = hoverKey || hoverFire ? 'pointer' : '';
   }
   fireTip.style.display = hoverFire ? '' : 'none';
-  if (hoverFire) place(fireTip, vt.copy(hoverFire.pos).setY(hoverFire.base + 1.9 * hoverFire.sc));
+  if (hoverFire) { if (fireTip.dataset.m !== hoverFire.mung) { fireTip.dataset.m = hoverFire.mung; setHTML(fireTip, `<span class="nm">${esc(MUNG[hoverFire.mung].tip())}</span>`); } place(fireTip, vt.copy(hoverFire.pos).setY(hoverFire.base + 1.9 * hoverFire.sc)); }
   const near = PPU * camera.zoom >= NEAR_PPU;
   const far = PPU * camera.zoom < 20; // 기본 보기(26px)보다 더 멀어졌을 때만 이름 한 줄로
   if (far !== tick.far) { tick.far = far; $('#labels').classList.toggle('far', far); }
-  catTick(t, dt); petsTick(t, dt); waterTick(t); weatherFx(t); firesTick(t, near);
+  catTick(t, dt); petsTick(t, dt); waterTick(t); weatherFx(t); firesTick(t, near); if (gaze?.M.tick) gaze.M.tick(t, gaze.o);
   // 나가는 사람 — 정문까지 걸어가 흐려지며 사라진다
   for (const a of leavers) {
     if (a.walk) walkTick(a, t, dt);

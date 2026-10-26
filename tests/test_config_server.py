@@ -291,6 +291,12 @@ class TestLock(unittest.TestCase):
         self.assertEqual(json.loads(post({"op": "delete", "id": tid})[2])["items"], [])
         self.assertEqual(json.loads(self.todo_file.read_text(encoding="utf-8")), {"items": []})
 
+    def test_missing_sound_is_empty_not_404(self):
+        self.start()
+        self.assertEqual(self.req("GET", "/sounds/none-such.mp3")[0], 204)
+        self.assertEqual(self.req("GET", "/sounds/fire.mp3")[0], 200)
+        self.assertEqual(self.req("GET", "/none-such.txt")[0], 404)  # 소리 밖은 그대로
+
     def test_no_token_is_open(self):
         self.start()
         self.assertEqual(self.req("GET", "/")[0], 200)

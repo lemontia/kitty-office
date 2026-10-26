@@ -24,7 +24,7 @@ Everything runs on this Mac. It reads Claude Code's own session files and never 
 - **Ten cat personalities** — each coat has its own way of talking in speech bubbles that follow the real situation (waiting for an hour, context almost full, working late)
 - **List your way** — urgent first, or grouped by project with a color per folder. Pin sessions to the top
 - **On your phone** — open it remotely through a proxy, locked with a token
-- **Stare at the fire** — click the campfire outside, the lounge fireplace or 🔥 in the header: the camera drifts to the fire, the page goes quiet, nearby cats doze around it and logs crackle softly (sound made in the browser, mute with 🔇). New approvals still show up in a corner. Esc or a click brings you back
+- **Fire and fishing breaks** — click the campfire outside or the lounge fireplace (fire), the pier by the sea (fishing), or pick one from 🔥 in the header: the camera drifts there and the page goes quiet. Three cats doze around the fire or sit on the pier watching their floats — now and then one lands a fish. Crackle and waves are real recordings (mute with 🔇 — credits in [web/sounds/README.md](web/sounds/README.md)). New approvals still show up in a corner. Esc or a click brings you back
 - **Today's to-do board** — a chalkboard on the office wall. Write and tick tasks right on the page, no file to edit; everyone cheers when you finish them all
 - **Korean and English** — follows the browser language
 
