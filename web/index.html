@@ -116,6 +116,8 @@
   .sayb::after { content: ''; position: absolute; left: 50%; bottom: -5px; width: 8px; height: 8px; margin-left: -5px; background: #fffaf2;
     border-right: 1.5px solid #a08a74; border-bottom: 1.5px solid #a08a74; transform: rotate(45deg); }
   .sayb.out { opacity: 0; }
+  #perchSay { position: fixed; z-index: 400002; display: none; } /* 팝업 고양이 말풍선 — 고양이 오른쪽, 꼬리는 왼쪽 */
+  #perchSay::after { left: -5px; bottom: auto; top: 50%; margin: -4px 0 0; transform: rotate(135deg); }
   @keyframes sayIn { from { opacity: 0; } }
   .tag .wt { display: inline-block; vertical-align: bottom; margin: 0 0 0 3px; /* 발밑 이름표 — 이름 옆에 한 줄로(결재 줄 뒷사람 이름표가 앞사람 몸을 덜 가리게) */ width: max-content; font-size: 12px; font-weight: 800; color: #fff;
     background: var(--red); border-radius: 99px; padding: 1px 8px; }
@@ -125,6 +127,7 @@
     font-size: 11px; background: #fff; border: 1.5px solid #5a3d28; border-radius: 10px; padding: 2px 8px; position: relative; }
   .tag.prop .nm { font-size: 13px; padding: 3px 10px; background: #5a3d28; color: #fff3e0; border-color: #5a3d28; max-width: none; }
   .tag.prop.hot .nm { background: var(--red); border-color: var(--red); }
+  .tag.prop.blue .nm { background: #3f6fa8; border-color: #3f6fa8; }
   .tag.prop.big .nm { font-size: 14px; padding: 4px 12px; }
   .tag.more .nm { background: #5a3d28; color: #fff; border-color: #5a3d28; font-size: 12px; }
 
@@ -212,6 +215,9 @@
   #todoDlg li.old .tx { color: var(--red); font-weight: 700; }
   #todoDlg li .ed { flex: 1; font: inherit; font-size: 15px; padding: 4px 8px; border: 1px solid var(--line); border-radius: 8px; }
   #todoDlg li .del { border: 0; background: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 0 4px; }
+  #boardDlg { overflow: visible; } /* 위 테두리에 누운 고양이가 창 밖으로 나오게 — 목록 스크롤은 ul 이 한다 */
+  #boardDlg .lie { position: absolute; right: 64px; top: -146px; width: 150px; pointer-events: none; transform-origin: 50% 100%; }
+  @media (prefers-reduced-motion: no-preference) { @keyframes breathe { 50% { transform: scaleY(1.03); } } #boardDlg .lie { animation: breathe 3.2s ease-in-out infinite; } }
   #boardDlg ul { list-style: none; margin: 0; padding: 6px 10px 12px; overflow-y: auto; flex: 1; min-height: 0; }
   #boardDlg li { cursor: pointer; flex-direction: column; align-items: stretch; gap: 2px; }
   #boardDlg li .r { display: flex; gap: 8px; align-items: baseline; } #boardDlg li b { font-size: 15px; } #boardDlg li i { flex: 1; font-style: normal; font-size: 12px; color: var(--muted); }
@@ -245,6 +251,10 @@
   #msg::backdrop { background: rgba(40,25,10,.06); }
   #msg header { display: flex; align-items: center; gap: 8px; padding: 14px 18px; border-bottom: 1px dashed var(--line); }
   #msg header b { font-size: 17px; }
+  /* 팝업 왼쪽 위에 턱과 앞발을 걸친 그 세션 고양이 — 팝업은 resize 때문에 overflow 를 못 열어 따로 띄우고 tick 이 자리를 맞춘다 */
+  #perch { position: fixed; width: 130px; z-index: 400001; pointer-events: none; display: none; }
+  @media (prefers-reduced-motion: no-preference) { @keyframes perchIn { from { transform: translateY(24px); opacity: 0; } } #perch.in { animation: perchIn 320ms cubic-bezier(0.2, 0, 0, 1); } }
+  #msg header .pk { display: none; }
   #msg header .fl { color: var(--muted); font-size: 13px; }
   #msg header .t { margin-left: auto; font-weight: 800; color: var(--red); }
   #msg header button { border: 0; background: none; font-size: 22px; cursor: pointer; color: var(--muted); padding: 0 4px; }
@@ -407,6 +417,9 @@
     #msg header b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     #msg header .fl { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     #msg header .t { flex: none; }
+    #msg header b { min-width: 4.5em; }
+    #msg header .pk { display: block; flex: none; position: relative; width: 36px; height: 36px; overflow: hidden; border-radius: 50%; background: #fbf3e6; }
+    #msg header .pk img { position: absolute; width: 80px; left: -20px; top: -23px; }
     #msg header button { min-width: 44px; min-height: 44px; }
     #msg .body { font-size: 15px; padding: 14px 12px; }
     #msg footer { padding: 8px 10px calc(10px + env(safe-area-inset-bottom)); }
@@ -461,10 +474,11 @@
   <p class="setnote"><span data-t="setNote">설정은 이 브라우저에만 저장됩니다.</span><span id="ver"></span></p></dialog>
 <dialog id="todoDlg"><header><b data-t="todoTitle">오늘 할 일</b><span class="cnt"></span><button class="x" aria-label="닫기" data-t-aria="close">×</button></header>
   <form class="add"><input maxlength="200" data-t-ph="todoPh" placeholder="할 일을 적고 Enter" autocomplete="off"></form><ul class="todos"></ul><p class="note"></p></dialog>
-<dialog id="boardDlg"><header><b></b><span class="cnt"></span><button class="x" aria-label="닫기" data-t-aria="close">×</button></header><ul></ul></dialog>
+<dialog id="boardDlg"><img class="lie" alt="" aria-hidden="true"><header><b></b><span class="cnt"></span><button class="x" aria-label="닫기" data-t-aria="close">×</button></header><ul></ul></dialog>
 <dialog id="logDlg"><header><b data-t="activityLog">활동 로그</b><button class="x" aria-label="닫기" data-t-aria="close">×</button></header>
   <ul class="log" id="log"></ul><p class="setnote" data-t="logNote">승인·질문 창 대기도 잡는다. 3초마다 다시 읽는다.</p></dialog>
-<dialog id="msg"><header><b></b><span class="fl"></span><span class="t"></span><span class="ctx" hidden></span><button class="pin" title="오른쪽 목록 맨 위에 고정" data-t-title="pinTitle">📌</button><button class="ren" title="세션 이름 바꾸기" data-t-title="renameTitle">✎</button><button class="x" aria-label="닫기" data-t-aria="close">×</button></header><div class="body"></div>
+<img id="perch" alt="" aria-hidden="true"><div id="perchSay" class="sayb"></div>
+<dialog id="msg"><header><span class="pk"><img alt=""></span><b></b><span class="fl"></span><span class="t"></span><span class="ctx" hidden></span><button class="pin" title="오른쪽 목록 맨 위에 고정" data-t-title="pinTitle">📌</button><button class="ren" title="세션 이름 바꾸기" data-t-title="renameTitle">✎</button><button class="x" aria-label="닫기" data-t-aria="close">×</button></header><div class="body"></div>
   <footer><textarea rows="2" data-t-ph="taHint" placeholder="여기에 답을 쓰면 그 세션 입력창으로 들어갑니다 (Enter 보내기 · Shift+Enter 줄바꿈 · 이미지는 붙여넣기·끌어다 놓기)"></textarea>
     <div class="att"></div>
     <div class="row"><button class="clip" title="사진·파일 첨부" data-t-title="attach">📎</button><button class="exit" hidden data-t="exit">세션 끝내기</button><input type="file" id="pick" accept="image/*,application/pdf,text/*,.md,.csv,.json" multiple hidden><span class="note"></span><button class="cmp" data-cmd="/compact" hidden title="지금까지 대화를 요약하고 이어 갑니다(/compact)" data-t-title="compactTitle" data-t="compact">대화 정리하기</button><button class="cmp" data-cmd="/clear" hidden title="지금 대화를 비우고 새로 시작합니다(/clear)" data-t-title="clearTitle" data-t="clear">새로 시작</button><button class="stop" hidden data-t="stop">하던 일 중단하기</button><button class="go" data-t="goTerm">터미널로 가기</button><button class="send" data-t="send">보내기</button></div></footer></dialog>
@@ -493,7 +507,7 @@ const T = {
     sideGrip: '끌어서 너비 조절 · 두 번 누르면 원래대로', sheetGrip: '목록 펼치기·접기', sideFold: '오른쪽 목록 접기·펼치기 (])',
     now: '방금', min: (n) => `${n}분`, hour: (n) => `${n}시간`, day: (n) => `${n}일`, ago: (d) => `${d} 전`,
     signWork: '작업실', signMeet: '회의', signBoss: '결재실', signBossPlate: '결재', signReport: '보고', signReportN: (n) => `보고 (${n})`, signStale: '묵은 질문', signLounge: '휴게실', signTodo: '오늘의 할 일: 없음', stamp: '완료',
-    more: (n) => `+${n}명 더`, propStale: (n) => `묵은 질문 ${n}`, staleNote: '하루 넘게 답을 기다리는 중', boardQueue: '결재 대기', propQueue: (n) => `결재 대기 ${n}명`,
+    more: (n) => `+${n}명 더`, propStale: (n) => `묵은 질문 ${n}`, staleNote: '하루 넘게 답을 기다리는 중', boardQueue: '결재 대기', propQueue: (n) => `결재 대기 ${n}명`, propReport: (n) => `보고 ${n}명`,
     lastRead: (t) => `마지막으로 읽은 시각 ${t}`, bossWaiting: '결재 기다림',
     navBoss: '결재실',
     foldTitle: '접기·펴기', fireStare: '불멍하기', fireBack: '돌아가기', fireSoundOn: '소리 끄기', fireSoundOff: '소리 켜기', fishStare: '낚시멍', mungFire: '🔥 불멍', mungFish: '🎣 낚시멍', mungTitle: '멍 때리기', fireWait: (n) => `결재 ${n}`,
@@ -530,7 +544,7 @@ const T = {
     sideGrip: 'Drag to resize · double-click to reset', sheetGrip: 'Expand or collapse the list', sideFold: 'Collapse or expand the list (])',
     now: 'now', min: (n) => `${n}m`, hour: (n) => `${n}h`, day: (n) => `${n}d`, ago: (d) => d === 'now' ? 'just now' : `${d} ago`,
     signWork: 'Workroom', signMeet: 'Meeting', signBoss: 'Approvals', signBossPlate: 'Desk', signReport: 'Reports', signReportN: (n) => `Reports (${n})`, signStale: 'Old questions', signLounge: 'Lounge', signTodo: "Today's to-do: nothing", stamp: 'DONE',
-    more: (n) => `+${n} more`, propStale: (n) => `Old questions ${n}`, staleNote: 'waiting over a day', boardQueue: 'Waiting for you', propQueue: (n) => `Waiting ${n}`,
+    more: (n) => `+${n} more`, propStale: (n) => `Old questions ${n}`, staleNote: 'waiting over a day', boardQueue: 'Waiting for you', propQueue: (n) => `Waiting ${n}`, propReport: (n) => `Reports ${n}`,
     lastRead: (t) => `Last read ${t}`, bossWaiting: 'Waiting for you',
     navBoss: 'Approvals',
     foldTitle: 'Collapse or expand', fireStare: 'Stare at the fire', fireBack: 'Back', fireSoundOn: 'Mute', fireSoundOff: 'Unmute', fishStare: 'Gone fishing', mungFire: '🔥 Fire', mungFish: '🎣 Fishing', mungTitle: 'Zone out', fireWait: (n) => `${n} waiting`,
@@ -1315,7 +1329,8 @@ function buildBoss(g, r) {
   // 보고 자리 깔개 — 결재 줄(빨강)과 나란히, 덜 급한 파랑
   { const r0 = L.report[0], r9 = L.report[L.report.length - 1];
     g.add(plane(r9.x - r0.x + 1.8, r9.z - r0.z + 1.8, new THREE.MeshStandardMaterial({ map: rugTex('#3f6fa8', '#cfe0f2'), roughness: 1 }), (r0.x + r9.x) / 2, 0.02, (r0.z + r9.z) / 2));
-    g.userData.repSign = postSign(g, t('signReport'), r0.x - 0.6, r0.z - 1.0, '#3f6fa8', undefined, 1.6); } // 보고 수는 syncScene 이 「보고 (N)」으로 바꿔 그린다
+    g.userData.repSign = postSign(g, t('signReport'), r0.x - 0.6, r0.z - 1.0, '#3f6fa8', undefined, 1.6);
+    const repA = { pos: new THREE.Vector3(r0.x - 0.6, 3.6, r0.z - 1.0), el: tagEl('prop') }; repA.el.dataset.board = 'report'; props.push(repA); g.userData.repA = repA; } // 보고 수는 syncScene 이 「보고 (N)」으로 바꿔 그린다
   const sb = L.staleBox;
   g.add(rbox(1.3, 0.9, 1.0, 0xc8a06a, sb.x, 0, sb.z, 0.04)); g.add(rbox(1.32, 0.1, 0.25, 0xe8d2a6, sb.x, 0.9, sb.z, 0.01));
   const box = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.3), new THREE.MeshBasicMaterial({ map: signTex(t('signStale'), '#fff6e0', '#7a4b26') }));
@@ -1900,6 +1915,14 @@ function kittyTex(kt, pose, flip) {
       stripes([[x - rx * 0.7, y - ry * 0.6, x - rx * 0.5, y + ry * 0.2], [x - rx * 0.35, y - ry * 0.85, x - rx * 0.2, y], [x - rx * 0.95, y - ry * 0.1, x - rx * 0.8, y + ry * 0.5]]);
     });
     const work = pose.startsWith('working');
+    if (pose === 'lie') { // 목록 창 위 테두리에 배 깔고 늘어져 조는 고양이 — sprawl 에서 서류·폰을 뺀 것
+      tail([[150, 482], [118, 500], [70, 504], [28, 496]]);
+      for (const [x, y, a] of [[118, 486, 0.25], [150, 490, 0.1]]) part(() => wob(x, y, 40, 13, a), C.base);
+      body(240, 470, 120, 34);
+      for (const [x, y] of [[392, 492], [420, 488]]) part(() => wob(x, y, 44, 12, -0.05), C.white ? white : C.point || C.base);
+      head(346, 446, 'sleep', 0.06);
+      return;
+    }
     if (pose.startsWith('sprawl')) { // 보고하고 1시간 넘게 아무도 안 봐서 늘어졌다 — 배 깔고 다리 쭉, 엎드려 폰으로 유튜브. 「완료」 보고서는 발치에 널브러짐. Zzz 없음
       const f = pose.endsWith('.1'); // 화면 빛 깜빡 두 장(tick 이 바꿔 끼운다)
       const paper = (x, y, r, stamp) => { // 구겨진 듯 비뚤게 떨어진 보고서
@@ -1926,6 +1949,11 @@ function kittyTex(kt, pose, flip) {
       body(262, 430, 86, 70);
       head(282, 330, up ? 'open' : 'dot', up ? -0.12 : 0.05);
       paw(300, 488); paw(up ? 380 : 352, up ? 372 : 440); // 낚싯대를 쥔 앞발
+      return;
+    }
+    if (pose === 'perch' || pose === 'perchB') { // 팝업 모서리에 턱을 괴고 앞발을 걸침 — perchB 는 눈 감은 칸(깜빡임)
+      head(256, 300, pose === 'perchB' ? 'sleep' : 'dot', 0.03);
+      paw(200, 392); paw(318, 392);
       return;
     }
     if (pose === 'peek' || pose === 'kot') { // 상자·고타츠 이불 밖으로 머리와 앞발만 — 몸은 그 안이라 그리지 않는다
@@ -2182,6 +2210,8 @@ function syncScene() {
   const nStale = ss.filter((s) => s.state === 'waiting' && s.stale).length;
   const nQ = ss.filter((s) => s.state === 'waiting' && !s.stale).length;
   const { pile, staleA, queueA, pileAt } = floorG.userData.boss;
+  const ra = floorG.userData.repA; // 「보고 N명」 표 — 결재 대기 표와 같은 모양, 파랑
+  if (ra) { setHTML(ra.el, `<span class="nm">${t('propReport', nRep)}</span>`); ra.el.className = 'tag prop big click' + (nRep ? ' blue' : ''); }
   const rs = floorG.userData.repSign; // 파란 깔개 팻말 — 수가 바뀔 때만 다시 그린다
   if (rs && rs.userData.n !== LANG + nRep) { rs.userData.n = LANG + nRep; rs.material.map?.dispose(); rs.material.map = signTex(nRep ? t('signReportN', nRep) : t('signReport'), '#3f6fa8'); rs.material.needsUpdate = true; }
   if (pile.userData.n !== nRep) {
@@ -2519,6 +2549,31 @@ msg.addEventListener('cancel', (e) => { e.preventDefault(); closeMsg(); }); // �
 setInterval(() => { // 「생각 중… N초째」 — 화면에서 1초마다 센다
   for (const el of msg.querySelectorAll('.ticker')) el.textContent = t('ticker', el.dataset.kind, secLabel(Date.now() - +el.dataset.t0));
 }, 1000);
+const perch = $('#perch'), perchUrl = {}; let perchKt = null;
+const perchSrc = (kt, pose) => perchUrl[kt + pose] ||= charTex(kt, pose).image.toDataURL();
+function perchSet(s) {
+  const kt = typeOf(s.character, s.name); if (kt === perchKt && msg.open) return;
+  perchKt = kt; perch._b = false; perch.src = msg.querySelector('header .pk img').src = perchSrc(kt, 'perch');
+  perch.classList.remove('in'); void perch.offsetWidth; perch.classList.add('in'); // 새로 열 때마다 아래에서 쏙
+}
+// 매 프레임: 팝업 왼쪽 위 모서리를 따라간다(끌기·크기 바꾸기) · 4초쯤마다 깜빡
+function perchTick(t) {
+  const on = msg.open && !isPhone() && perchKt && !msg.classList.contains('nav-pop');
+  perch.style.display = on ? 'block' : 'none'; if (!on) { $('#perchSay').style.display = 'none'; perch.nextSay = null; perch.sayUntil = 0; return; }
+  const r = msg.getBoundingClientRect(); perch.style.left = r.left + 14 + 'px'; perch.style.top = r.top - 98 + 'px'; // 앞발(그림 y 392/512)이 팝업 테두리에 걸리게
+  const b = t % 4.3 < 0.14; if (b !== perch._b) { perch._b = b; perch.src = perchSrc(perchKt, b ? 'perchB' : 'perch'); }
+  // 말풍선 — 연 지 1초 뒤 한 번, 그 뒤 12~18초마다 4초. 대사는 사무실 고양이와 같은 표(lineFor)
+  const say = $('#perchSay');
+  say.style.left = r.left + 110 + 'px'; say.style.top = r.top - 40 + 'px'; // 머리 오른쪽 볼 옆(그림 머리 가운데 y 300/512)
+  if (perch.sayUntil && t > perch.sayUntil) { say.style.display = 'none'; perch.sayUntil = 0; }
+  else if (perch.sayUntil) say.classList.toggle('out', t > perch.sayUntil - 0.4);
+  if (perch.nextSay == null) perch.nextSay = t + 1;
+  if (LINES && t > perch.nextSay) {
+    perch.nextSay = t + 12 + Math.random() * 6;
+    const s = (S.sessions || []).find((x) => x.id === msgSid), text = s && lineFor({ kt: perchKt }, SAY_STATE[s.state] || 'working', s);
+    if (text) { say.textContent = text; say.classList.remove('out'); say.style.display = 'block'; perch.sayUntil = t + 4; }
+  }
+}
 function openMsg(s) {
   if (fresh.delete(keyOf(s))) renderPanel();
   msg.querySelector('b').textContent = s.name;
@@ -2542,6 +2597,7 @@ function openMsg(s) {
   if (!msg.open || other) { ta.value = ''; atts.length = 0; drawAtts(); growTa(); }
   // 컴퓨터에선 창을 띄운 채로도 사무실을 끌어 이동하고 다른 사람을 누를 수 있게 비모달로. 폰은 전체 화면이라 모달
   msg.classList.remove('nav-pop'); // 닫히는 중에 다른 사람을 누르면 닫기를 멈춘다
+  perchSet(s);
   if (!msg.open) { isPhone() ? msg.showModal() : msg.show(); placeMsg(); motion(msg, 'nav-push'); }
   const bd = msg.querySelector('.body'); bd.scrollTop = s.recent?.length || pend.has(s.id) || s.state === 'working' ? bd.scrollHeight : 0; // 대화면 가장 최근 답이 보이게
   msg.querySelector('.clip').hidden = !canAnswer;
@@ -3092,13 +3148,15 @@ let boardKind = 'stale';
 function drawList() {
   const B = BOARDS[boardKind], ss = (S.sessions || []).filter(B.of).sort(B.sort);
   boardDlg.querySelector('header b').textContent = t(B.title);
+  const lk = boardDlg.lieK, lie = boardDlg.querySelector('.lie'); // 창 위에 누운 고양이 — 열 때마다 무작위 털
+  if (lie.dataset.k !== lk) { lie.dataset.k = lk; lie.src = charTex(lk, 'lie').image.toDataURL(); }
   boardDlg.querySelector('.cnt').textContent = ss.length ? (B.note ? `${ss.length} · ${t(B.note)}` : String(ss.length)) : '';
   setHTML(boardDlg.querySelector('ul'), ss.length ? ss.map((s) => `<li data-id="${esc(s.id)}"><div class="r"><b>${esc(s.name)}</b><i>${esc(zoneOf(s))}</i><span class="t">${B.when(s)}</span></div>${s.lastText ? `<div class="q">${esc(lastLine(s.lastText))}</div>` : ''}</li>`).join('')
     : `<li><i>${t('none')}</i></li>`);
 }
 function openList(kind) {
   if (boardDlg.open || !BOARDS[kind]) return;
-  boardKind = kind; drawList(); boardDlg.classList.remove('nav-pop'); boardDlg.showModal(); motion(boardDlg, 'nav-push');
+  boardKind = kind; boardDlg.lieK = pickOne(KITTY_TYPES); drawList(); boardDlg.classList.remove('nav-pop'); boardDlg.showModal(); motion(boardDlg, 'nav-push');
 }
 function closeList(then) { if (!boardDlg.open || boardDlg.classList.contains('nav-pop')) return; motion(boardDlg, 'nav-pop', () => { boardDlg.close(); then?.(); }); }
 boardDlg.addEventListener('cancel', (e) => { e.preventDefault(); closeList(); });
@@ -3726,6 +3784,7 @@ const clock = new THREE.Clock(), vt = new THREE.Vector3();
 function tick() {
   requestAnimationFrame(tick);
   const t = clock.getElapsedTime(), dt = Math.min(0.1, t - (tick.t ?? t)); tick.t = t;
+  perchTick(t);
   viewShift(); // 오른쪽 목록을 접고 펴는 동안 사무실 가운데를 따라 옮긴다(캔버스 크기는 그대로)
   flyTick(t); followFocus();
   controls.update(); clampTarget();
