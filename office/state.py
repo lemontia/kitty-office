@@ -174,7 +174,7 @@ def load_tail(path):
     return {**hit[1], "messages": [dict(m) for m in hit[1]["messages"]]}
 
 
-RECENT_REPLIES = 3
+RECENT_REPLIES = 10  # 팝업에서 거슬러 볼 수 있는 AI 답 수(사이의 사람 말 포함) — 3 이면 새로 말을 걸 때마다 앞 대화가 금방 밀려났다
 
 
 def _last_replies(turns, n):

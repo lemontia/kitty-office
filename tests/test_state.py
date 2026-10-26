@@ -361,7 +361,8 @@ class TestRecent(Base):
                           human("둘", minutes=7), said("중간", minutes=6.5), said("답2", minutes=6),
                           human("셋", minutes=5), said("답3", minutes=4),
                           human("넷", minutes=3), said("답4?", minutes=2)])
-        r = self.one("대화")["recent"]
+        with mock.patch("office.state.RECENT_REPLIES", 3):  # 자르는 규칙만 본다 — 실제 개수는 상수에
+            r = self.one("대화")["recent"]
         self.assertEqual([(x["who"], x["text"]) for x in r],
                          [("me", "둘"), ("ai", "답2"), ("me", "셋"), ("ai", "답3"), ("me", "넷"), ("ai", "답4?")])
 
