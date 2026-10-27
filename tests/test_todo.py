@@ -68,6 +68,13 @@ class TestTodo(unittest.TestCase):
         with self.assertRaises(todo.TodoError):
             todo.act({"op": "today", "id": "nope"}, self.p, now)
 
+    def test_order_reseats_given_ids_in_their_slots(self):
+        a, b, c, d = (self.add(x) for x in "abcd")
+        items = todo.act({"op": "order", "ids": [c, "nope", a]}, self.p, D1)  # a·c 자리만 서로 바뀐다
+        self.assertEqual([i["id"] for i in items], [c, b, a, d])
+        self.assertEqual([i["id"] for i in todo.load(self.p, D1)], [c, b, a, d])
+        self.assertEqual(len(todo.act({"op": "order", "ids": "x"}, self.p, D1)), 4)
+
     def test_limits(self):
         with self.assertRaises(todo.TodoError):
             self.add("x" * (todo.TEXT_MAX + 1))

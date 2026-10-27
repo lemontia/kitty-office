@@ -87,6 +87,8 @@
   #todoPane li .del { border: 0; background: none; color: var(--muted); font-size: 15px; cursor: pointer; padding: 0 2px; opacity: .5; } #todoPane li:hover .del { opacity: 1; }
   #todoPane .add { padding: 6px 8px 8px; } #todoPane .add input { width: 100%; box-sizing: border-box; font: inherit; font-size: 13px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
   #todoPane .chip { display: none; }
+  .todos .grip { flex: none; cursor: grab; color: var(--muted); opacity: .45; font-size: 9px; letter-spacing: -2px; padding: 0; margin-right: -4px; touch-action: none; user-select: none; } .todos li:hover .grip { opacity: 1; }
+  .todos li.drag { background: #fbf7f0; } .todos li.ghost { opacity: .35; }
   #todoPane .dt, #todoDlg .dt { flex: none; font-size: 11px; color: var(--muted); }
   #todoPane .lateh, #todoDlg .lateh { padding: 2px 4px; } #todoPane .lateh:hover, #todoDlg .lateh:hover { background: none; }
   .pastTgl { all: unset; cursor: pointer; font-size: 12px; font-weight: 700; color: #4f6b55; padding: 3px 6px; border-radius: 6px; } .pastTgl:hover { background: rgba(63,143,95,.12); }
@@ -447,6 +449,7 @@
     }
   }
 </style>
+<script src="./vendor/sortablejs/Sortable.min.js"></script>
 <script type="importmap">
 { "imports": {
   "three": "./vendor/three/build/three.module.js",
@@ -532,7 +535,7 @@ const T = {
     compactAsk: ['지금까지 대화를 요약하고 이어 갑니다(/compact). 할까요?', '정리 요청 보냄'],
     clearAsk: ['지금 대화를 비우고 새로 시작합니다(/clear). 남길 것은 미리 남겼나요?', '새로 시작 요청 보냄'],
     todoTitle: '오늘 할 일', todoLine: (d, n) => `오늘 할 일 ${d}/${n}`, todoEmpty: '오늘 할 일 적기', todoPh: '할 일을 적고 Enter', todoNone: '아직 없어요. 할 일을 적어 보세요',
-    todoDel: '지우기', todoEdit: '눌러서 고치기', todoOld: '3일 넘었어요', todoMore: (n) => `+${n}`, todoLateN: (n) => `밀린 일 ${n}개`, todoPastN: (n) => `끝낸 일 ${n}개`, todoUndo: '체크를 풀면 다시 할 일로', todoToday: '오늘로', todoTodayT: '오늘 할 일로 다시 올리기', todoYesterday: '어제', signTodoN: (n) => `오늘의 할 일: ${n}개`, todoDone: '다 했어요!',
+    todoDel: '지우기', todoDrag: '끌어서 순서 바꾸기', todoEdit: '눌러서 고치기', todoOld: '3일 넘었어요', todoMore: (n) => `+${n}`, todoLateN: (n) => `밀린 일 ${n}개`, todoPastN: (n) => `끝낸 일 ${n}개`, todoUndo: '체크를 풀면 다시 할 일로', todoToday: '오늘로', todoTodayT: '오늘 할 일로 다시 올리기', todoYesterday: '어제', signTodoN: (n) => `오늘의 할 일: ${n}개`, todoDone: '다 했어요!',
     fresh: '새로', findPh: (k) => `이름 찾기 (${k}F)`, waitingFor: (t) => `기다림 ${t}`, none: '없습니다', dialogWait: '승인·선택 대기: ',
   },
   en: {
@@ -569,7 +572,7 @@ const T = {
     compactAsk: ['Summarize the conversation so far and continue (/compact)?', 'Compact requested'],
     clearAsk: ['Clear this conversation and start over (/clear)? Saved anything you need?', 'Start over requested'],
     todoTitle: "Today's to-do", todoLine: (d, n) => `Today's to-do ${d}/${n}`, todoEmpty: "Write today's to-do", todoPh: 'Type a task and press Enter', todoNone: 'Nothing yet. Add your first task',
-    todoDel: 'Delete', todoEdit: 'Click to edit', todoOld: 'Over 3 days old', todoMore: (n) => `+${n}`, todoLateN: (n) => `${n} overdue`, todoPastN: (n) => `${n} done earlier`, todoUndo: 'Untick to bring it back', todoToday: 'Today', todoTodayT: 'Move back to today', todoYesterday: 'Yesterday', signTodoN: (n) => `Today's to-do: ${n} left`, todoDone: 'All done!',
+    todoDel: 'Delete', todoDrag: 'Drag to reorder', todoEdit: 'Click to edit', todoOld: 'Over 3 days old', todoMore: (n) => `+${n}`, todoLateN: (n) => `${n} overdue`, todoPastN: (n) => `${n} done earlier`, todoUndo: 'Untick to bring it back', todoToday: 'Today', todoTodayT: 'Move back to today', todoYesterday: 'Yesterday', signTodoN: (n) => `Today's to-do: ${n} left`, todoDone: 'All done!',
     fresh: 'New', findPh: (k) => `Find by name (${k}F)`, waitingFor: (t) => `waiting ${t}`, none: 'No matches', dialogWait: 'Waiting for approval: ',
   },
 };
@@ -3086,7 +3089,7 @@ const dayLabel = (iso) => { // 작성일 — 오늘이면 안 쓰고, 어제·�
   const day = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime(), diff = Math.round((day(n) - day(d)) / 86400000);
   return diff <= 0 ? '' : diff === 1 ? t('todoYesterday') : LANG === 'ko' ? `${d.getMonth() + 1}/${d.getDate()}` : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
-const todoLi = (i) => { const dl = dayLabel(i.created); return `<li class="${i.done ? 'done' : ''}${i.old && !i.done ? ' old' : ''}${i.late ? ' late' : ''}" data-id="${esc(i.id)}"><input type="checkbox"${i.done ? ' checked' : ''}><span class="tx" title="${esc(i.old && !i.done ? t('todoOld') : t('todoEdit'))}">${esc(i.text)}</span>${dl ? `<small class="dt">${esc(dl)}</small>` : ''}${i.late ? `<button class="today" title="${esc(t('todoTodayT'))}">${esc(t('todoToday'))}</button>` : ''}<button class="del" title="${esc(t('todoDel'))}" aria-label="${esc(t('todoDel'))}">×</button></li>`; };
+const todoLi = (i, grip) => { const dl = dayLabel(i.created); return `<li class="${i.done ? 'done' : ''}${i.old && !i.done ? ' old' : ''}${i.late ? ' late' : ''}${grip ? ' cur' : ''}" data-id="${esc(i.id)}">${grip ? `<span class="grip" title="${esc(t('todoDrag'))}">⋮⋮</span>` : ''}<input type="checkbox"${i.done ? ' checked' : ''}><span class="tx" title="${esc(i.old && !i.done ? t('todoOld') : t('todoEdit'))}">${esc(i.text)}</span>${dl ? `<small class="dt">${esc(dl)}</small>` : ''}${i.late ? `<button class="today" title="${esc(t('todoTodayT'))}">${esc(t('todoToday'))}</button>` : ''}<button class="del" title="${esc(t('todoDel'))}" aria-label="${esc(t('todoDel'))}">×</button></li>`; };
 // 끝낸 일 — 어제 이전에 끝낸 기록(서버가 30일 보관). 펼치면 끝낸 날짜별 묶음, 체크를 풀면 안 끝난 항목으로 돌아간다
 function pastHTML() {
   const past = TODO.filter((i) => i.past).sort((a, b) => String(b.doneAt).localeCompare(String(a.doneAt)));
@@ -3104,7 +3107,7 @@ function pastHTML() {
 }
 const todoItems = () => {
   const cur = todoCur(), late = TODO.filter((i) => i.late);
-  return (cur.length ? cur.map(todoLi).join('') : `<li class="none"><span class="tx" style="color:var(--muted);cursor:default">${esc(t('todoNone'))}</span></li>`)
+  return (cur.length ? cur.map((i) => todoLi(i, true)).join('') : `<li class="none"><span class="tx" style="color:var(--muted);cursor:default">${esc(t('todoNone'))}</span></li>`)
     + (late.length ? `<li class="lateh"><button class="lateTgl">${esc(t('todoLateN', late.length))} ${lateOpen ? '▾' : '▸'}</button></li>` + (lateOpen ? late.map(todoLi).join('') : '') : '')
     + pastHTML();
 };
@@ -3114,7 +3117,7 @@ function drawTodo() {
   const cur = todoCur(), done = cur.filter((i) => i.done).length;
   todoDlg.querySelector('.cnt').textContent = cur.length ? `${done}/${cur.length}` : '';
   const ul = todoDlg.querySelector('.todos');
-  if (ul.querySelector('.ed')) return; // 고치는 중엔 다시 그리지 않는다
+  if (ul.querySelector('.ed, .drag')) return; // 고치거나 끄는 중엔 다시 그리지 않는다
   setHTML(ul, todoItems());
 }
 // 왼쪽 위 할 일 패널(PC) — 창과 같은 동작을 패널 안에서 바로. 접으면 제목만(이 브라우저에 기억). 휴대폰은 칩 하나 → 할 일 창
@@ -3124,13 +3127,19 @@ function drawPane() {
   const cur = todoCur(), done = cur.filter((i) => i.done).length, cnt = cur.length ? `${done}/${cur.length}` : '';
   pane.classList.toggle('folded', paneFold);
   if (!pane.querySelector('.todos')) pane.innerHTML = `<button class="chip"></button><div class="cap"><span class="ti"></span><small></small><button class="fold" title="${esc(t('foldTitle'))}"></button></div>
-    <ul class="todos"></ul><form class="add"><input maxlength="200" placeholder="${esc(t('todoPh'))}" autocomplete="off"></form>`;
+    <ul class="todos"></ul><form class="add"><input maxlength="200" placeholder="${esc(t('todoPh'))}" autocomplete="off"></form>`, todoSortable(pane.querySelector('.todos'));
   pane.querySelector('.chip').textContent = `📝 ${cnt || t('todoTitle')}`;
   pane.querySelector('.ti').textContent = t('todoTitle'); pane.querySelector('small').textContent = cnt;
   pane.querySelector('.fold').textContent = paneFold ? '▸' : '◂';
   const ul = pane.querySelector('.todos');
-  if (!ul.querySelector('.ed')) setHTML(ul, todoItems());
+  if (!ul.querySelector('.ed, .drag')) setHTML(ul, todoItems());
 }
+// 끌어서 순서 바꾸기 — SortableJS(vendor). 손잡이(⋮⋮)로만, 오늘 목록(.cur)만. 놓으면 서버에 새 순서
+function todoSortable(ul) {
+  Sortable.create(ul, { handle: '.grip', draggable: '.cur', animation: 150, chosenClass: 'drag', ghostClass: 'ghost',
+    onEnd: (e) => { ul._h = null; if (e.oldIndex === e.newIndex) return drawTodo(); todoAct({ op: 'order', ids: [...ul.querySelectorAll('li.cur')].map((x) => x.dataset.id) }); } });
+}
+todoSortable(todoDlg.querySelector('.todos'));
 pane.addEventListener('click', (e) => {
   if (e.target.closest('.chip')) return openTodo();
   if (e.target.closest('.fold')) { paneFold = !paneFold; try { localStorage.setItem('knock.todoFold', paneFold ? '1' : '0'); } catch {} return drawPane(); }

@@ -104,7 +104,7 @@ def _text(v):
 
 
 def act(body, p=None, now=None):
-    """화면에서 온 바꾸기 하나 — op: add(text) · toggle(id) · edit(id, text) · delete(id) · today(id: 작성일을 지금으로 — 밀린 일을 다시 위로). 바뀐 목록을 돌려준다."""
+    """화면에서 온 바꾸기 하나 — op: add(text) · toggle(id) · edit(id, text) · delete(id) · today(id: 작성일을 지금으로 — 밀린 일을 다시 위로) · order(ids: 끌어서 바꾼 순서). 바뀐 목록을 돌려준다."""
     p, now = Path(p) if p else path(), now or _now()
     op = body.get("op")
     with LOCK:
@@ -114,6 +114,11 @@ def act(body, p=None, now=None):
                 raise TodoError("todoFull")
             items.append({"id": secrets.token_hex(6), "text": _text(body.get("text")), "done": False,
                           "created": now.isoformat(timespec="seconds"), "doneAt": None})
+        elif op == "order":  # 끌어서 바꾼 순서 — 받은 id 들이 있던 자리에 그 순서대로 다시 앉힌다(모르는 id 는 무시)
+            ids = body.get("ids") if isinstance(body.get("ids"), list) else []
+            pos = {x: n for n, x in enumerate(ids) if isinstance(x, str)}
+            moved = iter(sorted((i for i in items if i["id"] in pos), key=lambda i: pos[i["id"]]))
+            items = [next(moved) if i["id"] in pos else i for i in items]
         else:
             it = next((i for i in items if i["id"] == body.get("id")), None)
             if op not in ("toggle", "edit", "delete", "today"):
