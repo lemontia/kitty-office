@@ -1251,6 +1251,48 @@
     "Let's all fish together{meow}",
     "Doing great even with no fish{meow}"
    ]
+  },
+  "sent": {
+   "mackerel": [
+    "Got it… hope I do it right",
+    "On it{meow}"
+   ],
+   "tuxedo": [
+    "Noted.",
+    "On it"
+   ],
+   "ginger": [
+    "Got it{meow}!",
+    "Yay, on it{meow}!"
+   ],
+   "siamese": [
+    "Request parsed. Proceeding",
+    "Clear. Starting now"
+   ],
+   "calico": [
+    "Ooh, good one! On it",
+    "Okay okay~ starting"
+   ],
+   "patch": [
+    "Deal{meow}",
+    "Got it. Paid in treats"
+   ],
+   "gray": [
+    "Mm… okay{meow}",
+    "One yawn, then on it"
+   ],
+   "black": [
+    "Easy{meow}",
+    "Leave it to me"
+   ],
+   "brown": [
+    "Snack after this{meow}",
+    "On it, but I'm hungry"
+   ],
+   "cream": [
+    "Thank you, I'll try{meow}",
+    "Got it, nice and slow"
+   ]
   }
  }
 }
