@@ -219,7 +219,10 @@
   #boardDlg .lie { position: absolute; right: 64px; top: -146px; width: 150px; pointer-events: none; transform-origin: 50% 100%; }
   @media (prefers-reduced-motion: no-preference) { @keyframes breathe { 50% { transform: scaleY(1.03); } } #boardDlg .lie { animation: breathe 3.2s ease-in-out infinite; } }
   #boardDlg ul { list-style: none; margin: 0; padding: 6px 10px 12px; overflow-y: auto; flex: 1; min-height: 0; }
-  #boardDlg li { cursor: pointer; flex-direction: column; align-items: stretch; gap: 2px; }
+  #boardDlg li { cursor: pointer; }
+  #boardDlg li .pk { flex: none; position: relative; width: 40px; height: 40px; overflow: hidden; border-radius: 50%; background: #fbf3e6; }
+  #boardDlg li .pk img { position: absolute; width: 88px; left: -22px; top: -32px; } /* perch 그림의 얼굴만 — 팝업 폰 머리줄 얼굴과 같은 자르기 */
+  #boardDlg li .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
   #boardDlg li .r { display: flex; gap: 8px; align-items: baseline; } #boardDlg li b { font-size: 15px; } #boardDlg li i { flex: 1; font-style: normal; font-size: 12px; color: var(--muted); }
   #boardDlg li .t { font-size: 12px; font-weight: 700; color: #8a6a4a; white-space: nowrap; }
   #boardDlg li .q { font-size: 13px; color: var(--ink); opacity: .8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -419,7 +422,7 @@
     #msg header .t { flex: none; }
     #msg header b { min-width: 4.5em; }
     #msg header .pk { display: block; flex: none; position: relative; width: 36px; height: 36px; overflow: hidden; border-radius: 50%; background: #fbf3e6; }
-    #msg header .pk img { position: absolute; width: 80px; left: -20px; top: -23px; }
+    #msg header .pk img { position: absolute; width: 80px; left: -20px; top: -29px; }
     #msg header button { min-width: 44px; min-height: 44px; }
     #msg .body { font-size: 15px; padding: 14px 12px; }
     #msg footer { padding: 8px 10px calc(10px + env(safe-area-inset-bottom)); }
@@ -1164,12 +1167,12 @@ function planLayout() {
   // 쉬는 자리(rest)는 한 자리에 한 마리 — 서로 1.5 넘게 떨어뜨린다(고양이 그림 폭이 1.7 이라 가로로는 1.8 넘게)
   const lg = lounge, tx = 8.7;
   const kx = 4.6, at = (x, z, o = {}) => ({ x: lg.x + lg.w - x, z: lg.z + z, ...o });
-  const rest = [ // 고타츠 — 이불 밖으로 머리만
+  const kot = [ // 고타츠 — 이불 밖으로 머리만
     at(kx - 1.0, 0.75, { y: 0.3, pose: 'kot', kot: 1, flip: true }), at(kx + 1.0, 0.75, { y: 0.3, pose: 'kot', kot: 1 }), at(kx, 1.7, { y: 0.3, pose: 'kot', kot: 1, flip: true }),
   ];
   const cush = [[1.0, 3.6], [3.0, 3.9], [1.0, 5.6], [4.9, 5.0], [2.9, 7.0]].map(([x, z]) => at(x, z, { y: 0.14, pose: 'resting', cushion: 1 }));
   const box = [[2.9, 5.4], [1.0, 7.4]].map(([x, z]) => at(x, z, { y: 0.32, pose: 'peek', box: 1 })); // 종이 상자 안 — 머리만
-  rest.push(cush[0], cush[1], box[0], at(tx, 0.8, { y: 2.25, pose: 'resting', top: 1 }), cush[2], cush[3], box[1], cush[4]); // 차는 순서 — 몇 마리 안 돼도 가구마다 골고루
+  const rest = [cush[0], box[0], kot[0], cush[1], cush[2], kot[1], box[1], cush[3], at(tx, 0.8, { y: 2.25, pose: 'resting', top: 1 }), cush[4], kot[2]]; // 차는 순서 — 셋만 와도 방석·상자 하나·고타츠 하나로 골고루
   const xL = x0 + A / 2, xR = x0 + P.Wt - A / 2, lanes = P.lanes.map((l) => z0 + l);
   // 뒷벽 복도는 벽에서 1.9 — 가운데(1.2)로 걸으면 발이 걸레받이 높이에 그려져 벽 속을 걷는 것처럼 보였다(벽난로는 0.9 까지 나와 있다)
   const BACKZ = z0 + 1.9, back = (z) => Math.abs(z - lanes[0]) < 1e-6 ? BACKZ : z;
@@ -1952,7 +1955,7 @@ function kittyTex(kt, pose, flip) {
       return;
     }
     if (pose === 'perch' || pose === 'perchB') { // 팝업 모서리에 턱을 괴고 앞발을 걸침 — perchB 는 눈 감은 칸(깜빡임)
-      head(256, 300, pose === 'perchB' ? 'sleep' : 'dot', 0.03);
+      head(256, 336, pose === 'perchB' ? 'sleep' : 'dot', 0.03);
       paw(200, 392); paw(318, 392);
       return;
     }
@@ -2122,6 +2125,7 @@ function deskOf(s) {
 }
 const WAIT_BORED_MS = 60 * 60 * 1000;   // 결재를 이만큼 넘게 기다리면 줄 제자리에서 딴짓한다(자리·이름표·클릭은 그대로)
 const REPORT_TIRED_MS = 60 * 60 * 1000; // 보고 올리고 이만큼 지나면 깔개를 떠나 복도에 널브러진다
+const REPORT_LOUNGE_MS = 6 * 60 * 60 * 1000; // 이만큼 지나면 복도에서 일어나 휴게실로 쉬러 간다(24시간이면 퇴근 — 서버 판정)
 // 한 사람은 한 곳에만 — 일하는 중은 책상(자기 섬), 결재 기다림은 대표실 문 앞 줄(책상은 빈 의자), 회의는 회의실, 보고는 결재 줄 옆 파란 깔개, 쉬는 중은 휴게실 쉼터
 function placements() {
   const out = [], ss = S.sessions || [];
@@ -2149,17 +2153,17 @@ function placements() {
     put(s, slot.a); if (p) put(p, slot.b, { flip: true }); k++;
   }
   if (extra) setMore('meet', extra, L.meetMore);
-  // 보고 올리고 1시간 넘게 아무도 안 봤으면 — 깔개를 떠나 사무실 여기저기 바닥에 늘어진다(상태는 그대로 「보고」).
+  // 보고 올리고 1~6시간 아무도 안 봤으면 — 깔개를 떠나 사무실 여기저기 바닥에 늘어진다(상태는 그대로 「보고」).
   // 자리는 통로 끝 벽 앞·통로 가장자리(L.sprawl), 세션 id 해시 순이라 새로고침해도 같은 곳. 넘치면 「+N」
-  const tired = (s) => Date.now() - Date.parse(s.lastActivity || 0) > REPORT_TIRED_MS;
+  const age = (s) => Date.now() - Date.parse(s.lastActivity || 0), tired = (s) => age(s) > REPORT_TIRED_MS, lounging = (s) => age(s) > REPORT_LOUNGE_MS;
   { // 열 자리 전체에서 각자 굴린 자리를 고르고, 먼저 찬 자리면 다음 빈자리
-    const lazy = list('reported', tired).sort((a, b) => hsh(a) - hsh(b) || byName(a, b)), taken = new Set();
+    const lazy = list('reported', (s) => tired(s) && !lounging(s)).sort((a, b) => hsh(a) - hsh(b) || byName(a, b)), taken = new Set();
     for (const s of lazy.slice(0, L.sprawl.length)) { let i = roll(s) % L.sprawl.length; while (taken.has(i)) i = (i + 1) % L.sprawl.length; taken.add(i); put(s, L.sprawl[i], { pose: 'sprawl' }); }
     if (lazy.length > L.sprawl.length) setMore('sprawl', lazy.length - L.sprawl.length, L.sprawl[0]);
   }
   fill(list('reported', (s) => !tired(s)).sort(byRecent), L.report, ['report', { x: L.repA.x + L.repA.w / 2, z: L.repA.z + CD - 1.2 }]);
-  // 쉬는 중 — 휴게실 쉼터 자리마다 한 마리(고타츠·상자는 머리만 내민 그림). 이름순이라 같은 사람은 같은 자리
-  const offs = list('off').sort(byName);
+  // 쉬는 중 + 보고 6시간 넘은 고양이 — 휴게실 쉼터 자리마다 한 마리(고타츠·상자는 머리만 내민 그림). 이름순이라 같은 사람은 같은 자리
+  const offs = [...list('off'), ...list('reported', lounging)].sort(byName);
   offs.slice(0, L.rest.length).forEach((s, i) => { const r = L.rest[i]; put(s, r, { pose: r.pose, flip: !!r.flip, kot: r.kot, ri: i, rn: Math.min(offs.length, L.rest.length) }); });
   if (offs.length > L.rest.length) setMore('rest', offs.length - L.rest.length, L.restMore);
   // 퇴근 — 바깥에서 쉰다. 자리는 세션 id 해시 순(새로고침해도 같은 사람이 같은 곳): 낚시 · 해먹 · 모닥불 의자 둘 · 나머지는 바닷가·오솔길 산책
@@ -3151,7 +3155,7 @@ function drawList() {
   const lk = boardDlg.lieK, lie = boardDlg.querySelector('.lie'); // 창 위에 누운 고양이 — 열 때마다 무작위 털
   if (lie.dataset.k !== lk) { lie.dataset.k = lk; lie.src = charTex(lk, 'lie').image.toDataURL(); }
   boardDlg.querySelector('.cnt').textContent = ss.length ? (B.note ? `${ss.length} · ${t(B.note)}` : String(ss.length)) : '';
-  setHTML(boardDlg.querySelector('ul'), ss.length ? ss.map((s) => `<li data-id="${esc(s.id)}"><div class="r"><b>${esc(s.name)}</b><i>${esc(zoneOf(s))}</i><span class="t">${B.when(s)}</span></div>${s.lastText ? `<div class="q">${esc(lastLine(s.lastText))}</div>` : ''}</li>`).join('')
+  setHTML(boardDlg.querySelector('ul'), ss.length ? ss.map((s) => `<li data-id="${esc(s.id)}"><span class="pk"><img alt="" src="${perchSrc(typeOf(s.character, s.name), 'perch')}"></span><div class="tx"><div class="r"><b>${esc(s.name)}</b><i>${esc(zoneOf(s))}</i><span class="t">${B.when(s)}</span></div>${s.lastText ? `<div class="q">${esc(lastLine(s.lastText))}</div>` : ''}</div></li>`).join('')
     : `<li><i>${t('none')}</i></li>`);
 }
 function openList(kind) {
