@@ -127,3 +127,38 @@ class TestClipboardPaths(unittest.TestCase):
                 self.assertEqual(term.clipboard_paths(), paths[:1])
             with self.ps(""):  # 파일 복사가 아님(캡처 이미지·글자)
                 self.assertEqual(term.clipboard_paths(), [])
+
+
+class TestDialog(unittest.TestCase):
+    # 2026-10-28 herdr 화면 실측 — 선택 질문(목록이 길어 3번은 화면 밖, 앞에 ↓)
+    ASK = ["", " ☐ 띄울 범위", "", "어떤 것까지", "띄울까요?", "",
+           "❯ 1. 둘 다 (추천)", "     선택 질문 + 승인 창", "     모두 팝업에서",
+           "↓ 2. 선택 질문만", "     승인 창은 탭에서",
+           "──────────", "  4. Chat about this", "", "Enter to select · ↑/↓ to navigate · Esc to cancel"]
+    INPUT = ["● 다 했어요.", "", "─────", "❯ ", "─────", "  ⏵⏵ auto mode on"]
+
+    def test_reads_question_options_cursor(self):
+        d = term.parse_dialog(self.ASK)
+        self.assertEqual(d["question"], "어떤 것까지\n띄울까요?")
+        self.assertEqual([(o["n"], o["label"]) for o in d["options"]], [(1, "둘 다 (추천)"), (2, "선택 질문만"), (4, "Chat about this")])
+        self.assertEqual(d["options"][0]["desc"], "선택 질문 + 승인 창 모두 팝업에서")
+        self.assertEqual(d["cursor"], 1)
+
+    def test_plain_input_box_is_not_a_dialog(self):
+        self.assertIsNone(term.parse_dialog(self.INPUT))
+
+    def test_pick_moves_checks_then_enters(self):
+        moved = [l.replace("❯ 1.", "  1.").replace("↓ 2.", "❯ 2.") for l in self.ASK]
+        sent = []
+        with mock.patch.object(term, "_screen", side_effect=[self.ASK, moved]), \
+                mock.patch.object(term, "_run", lambda *a: sent.append(a[4:])):
+            term.pick(("herdr", "w1:p1"), 2, "선택 질문만")
+        self.assertEqual(sent, [("down",), ("enter",)])
+
+    def test_pick_refuses_when_screen_changed(self):
+        sent = []
+        with mock.patch.object(term, "_screen", return_value=self.ASK), \
+                mock.patch.object(term, "_run", lambda *a: sent.append(a)):
+            with self.assertRaises(RuntimeError):
+                term.pick(("herdr", "w1:p1"), 2, "다른 질문의 선택지")
+        self.assertEqual(sent, [])  # 아무 키도 안 눌렀다

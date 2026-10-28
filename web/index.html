@@ -280,6 +280,14 @@
   #msg footer { border-top: 1px dashed var(--line); padding: 10px 18px 14px; }
   #msg footer textarea { width: 100%; font: inherit; font-size: 14px; padding: 12px 14px; border: 1px solid var(--line);
     border-radius: 10px; resize: none; box-sizing: border-box; line-height: 1.45; overflow-y: hidden; }
+  /* 승인·선택 창의 선택지 — 누르면 터미널에서 그 칸을 고른다 */
+  #msg footer .opts:empty { display: none; }
+  #msg footer .opts { margin-bottom: 10px; }
+  #msg footer .opts .q { font-size: 13px; font-weight: 700; white-space: pre-wrap; max-height: 9em; overflow: auto; }
+  #msg footer .opts button.opt { display: block; width: 100%; text-align: left; border-radius: 10px; margin-top: 6px; padding: 8px 12px; }
+  #msg footer .opts button.opt:hover { background: #fff4e6; }
+  #msg footer .opts button.opt:disabled { opacity: .5; cursor: default; }
+  #msg footer .opts .opt small { display: block; margin-top: 2px; font-size: 12px; font-weight: 400; color: var(--muted); }
   #msg footer .att { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
   #msg footer .att:empty { display: none; }
   #msg footer .att span { position: relative; font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 8px;
@@ -497,7 +505,7 @@
   <ul class="log" id="log"></ul><p class="setnote" data-t="logNote">승인·질문 창 대기도 잡는다. 3초마다 다시 읽는다.</p></dialog>
 <img id="perch" alt="" aria-hidden="true"><div id="perchSay" class="sayb"></div><div id="perchFx" aria-hidden="true"></div>
 <dialog id="msg"><header><span class="pk"><img alt=""></span><b></b><span class="fl"></span><span class="t"></span><span class="ctx" hidden></span><button class="pin" title="오른쪽 목록 맨 위에 고정" data-t-title="pinTitle">📌</button><button class="ren" title="세션 이름 바꾸기" data-t-title="renameTitle">✎</button><button class="x" aria-label="닫기" data-t-aria="close">×</button></header><div class="body"></div>
-  <footer><textarea rows="2" data-t-ph="taHint" placeholder="여기에 답을 쓰면 그 세션 입력창으로 들어갑니다 (Enter 보내기 · Shift+Enter 줄바꿈 · 이미지는 붙여넣기·끌어다 놓기)"></textarea>
+  <footer><div class="opts"></div><textarea rows="2" data-t-ph="taHint" placeholder="여기에 답을 쓰면 그 세션 입력창으로 들어갑니다 (Enter 보내기 · Shift+Enter 줄바꿈 · 이미지는 붙여넣기·끌어다 놓기)"></textarea>
     <div class="att"></div>
     <div class="row"><button class="clip" title="사진·파일 첨부" data-t-title="attach">📎</button><button class="exit" hidden data-t="exit">세션 끝내기</button><input type="file" id="pick" accept="image/*,application/pdf,text/*,.md,.csv,.json" multiple hidden><span class="note"></span><button class="cmp" data-cmd="/compact" hidden title="지금까지 대화를 요약하고 이어 갑니다(/compact)" data-t-title="compactTitle" data-t="compact">대화 정리하기</button><button class="cmp" data-cmd="/clear" hidden title="지금 대화를 비우고 새로 시작합니다(/clear)" data-t-title="clearTitle" data-t="clear">새로 시작</button><button class="stop" hidden data-t="stop">하던 일 중단하기</button><button class="go" data-t="goTerm">터미널로 가기</button><button class="send" data-t="send">보내기</button></div></footer></dialog>
 <aside id="side"><button id="sideFold" data-t-title="sideFold" data-t-aria="sideFold"><span>›</span><b class="zero"></b></button><div id="sideGrip" title="끌어서 너비 조절 · 두 번 누르면 원래대로" data-t-title="sideGrip"></div>
@@ -540,7 +548,7 @@ const T = {
     thinking: '생각', working2: '작업', ticker: (k, t) => `${k} 중… ${t}째`, took: (t) => `${t} 걸림`,
     exitBusy: '일하는 중에는 끝낼 수 없습니다 — 먼저 「하던 일 중단하기」', exitDialog: '승인·선택 창이 떠 있어 끝낼 수 없습니다 — 탭에서 먼저 고르세요',
     exitTitle: '/exit 로 세션을 끝내고 터미널 탭을 닫습니다', taBusy: '일하는 중에도 보낼 수 있습니다 — 하던 일 사이에 읽습니다',
-    ctxFull: (n) => `대화 ${n}% 찼음`, readOnly: 'cmux·Orca·herdr 밖에서 띄운 세션이라 여기서는 읽기만 됩니다', dialogOpen: '승인·선택 창이 떠 있습니다 — 탭으로 가서 골라 주세요',
+    ctxFull: (n) => `대화 ${n}% 찼음`, readOnly: 'cmux·Orca·herdr 밖에서 띄운 세션이라 여기서는 읽기만 됩니다', dialogOpen: '승인·선택 창이 떠 있습니다 — 탭으로 가서 골라 주세요', picked: '골랐습니다',
     failed: '안 됐습니다: ', remove: '빼기', uploading: (n) => `올리는 중… ${n}`, image: '이미지', attachFailed: '첨부 안 됐습니다: ', attachBig: (n) => `${n} 은 20MB 가 넘어 첨부하지 않았습니다 — 경로를 넣으려면 탐색기에서 「경로로 복사」(Ctrl+Shift+C)로 복사해 붙여 주세요`,
     attachedNote: '첨부한 파일을 열어서 봐 주세요: ', sendingDots: '보내는 중…', sent: '보냈습니다', newName: '새 세션 이름',
     renameSent: '이름 바꾸기를 보냈습니다 — 몇 초 뒤 화면에 반영됩니다', thisSession: '이 세션', stopAsk: (n) => `${n}의 하던 일을 중단할까요?`,
@@ -577,7 +585,7 @@ const T = {
     thinking: 'Thinking', working2: 'Working', ticker: (k, t) => `${k}… ${t}`, took: (t) => `took ${t}`,
     exitBusy: "Can't end while working — press Stop first", exitDialog: "Can't end while an approval prompt is open — answer it in the tab first",
     exitTitle: 'Send /exit to end the session and close its terminal tab', taBusy: 'You can send while it works — it reads between steps',
-    ctxFull: (n) => `Context ${n}% full`, readOnly: 'Started outside cmux, Orca or herdr — read only here', dialogOpen: 'An approval prompt is open — go to the tab to answer it',
+    ctxFull: (n) => `Context ${n}% full`, readOnly: 'Started outside cmux, Orca or herdr — read only here', dialogOpen: 'An approval prompt is open — go to the tab to answer it', picked: 'Picked',
     failed: 'Failed: ', remove: 'Remove', uploading: (n) => `Uploading… ${n}`, image: 'image', attachFailed: 'Attach failed: ', attachBig: (n) => `${n} is over 20 MB, so it was not attached — to paste its path, use "Copy as path" (Ctrl+Shift+C) in Explorer`,
     attachedNote: 'Please open and look at the attached files: ', sendingDots: 'Sending…', sent: 'Sent', newName: 'New session name',
     renameSent: 'Rename sent — it shows up in a few seconds', thisSession: 'this session', stopAsk: (n) => `Stop what ${n} is doing?`,
@@ -2567,7 +2575,7 @@ function busyButtons(s) {
 msg.querySelector('.body').addEventListener('toggle', (e) => { if (e.target.classList?.contains('work')) workOpen = e.target.open; }, true);
 // 열린 팝업 본문을 다시 그린다 — 맨 아래를 보고 있을 때만 따라 내려간다(위로 올려 읽는 중이면 그대로)
 function refreshBody(s, force) {
-  busyButtons(s);
+  busyButtons(s); drawOpts(s);
   const bd = msg.querySelector('.body'), atBottom = bd.scrollHeight - bd.scrollTop - bd.clientHeight < 40, h = bodyHTML(s);
   if (bd._h !== h) {
     bd.innerHTML = h; bd._h = h; if (atBottom || force) bd.scrollTop = bd.scrollHeight;
@@ -2665,11 +2673,39 @@ function openMsg(s) {
   const bd = msg.querySelector('.body'); bd.scrollTop = s.recent?.length || pend.has(s.id) || s.state === 'working' ? bd.scrollHeight : 0; // 대화면 가장 최근 답이 보이게
   msg.querySelector('.clip').hidden = !canAnswer;
   // 일하는 중·회의 중 — 답(「얼마나 걸려?」)은 그대로 보내고, 옆에 덜 눈에 띄는 「하던 일 중단하기」(Esc)
-  busyButtons(s);
+  busyButtons(s); drawOpts(s, true);
   for (const b of msg.querySelectorAll('.cmp, .stop')) b.disabled = false;
   if (canAnswer && !isPhone()) ta.focus(); // 폰은 키보드가 먼저 올라와 대화를 가리지 않게
 }
 let msgSid = null;
+// 승인·선택 창 — 터미널 화면(herdr)에서 읽은 질문·선택지를 단추로. 3초 새로 그릴 때마다 다시 읽되 2.5초에 한 번만
+let optsAt = 0, optsBusy = false;
+async function drawOpts(s, force) {
+  const box = msg.querySelector('.opts');
+  if (!(s.tab && s.dialog)) { setHTML(box, ''); return; }
+  if (optsBusy || (!force && Date.now() - optsAt < 2500)) return;
+  optsBusy = true; optsAt = Date.now();
+  let d = null;
+  try {
+    const r = await fetch('api/dialog', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Lang': LANG }, body: JSON.stringify({ id: s.id }) });
+    d = r.ok ? (await r.json()).dialog : null;
+  } catch { /* 못 읽으면 예전처럼 「탭으로 가서 골라 주세요」 */ }
+  optsBusy = false;
+  if (msgSid !== s.id) return;
+  if (!d || !d.options?.length) { setHTML(box, ''); return; }
+  const note = msg.querySelector('.note'); if (note.textContent === t('dialogOpen')) note.textContent = '';
+  // 화면이 좁아 질문이 잘렸거나 아예 화면 밖이면 기록에 남은 질문 전체(선택 질문)를 쓴다
+  const tail = (d.question || '').split('\n').pop(), q = !tail || s.fullText?.includes(tail) ? s.fullText || d.question : d.question;
+  // 「Type something.」은 터미널을 글 쓰는 칸으로 바꿀 뿐이라 팝업에선 이어 쓸 수 없다 — 뺀다
+  const opts = d.options.filter((o) => !/^type something\.?$/i.test(o.label));
+  setHTML(box, (q ? `<div class="q">${esc(q)}</div>` : '') + opts.map((o) => `<button class="opt" data-n="${o.n}" data-label="${esc(o.label)}">${o.n}. ${esc(o.label)}${o.desc ? `<small>${esc(o.desc)}</small>` : ''}</button>`).join(''));
+}
+msg.querySelector('.opts').addEventListener('click', async (e) => {
+  const b = e.target.closest('button.opt'); if (!b) return;
+  const box = msg.querySelector('.opts'); for (const x of box.querySelectorAll('button')) x.disabled = true;
+  if (await act('api/pick', { n: +b.dataset.n, label: b.dataset.label })) msg.querySelector('.note').textContent = t('picked');
+  box._h = null; setTimeout(() => { const s = (S.sessions || []).find((x) => x.id === msgSid); if (s) drawOpts(s, true); }, 1200);
+});
 const TA_HINT = msg.querySelector('textarea').placeholder;
 async function act(path, body) {
   const note = msg.querySelector('.note');

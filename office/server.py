@@ -41,6 +41,9 @@ MSG = {
     "islandName": ("이름은 30자까지, 줄바꿈 없이", "Name: up to 30 characters, no line breaks"),
     "noTab": ("cmux·Orca·herdr 밖에서 띄운 세션이다", "This session was started outside cmux, Orca or herdr"),
     "dialog": ("승인·선택 창이 떠 있다 — 탭으로 가서 고른다", "An approval prompt is open — answer it in the tab"),
+    "noDialog": ("떠 있는 승인·선택 창이 없습니다", "No approval or choice prompt is open"),
+    "dialogChanged": ("선택 창이 그새 바뀌었습니다 — 다시 보고 골라 주세요", "The prompt changed — look again and pick"),
+    "dialogMove": ("그 칸으로 옮기지 못했습니다 — 터미널에서 골라 주세요", "Couldn't move to that option — pick it in the terminal"),
     "busy": ("일하는 중에는 끝낼 수 없습니다 — 먼저 「하던 일 중단하기」", "Can't end while working — press Stop first"),
     "renameRule": ("이름은 1~40자, 줄바꿈·/ 없이", "Name: 1–40 characters, no line breaks or /"),
     "empty": ("빈 답", "Empty reply"),
@@ -249,7 +252,7 @@ class Handler(SimpleHTTPRequestHandler):
         if self._blocked():
             return
         path = self.path.split("?")[0]
-        if path not in ("/api/focus", "/api/answer", "/api/rename", "/api/upload", "/api/island", "/api/stop", "/api/exit", "/api/todo", "/api/clippaths"):
+        if path not in ("/api/focus", "/api/answer", "/api/rename", "/api/upload", "/api/island", "/api/stop", "/api/exit", "/api/todo", "/api/clippaths", "/api/dialog", "/api/pick"):
             return self._json(404, {"error": self._m("noPath")})
         # 다른 웹페이지가 브라우저를 통해 127.0.0.1 로 보내는 요청을 막는다(이 화면에서 온 것만)
         ok = {f"{scheme}://{h}" for h in self._hosts() for scheme in ("http", "https")}
@@ -297,6 +300,18 @@ class Handler(SimpleHTTPRequestHandler):
                 return self._json(409, {"error": self._m("noTab")})
             if path == "/api/focus":
                 term.focus(tab)
+                return self._json(200, {"ok": True})
+            if path in ("/api/dialog", "/api/pick") and s.get("status") != "waiting":
+                return self._json(200 if path == "/api/dialog" else 409, {"dialog": None, "error": self._m("noDialog")})
+            if path == "/api/dialog":  # 떠 있는 승인·선택 창의 질문·선택지 — 터미널 화면에서 읽는다(herdr 만)
+                return self._json(200, {"dialog": term.dialog(tab)})
+            if path == "/api/pick":  # 팝업에서 선택지를 누름 — 화면이 그대로일 때만 그 칸을 고른다
+                try:
+                    term.pick(tab, int(body.get("n")), str(body.get("label") or ""))
+                except (TypeError, ValueError):
+                    return self._json(400, {"error": self._m("noDialog")})
+                except RuntimeError as e:
+                    return self._json(409, {"error": self._m(str(e)) if str(e) in MSG else str(e)})
                 return self._json(200, {"ok": True})
             if path == "/api/stop":  # 일하는 중인 세션의 지금 차례를 멈춘다(Esc)
                 term.stop(tab)

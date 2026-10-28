@@ -200,6 +200,70 @@ def stop(tab):
         _run(HERDR, "pane", "send-keys", tab[1], "esc")
 
 
+# 승인·선택 창 — Claude Code 는 선택지를 「❯ 1. 예」「  2. 아니요」 처럼 그리고, 설명은 그 아래 들여 쓴 줄에 둔다.
+# 목록이 길면 화면 밖 칸 앞에 ↑·↓ 가 붙는다(2026-10-28 herdr 화면 실측)
+OPT_RE = re.compile(r"^\s*([❯›>])?\s*[↑↓]?\s*(\d{1,2})\.\s+(\S.*?)\s*$")
+CUR_RE = re.compile(r"^\s*[❯›>]\s*[↑↓]?\s*\d{1,2}\.\s")
+RULE_RE = re.compile(r"^\s*[─━╭╰│]")
+
+
+def _screen(tab):
+    if tab[0] != "herdr":
+        return None
+    return _run(HERDR, "pane", "read", tab[1], "--source", "visible", "--lines", "80").splitlines()
+
+
+def parse_dialog(lines):
+    """화면 글에서 떠 있는 선택 창의 질문·선택지·지금 커서. 선택 창이 없으면 None."""
+    cur = next((i for i in range(len(lines) - 1, -1, -1) if CUR_RE.match(lines[i])), None)
+    if cur is None:
+        return None
+    is_more = lambda l: OPT_RE.match(l) or l.startswith("   ") and l.strip()  # 선택지거나 그 설명 줄
+    top = cur
+    while top > 0 and is_more(lines[top - 1]):
+        top -= 1
+    options, at = [], None
+    for l in lines[top:]:
+        m = OPT_RE.match(l)
+        if m:
+            options.append({"n": int(m.group(2)), "label": m.group(3), "desc": ""})
+            if m.group(1):
+                at = int(m.group(2))
+        elif options and l.startswith("   ") and l.strip() and not RULE_RE.match(l):
+            options[-1]["desc"] = (options[-1]["desc"] + " " + l.strip()).strip()
+        elif l.strip() and not RULE_RE.match(l):
+            break  # 아래 안내줄(Enter to select …) — 선택지 끝
+    q = []
+    for l in reversed(lines[:top]):
+        if RULE_RE.match(l) or (not l.strip() and q):
+            break
+        if l.strip():
+            q.insert(0, l.strip())
+    return {"question": "\n".join(q[-8:]), "options": options, "cursor": at}
+
+
+def dialog(tab):
+    lines = _screen(tab)
+    return parse_dialog(lines) if lines else None
+
+
+def pick(tab, n, label):
+    """선택지 n 을 고른다 — 커서를 화살표로 옮기고, 그 칸에 왔는지 다시 읽어 본 뒤에만 Enter.
+    화면이 그새 바뀌었으면(다른 질문·이미 골랐음) 아무것도 누르지 않고 RuntimeError(server.MSG 의 키)."""
+    d = dialog(tab)
+    opt = d and next((o for o in d["options"] if o["n"] == n), None)
+    if not opt or opt["label"] != label or d["cursor"] is None:
+        raise RuntimeError("dialogChanged")
+    step = n - d["cursor"]
+    if step:
+        _run(HERDR, "pane", "send-keys", tab[1], *(["down"] * step if step > 0 else ["up"] * -step))
+        time.sleep(0.3)
+        d = dialog(tab)
+        if not d or d["cursor"] != n:
+            raise RuntimeError("dialogMove")
+    _run(HERDR, "pane", "send-keys", tab[1], "enter")
+
+
 def alive(pid):
     """그 pid 의 프로세스가 살아 있나. 윈도우에선 os.kill(pid, 0) 이 확인이 아니라 그 프로세스를 끈다 — OpenProcess 로 본다."""
     try:
