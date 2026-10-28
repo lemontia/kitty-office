@@ -3,6 +3,7 @@
 <head>
 <script>if (!location.pathname.endsWith('/') && !/\.[a-z0-9]+$/i.test(location.pathname)) location.replace(location.pathname + '/' + location.search + location.hash);</script>
 <meta charset="utf-8">
+<script>if (window.KITTY_DEMO) { window.seedRand = (s) => () => { s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; Math.random = seedRand(20261028); } // 데모(서버가 KITTY_DEMO 를 심는다) — 고정 씨앗 무작위(mulberry32), 녹화를 다시 해도 같은 화면</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <title>Kitty Office</title>
 <link rel="icon" href="data:,">
@@ -508,6 +509,9 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+// 화면의 「지금」 — 보통은 이 컴퓨터 시계. 데모는 서버가 준 고정 시각(observedAt)에 맞춘다(녹화 때 기다린 시간·밤낮이 판마다 같게)
+let clockSkew = 0;
+const nowMs = () => Date.now() + clockSkew;
 
 // ───────── 화면 글자 — 한국어·영어. 브라우저 언어가 ko 로 시작하면 ko, 아니면 en(주소 ?lang=ko|en 이 우선) ─────────
 const LANG = (() => { const q = new URLSearchParams(location.search).get('lang'); return q === 'ko' || q === 'en' ? q : /^ko/i.test(navigator.language || 'ko') ? 'ko' : 'en'; })();
@@ -599,7 +603,7 @@ const phoneMQ = matchMedia('(max-width: 759px), (orientation: portrait)'), isPho
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 // 바뀐 때만 DOM 을 고친다(깜빡임 방지)
 const setHTML = (el, html) => { if (el._h !== html) { el.innerHTML = html; el._h = html; } };
-const mins = (iso) => iso ? Math.max(0, (Date.now() - Date.parse(iso)) / 60000) : 0;
+const mins = (iso) => iso ? Math.max(0, (nowMs() - Date.parse(iso)) / 60000) : 0;
 function ago(iso) {
   const m = mins(iso);
   if (m < 1) return t('now');
@@ -617,7 +621,7 @@ function lastLine(t) {
   return ls.length ? ls[ls.length - 1] : '';
 }
 const hhmm = (iso) => {
-  const d = new Date(iso), now = new Date();
+  const d = new Date(iso), now = new Date(nowMs());
   const t = d.toLocaleTimeString(LANG === 'ko' ? 'ko-KR' : 'en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
   return d.toDateString() === now.toDateString() ? t : `${d.getMonth() + 1}/${d.getDate()} ${t}`;
 };
@@ -759,7 +763,7 @@ const screenTex = (hue) => canvasTex(256, 160, (g, W, H) => {
 // ───────── 창밖 — 실제 시각대 · 실제 날씨(서울) ─────────
 // 시험용: ?t=21 (시각 덮어쓰기) · ?w=rain|snow|cloud|clear (날씨 덮어쓰기)
 const Q = new URLSearchParams(location.search);
-const hourNow = () => { const d = new Date(); return Q.has('t') ? +Q.get('t') : d.getHours() + d.getMinutes() / 60; };
+const hourNow = () => { const d = new Date(nowMs()); return Q.has('t') ? +Q.get('t') : d.getHours() + d.getMinutes() / 60; };
 const dayPart = (h = hourNow()) => h >= 6 && h < 10 ? 'morning' : h >= 10 && h < 17 ? 'day' : h >= 17 && h < 19 ? 'dusk' : 'night';
 let WEATHER = ['rain', 'snow', 'cloud', 'clear'].includes(Q.get('w')) ? Q.get('w') : 'clear';
 const SKY = {
@@ -1241,7 +1245,21 @@ function outLeg(p) { // 문 밖 첫 걸음 → p 직전까지
   const right = p.x > (L.x0 + x1) / 2, cx = right ? x1 + 2.0 : L.x0 - 2.6;
   return [d1, { x: cx, z: zb }, { x: cx, z: Math.min(Math.max(p.z, zb), z1 + 3) }];
 }
+// 바깥 p 로 나가는 문 — 뒤 오솔길(과 왼쪽 뒤 해먹)은 정문, 오른쪽(바닷가·부두)은 오른쪽 열린 면, 앞(모닥불·연못)은 앞 열린 면. 뒷벽·왼벽만 벽이라 두 면은 그냥 걸어 나간다
+function gateFor(p) {
+  const x1 = L.x0 + L.W, z1 = L.z0 + L.D;
+  if (p.z < L.z0 - 1 && p.x > L.x0 && p.x < x1 + 1) return null;
+  if (p.x < L.x0 && p.z < z1) return null; // 왼쪽은 벽이라 해먹까지는 정문으로 도는 게 가깝다
+  if (p.x > x1 && p.z < L.z0 + 2) return null; // 오른쪽이어도 뒤쪽 바닷가는 정문이 가깝다
+  const { rz, fx: x } = L.out.gates, fz = z1 + 2.0;
+  if (p.x > x1) return { in: { x: L.xR, z: nearLane(rz) }, out: [{ x: L.xR, z: rz }, { x: x1 + 2.0, z: rz }, { x: x1 + 2.0, z: Math.min(Math.max(p.z, L.z0 - 1.6), z1 + 3) }] }; // 오른쪽 통로를 따라 출입구까지 가서 옆으로
+  return { in: { x, z: L.lanes[L.lanes.length - 1] }, out: p.x < L.x0 ? [{ x, z: fz }, { x: L.x0 - 2.6, z: fz }, { x: L.x0 - 2.6, z: Math.max(p.z, L.z0) }] : [{ x, z: fz }] };
+}
 function route(a, b) {
+  if (L.out && inOffice(a) !== inOffice(b)) { // 안↔밖 — 가까운 열린 면이 있으면 그리로
+    const gt = gateFor(inOffice(a) ? b : a), end = { x: b.x, z: b.z, y: b.y || 0 };
+    if (gt) return inOffice(a) ? [...routeIn(a, gt.in), ...gt.out, end] : [...[...gt.out].reverse(), gt.in, ...routeIn(gt.in, b)];
+  }
   if (L.out && (!inOffice(a) || !inOffice(b))) {
     const d = { x: L.door.x, z: L.door.z }, end = { x: b.x, z: b.z, y: b.y || 0 };
     const first = inOffice(a) ? routeIn(a, d) : [...outLeg(a).reverse(), d];
@@ -1752,7 +1770,8 @@ function buildForest(g) {
   const fp = new THREE.Vector3(0, 0, 0.45); dock.localToWorld(fp); // 부두 뭍 쪽 끝 — 낚시멍 자리(앞 가장자리 셋)와 겹치지 않게
   L.out = { fish: { x: fp.x, z: fp.z, y: GY + 0.32 }, ham: { x: ham.x, z: ham.z, y: GY + 0.82 },
     chairs: [{ x: fire.x + 0.2, z: fire.z + 1.6, y: GY + 0.42 }, { x: fire.x + 1.5, z: fire.z + 0.55, y: GY + 0.42 }], walk, beachX, pathX,
-    moreAt: { x: x1 + 3, z: z1 + 13 }, box: [Math.min(fire.x - 3, x1 - 3), z0 - 4, shore + 5, z1 + 10] };
+    moreAt: { x: x1 + 3, z: z1 + 13 }, box: [Math.min(fire.x - 3, x1 - 3), z0 - 4, shore + 5, z1 + 10],
+    gates: { rz: Math.min(Math.max(fp.z, z0 + 2.5), z1 - 2.5), fx: frontGateX(fire.x) } }; // 오른쪽·앞 출입구 — 부두 높이·모닥불 앞(결재 줄 카펫은 비켜서)
   g.userData.idle.critters = critters(g, { GY, x0, x1, z0, z1, D, shore, edgeX, sandX, pathX, deer, fire, pond, ham, r });
   g.userData.forestCount = trunk.length;
 }
@@ -1777,6 +1796,18 @@ function vine(g, x, z, ry, seed) {
   }
 }
 // 정문 — 뒷벽에 문틀·매트·간판, 문짝은 드나들 때 열린다(tick). 문 너머는 바깥 하늘
+function frontGateX(want) { // 앞 출입구 x — 모닥불 쪽이되 결재 줄 카펫(앞 가장자리까지 깔림)과 안 겹치게 옆으로 비킨다
+  const xs = L.queue.map((q) => q.x), r0 = Math.min(...xs) - 1.5 - 1.9, r1 = Math.max(...xs) + 1.5 + 1.9, lo = L.xL + 1.5, hi = L.xR - 1.5;
+  const x = Math.min(Math.max(want, lo), hi);
+  if (x <= r0 || x >= r1) return x;
+  return (x - r0 < r1 - x && r0 >= lo) || r1 > hi ? r0 : r1;
+}
+function buildGates(g) { // 오른쪽·앞 출입구 — 벽이 없는 두 면. 정문과 같은 매트에 양옆 작은 화분(고양이가 여기로 드나든다)
+  const G = L.out?.gates; if (!G) return;
+  const x1 = L.x0 + L.W, z1 = L.z0 + L.D, rug = new THREE.MeshStandardMaterial({ map: rugTex('#8a6a4a', '#e8d2a6'), roughness: 1 });
+  g.add(plane(1.2, 2.4, rug, x1 - 0.6, 0.018, G.rz)); plant(g, x1 - 0.45, G.rz - 1.75, 0.7, 47); plant(g, x1 - 0.45, G.rz + 1.75, 0.7, 49);
+  g.add(plane(2.4, 1.2, rug, G.fx, 0.018, z1 - 0.6)); plant(g, G.fx - 1.75, z1 - 0.45, 0.7, 51); plant(g, G.fx + 1.75, z1 - 0.45, 0.7, 53);
+}
 function buildDoor(g) {
   const { x, z } = L.door, fz = L.z0 + 0.02, wood = 0x8a5e3a;
   const out = new THREE.Mesh(new THREE.PlaneGeometry(2.0, 2.4), new THREE.MeshBasicMaterial({ map: skyTex })); out.position.set(x, 1.2, fz + 0.01); g.add(out);
@@ -1827,7 +1858,7 @@ function buildFloor() {
   // 큰 화분 — 모서리
   plant(g, x0 + 0.7, z0 + 0.7, 1.5, 71); plant(g, x0 + W - 0.7, z0 + 0.7, 1.4, 73); plant(g, x0 + 0.7, z0 + D - 0.7, 1.3, 75);
   buildMeet(g, L.meet); buildBoss(g, L.boss); buildLounge(g, L.lounge);
-  buildForest(g);
+  buildForest(g); buildGates(g);
   scene.add(g);
   buildWorkG();
   shadowDirty();
@@ -2084,9 +2115,9 @@ function upsertActor(p) {
   else if (joy || (moved && a.group.position.distanceTo(to) > 0.05)) startWalk(a, joy);
   if (!a.walk) setTex(a, p.pose, p.flip); // 걷는 동안은 걷기 그림을 walkTick 이 정한다
   a.op = p.dim && !p.kot ? 0.75 : 1; // 고타츠 고양이는 흐리지 않는다 — 그림 속 이불 앞자락까지 비쳐 보이므로 // 흐림은 쉬는 중·퇴근, Zzz 는 쉬는 중(a.off)만 — 실제 투명도는 tick 이 들어오기·나가기와 곱한다
-  const fr = fresh.get(p.key), pulse = fr && Date.now() - fr.at < 6000;
+  const fr = fresh.get(p.key), pulse = fr && nowMs() - fr.at < 6000;
   a.el.className = `tag actor ${p.cls}${pulse ? ' pulse' + (fr.st === 'reported' ? ' rep' : '') : ''}`; a.el.dataset.k = p.key; a.shown = true; a.el.style.display = '';
-  a.pulseUntil = pulse ? (tick.t ?? 0) + (6000 - (Date.now() - fr.at)) / 1000 : 0;
+  a.pulseUntil = pulse ? (tick.t ?? 0) + (6000 - (nowMs() - fr.at)) / 1000 : 0;
   setHTML(a.el, p.html);
   a.seen = true;
   if (a.entering && !a.greeted) { a.greeted = true; say(a, 'enter'); }
@@ -2150,11 +2181,11 @@ function placements() {
   for (const s of list('working')) { const d = deskOf(s); if (d) put(s, d.sit); }
   const hsh = (x) => { let h = 2166136261; for (const ch of keyOf(x)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619); return h >>> 0; };
   // 사람마다 3~7분에 한 번 바뀌는 굴림값 — 늘어진 보고는 자리를, 오래 기다린 결재는 딴짓을 바꾼다(주기·박자는 해시라 새로고침해도 같다)
-  const roll = (x) => { const h = hsh(x), per = 180 + h % 240; let r = hsh({ id: keyOf(x) + ':' + Math.floor((Date.now() / 1000 + h % per) / per) });
+  const roll = (x) => { const h = hsh(x), per = 180 + h % 240; let r = hsh({ id: keyOf(x) + ':' + Math.floor((nowMs() / 1000 + h % per) / per) });
     r = Math.imul(r ^ (r >>> 16), 0x85ebca6b); r = Math.imul(r ^ (r >>> 13), 0xc2b2ae35); return (r ^ (r >>> 16)) >>> 0; }; // 해시를 한 번 더 섞는다 — 안 섞으면 키가 비슷한 사람끼리 순서가 안 바뀐다
   const fill = (arr, slots, mk, opt = {}) => { arr.slice(0, slots.length).forEach((s, i) => put(s, slots[i], opt)); if (arr.length > slots.length) setMore(mk[0], arr.length - slots.length, mk[1]); };
   // 결재 대기 — 1시간 넘었으면 제자리에서 딴짓(털실·꾸벅·그루밍). 무엇을 할지는 roll(3~7분마다 바뀜, 해시라 새로고침해도 같다)
-  const BORED = ['yarn', 'doze', 'groom'], bored = (s) => Date.now() - Date.parse(s.waitingSince || Date.now()) > WAIT_BORED_MS;
+  const BORED = ['yarn', 'doze', 'groom'], bored = (s) => nowMs() - Date.parse(s.waitingSince || nowMs()) > WAIT_BORED_MS;
   const fillWait = (arr, slots, mk) => { arr.slice(0, slots.length).forEach((s, i) => put(s, slots[i], bored(s) ? { pose: 'bored', bored: BORED[roll(s) % 3] } : {})); if (arr.length > slots.length) setMore(mk[0], arr.length - slots.length, mk[1]); };
   fillWait(list('waiting', (s) => !s.stale).sort(waitSort), L.queue, ['queue', L.queueMore]);
   fillWait(list('waiting', (s) => s.stale).sort(waitSort), L.stale, ['stale', L.staleMore]);
@@ -2170,7 +2201,7 @@ function placements() {
   if (extra) setMore('meet', extra, L.meetMore);
   // 보고 올리고 1~6시간 아무도 안 봤으면 — 깔개를 떠나 사무실 여기저기 바닥에 늘어진다(상태는 그대로 「보고」).
   // 자리는 통로 끝 벽 앞·통로 가장자리(L.sprawl), 세션 id 해시 순이라 새로고침해도 같은 곳. 넘치면 「+N」
-  const age = (s) => Date.now() - Date.parse(s.lastActivity || 0), tired = (s) => age(s) > REPORT_TIRED_MS, lounging = (s) => age(s) > REPORT_LOUNGE_MS;
+  const age = (s) => nowMs() - Date.parse(s.lastActivity || 0), tired = (s) => age(s) > REPORT_TIRED_MS, lounging = (s) => age(s) > REPORT_LOUNGE_MS;
   { // 열 자리 전체에서 각자 굴린 자리를 고르고, 먼저 찬 자리면 다음 빈자리
     const lazy = list('reported', (s) => tired(s) && !lounging(s)).sort((a, b) => hsh(a) - hsh(b) || byName(a, b)), taken = new Set();
     for (const s of lazy.slice(0, L.sprawl.length)) { let i = roll(s) % L.sprawl.length; while (taken.has(i)) i = (i + 1) % L.sprawl.length; taken.add(i); put(s, L.sprawl[i], { pose: 'sprawl' }); }
@@ -2357,7 +2388,7 @@ function rowHTML(s, pinned, noFd) {
   const q = esc(lastLine(s.lastText)), cr = ctxOf(s);
   // 내가 보낸 말이 최근(1시간 안)이면 그 줄 안에 작게
   const me = (Array.isArray(s.recent) ? s.recent : []).filter((m) => m && m.who === 'me' && m.text).sort((a, b) => Date.parse(b.at || 0) - Date.parse(a.at || 0))[0];
-  const meH = me && Date.now() - Date.parse(me.at || 0) < 3600000 ? `<span class="me" title="${esc(lastLine(me.text))}">${t('meSaid', esc(lastLine(me.text)), ago(me.at))}</span>` : '';
+  const meH = me && nowMs() - Date.parse(me.at || 0) < 3600000 ? `<span class="me" title="${esc(lastLine(me.text))}">${t('meSaid', esc(lastLine(me.text)), ago(me.at))}</span>` : '';
   return `<li class="${tabOf(s)}${s.stale ? ' stale' : ''}" style="--fc:${folderColor(s)}" data-id="${esc(s.id)}" data-name="${esc(s.name)}">
       <div class="r1">${pinned ? `<span class="grip" title="${t('dragOrder')}">⠿</span>` : ''}<b>${esc(s.name)}</b><span class="sn">${esc(ST_NAME[s.state] || s.state)}</span>${noFd ? '' : `<span class="fd" title="${esc(zoneOf(s))}">${esc(zoneOf(s))}</span>`}${fresh.has(keyOf(s)) ? `<span class="new">${t('fresh')}</span>` : ''}${cr >= 0.85 ? `<span class="ctxdot${cr >= 0.95 ? ' hi' : ''}" title="${t('ctxFull', Math.round(cr * 100))}"></span>` : ''}${s.stale ? `<span class="stale-tag">${t('signStale')}</span>` : ''}<span class="t">${tm}</span></div>
       <div class="r2"><span class="q" title="${q}">${s.state === 'meeting' && s.partner ? `↔ ${esc(s.partner)} · ` : ''}${q || '—'}</span>${meH}</div></li>`;
@@ -2424,7 +2455,7 @@ function applyState(st) {
     }
   }
   prevWait = nowWait;
-  const now = Date.now();
+  const now = nowMs();
   if (prevSt) for (const s of S.sessions) {
     const k = keyOf(s);
     if ((s.state === 'waiting' || s.state === 'reported') && prevSt.get(k) !== s.state && !(msg.open && msgSid === s.id)) { fresh.set(k, { at: now, st: s.state }); window.freshCount++; } // 지금 팝업으로 보고 있는 사람은 「새로」를 안 붙인다
@@ -2503,8 +2534,8 @@ function bodyHTML(s) {
     const ai = r.find((m) => m.who === 'ai' && Date.parse(m.at || 0) > P.at - 2000);
     if (ai) P.done = Math.max(1, Date.parse(ai.at) - P.at);
   }
-  if (P && !P.done && Date.now() - P.at > 30 * 60000) { pend.delete(s.id); return bodyHTML(s); } // 30분 넘게 답이 없으면 기다림 표시를 접는다
-  const waitingSend = P && !mine && Date.now() - P.at < 2 * 60000; // 보냈는데 상태가 아직 안 바뀐 잠깐
+  if (P && !P.done && nowMs() - P.at > 30 * 60000) { pend.delete(s.id); return bodyHTML(s); } // 30분 넘게 답이 없으면 기다림 표시를 접는다
+  const waitingSend = P && !mine && nowMs() - P.at < 2 * 60000; // 보냈는데 상태가 아직 안 바뀐 잠깐
   const live = busy || waitingSend;
   // 진행 중엔 마지막 AI 글이 progress 안에 있으니 대화에선 뺀다(두 번 안 보이게)
   if (busy && prog.length && r.length && r[r.length - 1].who === 'ai') r = r.slice(0, -1);
@@ -2513,9 +2544,9 @@ function bodyHTML(s) {
   if (live) {
     // 보낸 말은 시간 순서 자리에 — 보내기 전 진행은 위, 보낸 뒤 진행은 아래
     const before = pendH ? prog.filter((g) => Date.parse(g.at || 0) < P.at) : [], after = prog.slice(before.length);
-    const t0 = P && !P.done ? P.at : Date.parse(s.lastHumanAt || 0) || Date.now(), kind = P && !P.done ? t('thinking') : t('working2');
+    const t0 = P && !P.done ? P.at : Date.parse(s.lastHumanAt || 0) || nowMs(), kind = P && !P.done ? t('thinking') : t('working2');
     h += workHTML(s, before, false) + pendH + workHTML(s, after, true)
-      + `<div class="ticker" data-t0="${t0}" data-kind="${kind}">${t('ticker', kind, secLabel(Date.now() - t0))}</div>`;
+      + `<div class="ticker" data-t0="${t0}" data-kind="${kind}">${t('ticker', kind, secLabel(nowMs() - t0))}</div>`;
   } else {
     h += pendH;
     if (P && P.done) h += `<div class="took">${t('took', secLabel(P.done))}</div>`;
@@ -2566,7 +2597,7 @@ function closeMsg() {
 }
 msg.addEventListener('cancel', (e) => { e.preventDefault(); closeMsg(); }); // 휴대폰(모달)에서 Esc·뒤로
 setInterval(() => { // 「생각 중… N초째」 — 화면에서 1초마다 센다
-  for (const el of msg.querySelectorAll('.ticker')) el.textContent = t('ticker', el.dataset.kind, secLabel(Date.now() - +el.dataset.t0));
+  for (const el of msg.querySelectorAll('.ticker')) el.textContent = t('ticker', el.dataset.kind, secLabel(nowMs() - +el.dataset.t0));
 }, 1000);
 const perch = $('#perch'), perchUrl = {}; let perchKt = null;
 const perchSrc = (kt, pose) => perchUrl[kt + pose] ||= charTex(kt, pose).image.toDataURL();
@@ -2703,7 +2734,7 @@ async function sendAnswer() {
   const ok = await act('api/answer', { text });
   if (ok) { // 창은 그대로 두고(폰 시트도) 보낸 말을 바로 아래에 붙여 진행을 보여 준다
     msg.querySelector('.note').textContent = t('sent'); ta.value = ''; atts.length = 0; drawAtts(); growTa();
-    pend.set(msgSid, { text, at: Date.now() }); perchCheer();
+    pend.set(msgSid, { text, at: nowMs() }); perchCheer();
     const s = (S.sessions || []).find((x) => x.id === msgSid); if (s) refreshBody(s, true);
     if (isPhone()) ta.blur(); // 폰은 키보드를 내려 진행이 보이게
   }
@@ -2962,8 +2993,9 @@ addEventListener('keydown', (e) => { if (e.key === 'Escape' && !mungMenuEl.hidde
 // 낚시멍 — 찌가 둥실(사람마다 박자 다르게), 둘레에 작은 물결. 30~60초에 한 번 한 마리가 입질: 찌가 두세 번 까딱 → 쏙 → 낚싯대를 들고 작은 물고기가 퐁 → 하트
 function fishTick(t, o) {
   const G = gaze, sp = RM.matches ? 0.35 : 1;
-  G.bite ||= { at: t + 30 + Math.random() * 30, k: -1, n: 0 };
-  const B = G.bite, cats = [...actors.values()].filter((a) => a.p?.gaze && a.p.seat != null && !a.walk);
+  const cats = [...actors.values()].filter((a) => a.p?.gaze && a.p.seat != null && !a.walk);
+  if (!G.bite && (!window.KITTY_DEMO || cats.length)) G.bite = { at: t + (window.KITTY_DEMO ? 3 : 30 + Math.random() * 30), k: -1, n: 0 }; // 데모는 부두에 앉고 3초 뒤 꼭 한 번(촬영용 — 화면 시계 기준)
+  const B = G.bite || { at: Infinity, k: -1 };
   if (t > B.at + 3.2) Object.assign(B, { at: t + 30 + Math.random() * 30, k: -1, done: false });
   const e = t - B.at;
   if (e >= 0 && B.k < 0 && cats.length) B.k = cats[Math.random() * cats.length | 0].p.seat; // 입질할 한 마리 // 0~1.2 까딱 · 1.2~1.5 쏙 · 1.5 들어 올림·물고기·하트 · 3.2 다시 드리움
@@ -3110,7 +3142,7 @@ function boardAt(x, y) {
 const todoCur = () => TODO.filter((i) => !i.late && !i.past); // 오늘 목록 — 밀린 일·지난 끝낸 기록(past)은 아래에 접는다
 let lateOpen = false, pastOpen = false; // 펼침은 기억하지 않는다
 const dayLabel = (iso) => { // 작성일 — 오늘이면 안 쓰고, 어제·날짜
-  const d = new Date(iso), n = new Date(); if (isNaN(d)) return '';
+  const d = new Date(iso), n = new Date(nowMs()); if (isNaN(d)) return '';
   const day = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime(), diff = Math.round((day(n) - day(d)) / 86400000);
   return diff <= 0 ? '' : diff === 1 ? t('todoYesterday') : LANG === 'ko' ? `${d.getMonth() + 1}/${d.getDate()}` : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
@@ -3344,7 +3376,9 @@ async function poll() {
   try {
     const r = await fetch('api/state', { cache: 'no-store' });
     if (!r.ok) throw new Error(r.status);
-    applyState(await r.json());
+    const st = await r.json();
+    if (st.demo && !clockSkew) clockSkew = Date.parse(st.observedAt) - Date.now();
+    applyState(st);
     $('#conn').classList.remove('on');
     // 알림을 누르면 #s=<세션 id> 로 열린다 — 그 사람에게 다가가 팝업
     const sid = new URLSearchParams(location.hash.slice(1)).get('s');
@@ -3406,18 +3440,20 @@ const cat = (() => {
   return { g, sp, L: null, mode: 'sit', until: 0, dest: 'sit', to: new THREE.Vector3(), face: 0 };
 })();
 const pick = (a) => a[(Math.random() * a.length) | 0];
+const catRnd = window.seedRand ? seedRand(7) : Math.random; // 데모는 사무실 고양이만의 씨앗 — 상태가 늦게 와 다른 무작위 순서가 밀려도 고양이 길은 같다
+const catPick = (a) => a[(catRnd() * a.length) | 0];
 function catPlan() {
-  const P = L.cat, r = Math.random();
-  let dest = 'sit', pt = pick(P.walk);
-  if (r < 0.2) { dest = 'nap'; pt = pick(P.nap); } else if (r < 0.38) { dest = 'queue'; pt = P.queue; }
+  const P = L.cat, r = catRnd();
+  let dest = 'sit', pt = catPick(P.walk);
+  if (r < 0.2) { dest = 'nap'; pt = catPick(P.nap); } else if (r < 0.38) { dest = 'queue'; pt = P.queue; }
   cat.to.set(pt[0], pt[2] || 0, pt[1]); cat.dest = dest; cat.mode = 'walk';
   cat.path = route(cat.g.position, { x: pt[0], z: pt[1] }).slice(0, -1); // 복도를 따라 경유점 → 마지막은 cat.to
 }
 function catTick(t, dt) {
   if (!L) return;
   if (cat.L !== L) { // 바닥을 새로 지으면 아무 통로에서나 앉아 있다
-    cat.L = L; const p = pick(L.cat.walk);
-    cat.g.position.set(p[0], 0, p[1]); cat.mode = 'sit'; cat.until = t + 2 + Math.random() * 4;
+    cat.L = L; const p = catPick(L.cat.walk);
+    cat.g.position.set(p[0], 0, p[1]); cat.mode = 'sit'; cat.until = t + 2 + catRnd() * 4;
   }
   const pos = cat.g.position;
   if (cat.mode === 'walk') {
@@ -3426,7 +3462,7 @@ function catTick(t, dt) {
     if (d <= step && cat.path?.length) { pos.set(q.x, pos.y, q.z); cat.path.shift(); }
     else if (d <= step) {
       pos.set(cat.to.x, pos.y, cat.to.z); cat.mode = cat.dest === 'nap' ? 'nap' : 'sit';
-      cat.until = t + (cat.dest === 'nap' ? 25 + Math.random() * 35 : cat.dest === 'queue' ? 15 + Math.random() * 15 : 3 + Math.random() * 6);
+      cat.until = t + (cat.dest === 'nap' ? 25 + catRnd() * 35 : cat.dest === 'queue' ? 15 + catRnd() * 15 : 3 + catRnd() * 6);
     } else { pos.x += dx / d * step; pos.z += dz / d * step; }
     pos.y += ((d < 0.7 ? cat.to.y : 0) - pos.y) * 0.15; // 캣타워엔 마지막에 뛰어오른다
   } else if (t > cat.until) catPlan();
@@ -3790,7 +3826,7 @@ function lineFor(a, kind, s) {
   else if (s && kind !== 'enter' && kind !== 'leave' && a.p?.pose === 'bored') pool = LINES.situ?.['wait_bored_' + a.p.bored]?.[a.kt]; // 결재 기다리다 딴짓 중 — 그 딴짓(털실·졸기·그루밍) 칸 대사만
   else if (s && kind !== 'enter' && kind !== 'leave') { // 실제 상황이 맞으면 그 틀을 먼저
     const fr = [], h = hourNow(), cr = ctxOf(s);
-    if (s.state === 'reported' && Date.now() - Date.parse(s.lastActivity || 0) > REPORT_TIRED_MS) fr.push('stale_report');
+    if (s.state === 'reported' && nowMs() - Date.parse(s.lastActivity || 0) > REPORT_TIRED_MS) fr.push('stale_report');
     if (s.state === 'meeting' && s.partner) fr.push('partner');
     if (cr != null && cr >= 0.8) fr.push('ctx');
     if ((s.progress?.length || 0) >= 10) fr.push('steps');

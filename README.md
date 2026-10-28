@@ -88,7 +88,10 @@ cd kitty-office
 ./restart.sh          # http://127.0.0.1:5430 — 포그라운드, 소스가 바뀌면 다시 띄움, Ctrl+C 로 끝
 python3 -m office.server   # 감시 없이 한 번만
 OFFICE_PORT=5499 ./restart.sh   # 다른 포트
+KITTY_OFFICE_DEMO=1 OFFICE_PORT=5431 ./restart.sh   # 데모 — 가짜 세션 10개로 채운 사무실(영상·발표용)
 ```
+
+데모는 실제 세션 기록·설정 파일·터미널을 읽지도 쓰지도 않는다. 할 일은 임시 폴더에 따로 두고, 팝업에서 보낸 답은 화면 안에서만 몇 초 일하는 척하다 보고로 바뀐다.
 
 외부 패키지 없음(파이썬 표준 라이브러리). `127.0.0.1` 에만 연다.
 요약 파일(입력창 띠 등 밖에서 읽는다): `~/Library/Caches/kitty-office/wait.json` · 첨부: `~/Library/Caches/kitty-office/uploads/`(옛 `knock-office` 캐시 폴더가 있으면 그곳)

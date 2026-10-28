@@ -88,7 +88,10 @@ Sessions started in other terminals (iTerm, Terminal.app) show up too, but read-
 ./restart.sh          # http://127.0.0.1:5430 — foreground, restarts when the source changes, Ctrl+C to stop
 python3 -m office.server   # run once without watching
 OFFICE_PORT=5499 ./restart.sh   # another port
+KITTY_OFFICE_DEMO=1 OFFICE_PORT=5431 ./restart.sh   # demo — an office filled with 10 fake sessions (for videos and talks)
 ```
+
+The demo never reads or writes real session logs, the config file or any terminal. To-dos live in a temp folder, and a reply sent from the popup only plays out on screen: the cat works for a few seconds, then reports.
 
 No external packages (Python standard library only). It listens on `127.0.0.1` only.
 Summary file (read by things like an input-box status line): `~/Library/Caches/kitty-office/wait.json` · attachments: `~/Library/Caches/kitty-office/uploads/` (an existing old `knock-office` cache folder keeps being used)

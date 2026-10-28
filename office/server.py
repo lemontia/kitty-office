@@ -16,10 +16,11 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
-from office import config, term, todo, watch
+from office import config, demo, term, todo, watch
 from office.state import build_state, folders, load_sessions
 
 PORT = int(os.environ.get("OFFICE_PORT", "5430"))
+DEMO = os.environ.get("KITTY_OFFICE_DEMO") == "1"  # 가짜 사무실(office/demo.py) — 실제 세션·설정·터미널을 건드리지 않는다
 WEB = Path(__file__).resolve().parent.parent / "web"
 
 
@@ -200,8 +201,18 @@ class Handler(SimpleHTTPRequestHandler):
         if self._blocked():
             return
         if self.path.split("?")[0] == "/api/todo":  # 오늘 할 일 칠판
-            return self._json(200, {"items": todo.load()})
+            return self._json(200, {"items": todo.load(demo.TODO_PATH) if DEMO else todo.load()})
         path = self.path.split("?")[0]
+        if DEMO and path in ("/", "/index.html"):  # 데모 표시 — 화면이 고정 씨앗으로 무작위를 돌린다(녹화를 다시 해도 같은 화면). 열 때마다 처음 상태로
+            demo.reset()
+            data = (WEB / "index.html").read_text(encoding="utf-8").replace("<head>", "<head>\n<script>window.KITTY_DEMO = 1;</script>", 1).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+            return
         if path.startswith("/sounds/") and ".." not in path and not (WEB / path.lstrip("/")).is_file():  # 아직 안 넣은 소리 파일 — 404 대신 빈 204(브라우저 콘솔에 빨간 줄이 안 남고, 화면은 소리 없이 넘어간다)
             self.send_response(204)
             self.end_headers()
@@ -209,6 +220,8 @@ class Handler(SimpleHTTPRequestHandler):
         if path != "/api/state":
             return super().do_GET()
         try:
+            if DEMO:
+                return self._json(200, demo.state())
             home, cfg = Path.home(), self.server.cfg
             fds = folders(home)
             # 처음 본 폴더가 있거나 오늘 아직 「봤다」고 안 적은 폴더가 있을 때만 — 설정 파일 쓰기는 하루 몇 번으로 그친다
@@ -247,6 +260,15 @@ class Handler(SimpleHTTPRequestHandler):
             if n > UPLOAD_MAX * 4 // 3 + 10_000:
                 return self._json(413, {"error": self._m("tooBig")})
             body = json.loads(self.rfile.read(n) or b"{}")
+            if DEMO:  # 데모 — 할 일은 임시 폴더, 답은 화면 안에서만. 터미널·설정 파일엔 아무것도 안 한다
+                if path == "/api/todo":
+                    try:
+                        return self._json(200, {"items": todo.act(body, demo.TODO_PATH)})
+                    except todo.TodoError as e:
+                        return self._json(400, {"error": self._m(str(e))})
+                if path == "/api/answer":
+                    return self._json(200, demo.answer(body.get("id"), body.get("text")))
+                return self._json(200, {"ok": True, "path": "demo-file", "paths": []})
             if path == "/api/upload":  # 팝업에 붙인 이미지·파일을 저장하고 경로를 돌려준다 — 답에 경로로 넣는다
                 try:
                     return self._json(200, {"path": save_upload(body.get("name"), body.get("data"))})
@@ -371,13 +393,17 @@ def make_server(cfg, port=PORT):
 
 def main():
     try:
-        cfg = config.load()
+        cfg = {**config.DEFAULT} if DEMO else config.load()  # 데모는 설정 파일을 안 읽는다(우리 이름·고양이 배정이 안 새게)
     except ValueError as e:  # 설정이 깨졌거나 잠금 없이 원격에 열려는 설정 — 띄우지 않는다
         raise SystemExit(f"띄우지 않음: {e}")
     server = make_server(cfg)
-    print(f"{cfg['title']}: http://127.0.0.1:{PORT}  (설정 {config.path()})", flush=True)
     stop = threading.Event()
-    threading.Thread(target=watch.run, args=(stop, PORT, cfg), daemon=True).start()
+    if DEMO:
+        demo.seed_todo()
+        print(f"{cfg['title']} 데모: http://127.0.0.1:{PORT}  (가짜 사무실 — 실제 세션·설정을 안 읽는다)", flush=True)
+    else:
+        print(f"{cfg['title']}: http://127.0.0.1:{PORT}  (설정 {config.path()})", flush=True)
+        threading.Thread(target=watch.run, args=(stop, PORT, cfg), daemon=True).start()
     try:
         server.serve_forever()
     except KeyboardInterrupt:
