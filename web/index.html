@@ -880,6 +880,7 @@ const flameTex = [0, 1, 2, 3].map((k) => canvasTex(128, 192, (q) => {
 const sparkTex = canvasTex(32, 32, (q) => { const gr = q.createRadialGradient(16, 16, 1, 16, 16, 14); gr.addColorStop(0, 'rgba(255,240,180,1)'); gr.addColorStop(0.4, 'rgba(255,150,60,.9)'); gr.addColorStop(1, 'rgba(255,120,40,0)'); q.fillStyle = gr; q.fillRect(0, 0, 32, 32); });
 const warmTex = canvasTex(128, 128, (q) => { const gr = q.createRadialGradient(64, 64, 2, 64, 64, 62); gr.addColorStop(0, 'rgba(255,170,80,.75)'); gr.addColorStop(1, 'rgba(255,140,60,0)'); q.fillStyle = gr; q.fillRect(0, 0, 128, 128); });
 const fires = []; // {kind, pos, base, flames, sparks, warm, hit}
+const byCamp = (p) => fires.some((f) => f.kind === 'camp' && Math.hypot(p.x - f.pos.x, p.z - f.pos.z) < 3.5 * Math.max(f.sc / 1.6, 0.75)); // 모닥불 둘레(앉는 자리 반경 2.1·2.4 보다 조금 넓게)
 const mungs = []; // 누르면 「멍」에 드는 곳 — 불 둘 + 낚시 부두. {mung(MUNG 키), pos, base, sc, hit}
 const flameGeo = new THREE.PlaneGeometry(1, 1).translate(0, 0.46, 0); // 스프라이트 center(0.5, 0.04) 와 같은 밑동
 function makeFire(g, kind, x, base, z, sc) {
@@ -3964,7 +3965,7 @@ function tick() {
     a.sprite.material.opacity = a.op * Math.min(1, (t - a.born) / 0.5); // 들어올 땐 문간에서 서서히
     a.near = near; actorFx(a, t);
     // 사무실 밖(정문으로 돌아가는 길·숲길)은 벽이 고양이를 가리게 — 안에선 늘 맨 위에 그리지만, 밖에서 그러면 벽 뒤를 걷는 고양이가 벽 면 위에 그려졌다
-    const outside = !inOffice(a.group.position); a.sprite.material.depthTest = outside;
+    const outside = !inOffice(a.group.position); a.sprite.material.depthTest = outside && !byCamp(a.group.position); // 모닥불 둘레는 예외 — 통나무·의자가 앉은 고양이를 가렸다
     const P0 = a.group.position, walled = outside && ((P0.z < L.z0 && P0.z > L.z0 - 7 && P0.x > L.x0 - 0.5 && P0.x < L.x0 + L.W + 0.5) || (P0.x < L.x0 && P0.x > L.x0 - 7 && P0.z > L.z0 - 0.5 && P0.z < L.z0 + L.D)); // 뒷벽·왼벽 뒤
     const show = !walled && (near || a.p.cls === 'waiting' || a.key === hoverKey || a.key === focusKey || t < a.pulseUntil); // 새로 보고한 사람도 반짝이는 동안은 멀리서 보인다
     if (show !== a.shown) { a.el.style.display = show ? '' : 'none'; a.shown = show; }
