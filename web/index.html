@@ -66,7 +66,7 @@
   #mungMenu[hidden] { display: none; }
   #mungMenu button { all: unset; cursor: pointer; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 700; color: var(--ink); white-space: nowrap; }
   #mungMenu button:hover, #mungMenu button:focus-visible { background: var(--paper2); }
-  @media (max-width: 759px), (orientation: portrait) { #mungMenu button { min-height: 44px; box-sizing: border-box; display: flex; align-items: center; } }
+  @media (max-width: 759px) { #mungMenu button { min-height: 44px; box-sizing: border-box; display: flex; align-items: center; } }
   @media (prefers-reduced-motion: reduce) { #top, #todoPane, #side, #gazeUI { transition: none; } }
   /* 왼쪽 위 오늘 할 일 — 3D 사무실 위에 떠 있는 반투명 패널(PC). 휴대폰은 칩 하나 */
   #todoPane { position: fixed; left: 12px; top: 60px; z-index: 20; width: 240px; max-height: 50vh; display: flex; flex-direction: column;
@@ -195,7 +195,7 @@
   /* 클로즈업한 캐릭터가 안 가리게 오른쪽에 붙인다 */
   #msg { position: fixed; z-index: 400000; margin: 0; inset: 60px 16px auto auto; width: min(702px, 57vw); max-height: calc(100vh - 76px); }
   /* PC 는 이름 줄을 끌어 옮기고 오른쪽 아래 모서리로 크기를 바꾼다(자리는 JS placeMsg 가 left/top 으로) */
-  @media (min-width: 760px) and (orientation: landscape) {
+  @media (min-width: 760px) {
     #msg { resize: both; min-width: 440px; max-width: calc(100vw - 16px); }
     #msg.sized { min-height: 360px; } /* 키운 창 — 입력칸 6줄·버튼 줄이 들어갈 만큼 */
     #msg header { cursor: move; user-select: none; } #msg header button { cursor: pointer; }
@@ -354,6 +354,8 @@
   .wl .r2 .me { flex: 0 1 auto; max-width: 45%; font-size: 11px; color: #a08a74; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .wl .new { flex: none; font-size: 10px; font-weight: 800; color: #fff; background: #e0503a; border-radius: 99px; padding: 1px 6px; }
   .wl li.rep .new { background: #3f6fa8; }
+  .wl li.viewing { background: #fff1e0; box-shadow: inset 3px 0 0 var(--fc); } /* 지금 팝업으로 보고 있는 사람 */
+  .wl .vw { flex: none; font-size: 10px; font-weight: 800; color: #7a5a3a; background: #f3dcc0; border-radius: 99px; padding: 1px 6px; }
   /* 멀리서 볼 땐 이름표를 이름 한 줄로 — 결재 줄 앞뒤 줄 이름표가 겹치지 않게(기다린 시간은 목록·가까이서) */
   #labels.far .tag.actor .wt { display: none; }
   .ctxdot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: #e08a2e; opacity: .75; margin: 0 2px; }
@@ -396,7 +398,7 @@
   .foot { font-size: 11px; color: var(--muted); }
   /* 폰 — 폭 760px 미만이거나 세로로 긴 화면: 위 40% 사무실, 아래 끌어올리는 목록, 팝업은 화면 전체 */
   #top #findBtn, #msg .clip { display: none; }
-  @media (max-width: 759px), (orientation: portrait) {
+  @media (max-width: 759px) {
     body { grid-template-rows: 44px calc((100dvh - 44px) * .4) 1fr; grid-template-columns: 100%; grid-template-areas: "top" "view" "."; overscroll-behavior: none; }
     #top { gap: 4px; padding: 0 4px 0 12px; }
     #top h1 { font-size: 15px; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
@@ -559,7 +561,7 @@ const T = {
     clearAsk: ['지금 대화를 비우고 새로 시작합니다(/clear). 남길 것은 미리 남겼나요?', '새로 시작 요청 보냄'],
     todoTitle: '오늘 할 일', todoLine: (d, n) => `오늘 할 일 ${d}/${n}`, todoEmpty: '오늘 할 일 적기', todoPh: '할 일을 적고 Enter', todoNone: '아직 없어요. 할 일을 적어 보세요',
     todoDel: '지우기', todoDrag: '끌어서 순서 바꾸기', todoEdit: '눌러서 고치기', todoOld: '3일 넘었어요', todoMore: (n) => `+${n}`, todoLateN: (n) => `밀린 일 ${n}개`, todoPastN: (n) => `끝낸 일 ${n}개`, todoUndo: '체크를 풀면 다시 할 일로', todoToday: '오늘로', todoTodayT: '오늘 할 일로 다시 올리기', todoYesterday: '어제', signTodoN: (n) => `오늘의 할 일: ${n}개`, todoDone: '다 했어요!',
-    fresh: '새로', findPh: (k) => `이름 찾기 (${k}F)`, waitingFor: (t) => `기다림 ${t}`, none: '없습니다', dialogWait: '승인·선택 대기: ',
+    fresh: '새로', viewing: '보는 중', findPh: (k) => `이름 찾기 (${k}F)`, waitingFor: (t) => `기다림 ${t}`, none: '없습니다', dialogWait: '승인·선택 대기: ',
   },
   en: {
     reading: 'Loading…', disconnected: 'Disconnected', find: 'Find by name', settings: 'Settings', close: 'Close',
@@ -596,7 +598,7 @@ const T = {
     clearAsk: ['Clear this conversation and start over (/clear)? Saved anything you need?', 'Start over requested'],
     todoTitle: "Today's to-do", todoLine: (d, n) => `Today's to-do ${d}/${n}`, todoEmpty: "Write today's to-do", todoPh: 'Type a task and press Enter', todoNone: 'Nothing yet. Add your first task',
     todoDel: 'Delete', todoDrag: 'Drag to reorder', todoEdit: 'Click to edit', todoOld: 'Over 3 days old', todoMore: (n) => `+${n}`, todoLateN: (n) => `${n} overdue`, todoPastN: (n) => `${n} done earlier`, todoUndo: 'Untick to bring it back', todoToday: 'Today', todoTodayT: 'Move back to today', todoYesterday: 'Yesterday', signTodoN: (n) => `Today's to-do: ${n} left`, todoDone: 'All done!',
-    fresh: 'New', findPh: (k) => `Find by name (${k}F)`, waitingFor: (t) => `waiting ${t}`, none: 'No matches', dialogWait: 'Waiting for approval: ',
+    fresh: 'New', viewing: 'Viewing', findPh: (k) => `Find by name (${k}F)`, waitingFor: (t) => `waiting ${t}`, none: 'No matches', dialogWait: 'Waiting for approval: ',
   },
 };
 const t = (k, ...a) => { const v = T[LANG][k] ?? T.ko[k]; return typeof v === 'function' ? v(...a) : v; };
@@ -607,7 +609,7 @@ for (const [a, attr] of [['tTitle', 'title'], ['tPh', 'placeholder'], ['tAria', 
 // ───────── 공통 도우미 ─────────
 const $ = (s) => document.querySelector(s);
 // 폰 화면 — 폭 760px 미만이거나 세로로 긴 화면. CSS @media 와 같은 조건
-const phoneMQ = matchMedia('(max-width: 759px), (orientation: portrait)'), isPhone = () => phoneMQ.matches;
+const phoneMQ = matchMedia('(max-width: 759px)'), isPhone = () => phoneMQ.matches;
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 // 바뀐 때만 DOM 을 고친다(깜빡임 방지)
 const setHTML = (el, html) => { if (el._h !== html) { el.innerHTML = html; el._h = html; } };
@@ -2398,8 +2400,9 @@ function rowHTML(s, pinned, noFd) {
   // 내가 보낸 말이 최근(1시간 안)이면 그 줄 안에 작게
   const me = (Array.isArray(s.recent) ? s.recent : []).filter((m) => m && m.who === 'me' && m.text).sort((a, b) => Date.parse(b.at || 0) - Date.parse(a.at || 0))[0];
   const meH = me && nowMs() - Date.parse(me.at || 0) < 3600000 ? `<span class="me" title="${esc(lastLine(me.text))}">${t('meSaid', esc(lastLine(me.text)), ago(me.at))}</span>` : '';
-  return `<li class="${tabOf(s)}${s.stale ? ' stale' : ''}" style="--fc:${folderColor(s)}" data-id="${esc(s.id)}" data-name="${esc(s.name)}">
-      <div class="r1">${pinned ? `<span class="grip" title="${t('dragOrder')}">⠿</span>` : ''}<b>${esc(s.name)}</b><span class="sn">${esc(ST_NAME[s.state] || s.state)}</span>${noFd ? '' : `<span class="fd" title="${esc(zoneOf(s))}">${esc(zoneOf(s))}</span>`}${fresh.has(keyOf(s)) ? `<span class="new">${t('fresh')}</span>` : ''}${cr >= 0.85 ? `<span class="ctxdot${cr >= 0.95 ? ' hi' : ''}" title="${t('ctxFull', Math.round(cr * 100))}"></span>` : ''}${s.stale ? `<span class="stale-tag">${t('signStale')}</span>` : ''}<span class="t">${tm}</span></div>
+  const vw = msg.open && msgSid === s.id;
+  return `<li class="${tabOf(s)}${s.stale ? ' stale' : ''}${vw ? ' viewing' : ''}" style="--fc:${folderColor(s)}" data-id="${esc(s.id)}" data-name="${esc(s.name)}">
+      <div class="r1">${pinned ? `<span class="grip" title="${t('dragOrder')}">⠿</span>` : ''}<b>${esc(s.name)}</b>${vw ? `<span class="vw">${t('viewing')}</span>` : ''}<span class="sn">${esc(ST_NAME[s.state] || s.state)}</span>${noFd ? '' : `<span class="fd" title="${esc(zoneOf(s))}">${esc(zoneOf(s))}</span>`}${fresh.has(keyOf(s)) ? `<span class="new">${t('fresh')}</span>` : ''}${cr >= 0.85 ? `<span class="ctxdot${cr >= 0.95 ? ' hi' : ''}" title="${t('ctxFull', Math.round(cr * 100))}"></span>` : ''}${s.stale ? `<span class="stale-tag">${t('signStale')}</span>` : ''}<span class="t">${tm}</span></div>
       <div class="r2"><span class="q" title="${q}">${s.state === 'meeting' && s.partner ? `↔ ${esc(s.partner)} · ` : ''}${q || '—'}</span>${meH}</div></li>`;
 }
 function renderPanel() {
@@ -2489,7 +2492,7 @@ window.__cam = () => [controls.target.x, controls.target.z, camera.zoom].map((n)
 // 목록·이름표를 누르면 그 사람에게 다가가 전체 메시지를 팝업으로 띄운다(× · 바깥 · Esc 로 닫힘 — 닫으면 카메라가 돌아간다)
 const msg = $('#msg');
 const IS_LOCAL = ['127.0.0.1', 'localhost', '::1', '[::1]'].includes(location.hostname);
-msg.addEventListener('close', () => { for (const [k, P] of pend) if (P.done) pend.delete(k); });
+msg.addEventListener('close', () => { for (const [k, P] of pend) if (P.done) pend.delete(k); renderPanel(); });
 msg.addEventListener('close', () => { if (focusKey) { focusKey = null; if (saved) fly(saved.t, saved.z); saved = null; } });
 const STATE_KO = t('stPop');
 // 본문은 글자 그대로 두되, 마크다운 표(| 줄 + |---| 구분줄)만 진짜 표로 그린다
@@ -2647,7 +2650,7 @@ function perchCheer() { // 답을 보낸 순간 — 하트 둘 + 「알겠다냥
   const pool = LINES?.situ?.sent?.[perchKt]; if (pool?.length) perch.forceSay = pickOne(pool).replace('{냥}', '냥').replace('{meow}', ', meow');
 }
 function openMsg(s) {
-  if (fresh.delete(keyOf(s))) renderPanel();
+  fresh.delete(keyOf(s));
   msg.querySelector('b').textContent = s.name;
   msg.querySelector('.fl').textContent = zoneOf(s) + (s.realName && s.realName !== s.name ? ' · ' + s.realName : '');
   msg.querySelector('.t').textContent = s.state === 'waiting' ? ago(s.waitingSince) : STATE_KO[s.state] || '';
@@ -2676,6 +2679,7 @@ function openMsg(s) {
   // 일하는 중·회의 중 — 답(「얼마나 걸려?」)은 그대로 보내고, 옆에 덜 눈에 띄는 「하던 일 중단하기」(Esc)
   busyButtons(s); drawOpts(s, true);
   for (const b of msg.querySelectorAll('.cmp, .stop')) b.disabled = false;
+  renderPanel(); // 오른쪽 목록에 「보는 중」
   if (canAnswer && !isPhone()) ta.focus(); // 폰은 키보드가 먼저 올라와 대화를 가리지 않게
 }
 let msgSid = null;
