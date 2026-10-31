@@ -2772,11 +2772,13 @@ async function sendAnswer() {
   // 보내는 동안엔 입력칸을 잠근다 — 보낸 뒤 고친 글이 세션에 들어간 글과 달라 보이지 않게, 두 번 보내지 않게
   btn.disabled = ta.readOnly = true; ta.classList.add('sending');
   msg.querySelector('.note').textContent = t('sendingDots');
-  const ok = await act('api/answer', { text });
-  if (ok) { // 창은 그대로 두고(폰 시트도) 보낸 말을 바로 아래에 붙여 진행을 보여 준다
+  // 보낸 사람을 잡아 둔다 — 보내는 1~2초 사이에 다른 고양이를 누르면 msgSid 가 바뀌어, 「보내는 중」이 엉뚱한 사람 대화에 붙었다(2026-10-31)
+  const sid = msgSid, ok = await act('api/answer', { id: sid, text });
+  if (ok) pend.set(sid, { text, at: nowMs() });
+  if (ok && msgSid === sid) { // 창은 그대로 두고(폰 시트도) 보낸 말을 바로 아래에 붙여 진행을 보여 준다
     msg.querySelector('.note').textContent = t('sent'); ta.value = ''; atts.length = 0; drawAtts(); growTa();
-    pend.set(msgSid, { text, at: nowMs() }); perchCheer();
-    const s = (S.sessions || []).find((x) => x.id === msgSid); if (s) refreshBody(s, true);
+    perchCheer();
+    const s = (S.sessions || []).find((x) => x.id === sid); if (s) refreshBody(s, true);
     if (isPhone()) ta.blur(); // 폰은 키보드를 내려 진행이 보이게
   }
   btn.disabled = ta.readOnly = false; ta.classList.remove('sending');
