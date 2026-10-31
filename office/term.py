@@ -208,9 +208,21 @@ RULE_RE = re.compile(r"^\s*[─━╭╰│]")
 
 
 def _screen(tab):
+    if tab[0] == "cmux":  # 2026-10-31 이 맥 실측. Orca 는 화살표 보내기를 아직 못 재 봐서 빼 둔다(예전처럼 「탭으로 가서」)
+        _, ws, sf = tab
+        return _run(CMUX, "read-screen", "--workspace", ws, "--surface", sf, "--lines", "80").splitlines()
     if tab[0] != "herdr":
         return None
     return _run(HERDR, "pane", "read", tab[1], "--source", "visible", "--lines", "80").splitlines()
+
+
+def _keys(tab, *keys):
+    if tab[0] == "cmux":  # 선택 창이 떠 있으면 cmux 가 키를 막는다 — --force 로(2026-10-31 실측)
+        _, ws, sf = tab
+        for k in keys:
+            _run(CMUX, "send-key", "--force", "--workspace", ws, "--surface", sf, k)
+    else:
+        _run(HERDR, "pane", "send-keys", tab[1], *keys)
 
 
 def parse_dialog(lines):
@@ -256,12 +268,12 @@ def pick(tab, n, label):
         raise RuntimeError("dialogChanged")
     step = n - d["cursor"]
     if step:
-        _run(HERDR, "pane", "send-keys", tab[1], *(["down"] * step if step > 0 else ["up"] * -step))
+        _keys(tab, *(["down"] * step if step > 0 else ["up"] * -step))
         time.sleep(0.3)
         d = dialog(tab)
         if not d or d["cursor"] != n:
             raise RuntimeError("dialogMove")
-    _run(HERDR, "pane", "send-keys", tab[1], "enter")
+    _keys(tab, "enter")
 
 
 def alive(pid):

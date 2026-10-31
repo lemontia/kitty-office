@@ -2683,7 +2683,7 @@ function openMsg(s) {
   if (canAnswer && !isPhone()) ta.focus(); // 폰은 키보드가 먼저 올라와 대화를 가리지 않게
 }
 let msgSid = null;
-// 승인·선택 창 — 터미널 화면(herdr)에서 읽은 질문·선택지를 단추로. 3초 새로 그릴 때마다 다시 읽되 2.5초에 한 번만
+// 승인·선택 창 — 터미널 화면(herdr·cmux)에서 읽은 질문·선택지를 단추로. 3초 새로 그릴 때마다 다시 읽되 2.5초에 한 번만
 let optsAt = 0, optsBusy = false;
 async function drawOpts(s, force) {
   const box = msg.querySelector('.opts');

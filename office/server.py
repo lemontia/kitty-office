@@ -303,7 +303,7 @@ class Handler(SimpleHTTPRequestHandler):
                 return self._json(200, {"ok": True})
             if path in ("/api/dialog", "/api/pick") and s.get("status") != "waiting":
                 return self._json(200 if path == "/api/dialog" else 409, {"dialog": None, "error": self._m("noDialog")})
-            if path == "/api/dialog":  # 떠 있는 승인·선택 창의 질문·선택지 — 터미널 화면에서 읽는다(herdr 만)
+            if path == "/api/dialog":  # 떠 있는 승인·선택 창의 질문·선택지 — 터미널 화면에서 읽는다(herdr·cmux)
                 return self._json(200, {"dialog": term.dialog(tab)})
             if path == "/api/pick":  # 팝업에서 선택지를 누름 — 화면이 그대로일 때만 그 칸을 고른다
                 try:
