@@ -80,7 +80,7 @@ Sessions started in other terminals (iTerm, Terminal.app) show up too, but read-
 | Required | Claude Code (reads `~/.claude/sessions`) | no sessions to show |
 | Optional | one of cmux, Orca, herdr — only sessions started inside one can be jumped to or answered from the page | read-only (viewing still works) |
 | Optional | `terminal-notifier` — clicking a notification jumps to that session | plain macOS notification (no jump) |
-| External request | none by default. Only `api.open-meteo.com` (rain or snow outside the window), and only when `weather` is set in the config. And 🎤 voice input uses the browser's speech recognition — Chrome sends the audio to Google's servers to turn it into text. It listens only while on; browsers without speech recognition (e.g. Firefox) don't show the button | |
+| External request | none by default. Only `api.open-meteo.com` (rain or snow outside the window), and only when `weather` is set in the config. And 🎤 voice input uses the browser's speech recognition — Chrome sends the audio to Google's servers to turn it into text. It listens only while on; browsers without speech recognition (e.g. Firefox) don't show the button. Tested on a Mac (2026-11): works in Chrome and Safari; Whale has the feature but returns no text, so it says "try Chrome" right away; Aside can't reach a recognition service and stops with the same hint; Edge not tried yet | |
 
 ## Run
 
