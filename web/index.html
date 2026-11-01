@@ -297,8 +297,8 @@
   #msg footer textarea.sending { background: #f3ede4; color: var(--muted); }
   #msg footer textarea.drop { border-color: var(--red); background: #fff8f4; }
   #msg footer .row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-  #msg footer .note { flex: 1; font-size: 12px; color: var(--muted); }
-  #msg footer .row { flex-wrap: wrap; } #msg footer .note:not(:empty) { min-width: 40%; } /* 폰에서 안내 글이 세로로 찌그러지지 않게 — 버튼이 다음 줄로 */
+  #msg footer .note { font-size: 12px; color: var(--muted); margin-top: 6px; } #msg footer .note:empty { display: none; } /* 안내는 버튼 줄 위 제 줄에 — 길어도 버튼이 다음 줄로 밀리지 않게 */
+  #msg footer .row { flex-wrap: wrap; }
   #msg footer button { border: 1px solid #5a3d28; background: #fff; color: #5a3d28; border-radius: 99px; padding: 5px 14px;
     font-weight: 700; cursor: pointer; }
   #msg footer button.send { background: #5a3d28; color: #fff3e0; }
@@ -310,8 +310,8 @@
   #msg footer button.exit { border-color: var(--red); color: var(--red); font-size: 12px; font-weight: 600; padding: 4px 10px; }
   #msg footer button.exit.off { opacity: .4; cursor: not-allowed; }
   #msg footer button.cmp { font-size: 12px; font-weight: 600; padding: 4px 10px; }
-  /* 대화 작업 ▾ — 정리하기·새로 시작·세션 끝내기를 한 버튼 아래로(한 줄에 다 늘어놓으면 보내기가 다음 줄로 밀렸다). 안에 보일 게 없으면 버튼도 숨긴다 */
-  #msg footer .more { position: relative; }
+  /* 대화 작업 ▾ — 터미널로 가기·중단하기·정리하기·새로 시작·세션 끝내기를 한 버튼 아래로(한 줄에 다 늘어놓으면 보내기가 다음 줄로 밀렸다). 안에 보일 게 없으면 버튼도 숨긴다 */
+  #msg footer .more { position: relative; margin-left: auto; }
   #msg footer .more:not(:has(.menu > button:not([hidden]))) { display: none; }
   #msg footer .moreBtn { font-size: 12px; font-weight: 600; padding: 4px 10px; }
   #msg footer .menu { position: absolute; right: 0; bottom: calc(100% + 6px); z-index: 5; display: flex; flex-direction: column; gap: 4px; min-width: 150px;
@@ -319,7 +319,8 @@
   #msg footer .menu[hidden] { display: none; }
   #msg footer .menu button { width: 100%; text-align: left; border-radius: 8px; border-color: transparent; padding: 8px 12px; font-size: 13px; }
   #msg footer .menu button:hover { background: #fff1e0; }
-  #msg footer .menu button.exit { border-color: transparent; border-top: 1px solid var(--line); border-radius: 0 0 8px 8px; }
+  #msg footer .menu button.exit, #msg footer .menu button.cmp[data-cmd="/compact"] { border-color: transparent; border-top: 1px solid var(--line); border-radius: 0; } /* 가기·중단 | 정리·새로 | 끝내기 */
+  #msg footer .menu button.stop, #msg footer .menu button.exit { color: var(--red); font-weight: 700; }
   #msg footer button:disabled { opacity: .4; cursor: default; }
   /* 대화 찬 정도 — 팝업 머리 작은 막대 · 목록 줄 끝 점(85% 이상만, 결재 빨강보다 조용하게) */
   #msg header .ctx { --c: #a59a8c; display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); white-space: nowrap; }
@@ -523,8 +524,8 @@
 <img id="perch" alt="" aria-hidden="true"><div id="perchSay" class="sayb"></div><div id="perchFx" aria-hidden="true"></div>
 <dialog id="msg"><header><span class="pk"><img alt=""></span><b></b><span class="fl"></span><span class="t"></span><span class="ctx" hidden></span><button class="pin" title="오른쪽 목록 맨 위에 고정" data-t-title="pinTitle">📌</button><button class="ren" title="세션 이름 바꾸기" data-t-title="renameTitle">✎</button><button class="x" aria-label="닫기" data-t-aria="close">×</button></header><div class="body"></div>
   <footer><div class="opts"></div><textarea rows="2" data-t-ph="taHint" placeholder="여기에 답을 쓰면 그 세션 입력창으로 들어갑니다 (Enter 보내기 · Shift+Enter 줄바꿈 · 이미지는 붙여넣기·끌어다 놓기)"></textarea>
-    <div class="att"></div>
-    <div class="row"><button class="clip" title="사진·파일 첨부" data-t-title="attach">📎</button><button class="mic" hidden title="말로 입력" data-t-title="micTitle" data-t-aria="micTitle" aria-label="말로 입력"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1M12 18v4M8 22h8"/></svg></button><input type="file" id="pick" accept="image/*,application/pdf,text/*,.md,.csv,.json" multiple hidden><span class="note"></span><span class="more"><button class="moreBtn" aria-haspopup="menu" aria-expanded="false" data-t="moreBtn">대화 작업 ▾</button><span class="menu" role="menu" hidden><button class="cmp" data-cmd="/compact" hidden title="지금까지 대화를 요약하고 이어 갑니다(/compact)" data-t-title="compactTitle" data-t="compact">대화 정리하기</button><button class="cmp" data-cmd="/clear" hidden title="지금 대화를 비우고 새로 시작합니다(/clear)" data-t-title="clearTitle" data-t="clear">새로 시작</button><button class="exit" hidden data-t="exit">세션 끝내기</button></span></span><button class="stop" hidden data-t="stop">하던 일 중단하기</button><button class="go" data-t="goTerm">터미널로 가기</button><button class="send" data-t="send">보내기</button></div></footer></dialog>
+    <div class="att"></div><div class="note"></div>
+    <div class="row"><button class="clip" title="사진·파일 첨부" data-t-title="attach">📎</button><button class="mic" hidden title="말로 입력" data-t-title="micTitle" data-t-aria="micTitle" aria-label="말로 입력"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1M12 18v4M8 22h8"/></svg></button><input type="file" id="pick" accept="image/*,application/pdf,text/*,.md,.csv,.json" multiple hidden><span class="more"><button class="moreBtn" aria-haspopup="menu" aria-expanded="false" data-t="moreBtn">대화 작업 ▾</button><span class="menu" role="menu" hidden><button class="go" data-t="goTerm">터미널로 가기</button><button class="stop" hidden data-t="stop">하던 일 중단하기</button><button class="cmp" data-cmd="/compact" hidden title="지금까지 대화를 요약하고 이어 갑니다(/compact)" data-t-title="compactTitle" data-t="compact">대화 정리하기</button><button class="cmp" data-cmd="/clear" hidden title="지금 대화를 비우고 새로 시작합니다(/clear)" data-t-title="clearTitle" data-t="clear">새로 시작</button><button class="exit" hidden data-t="exit">세션 끝내기</button></span></span><button class="send" data-t="send">보내기</button></div></footer></dialog>
 <aside id="side"><button id="sideFold" data-t-title="sideFold" data-t-aria="sideFold"><span>›</span><b class="zero"></b></button><div id="sideGrip" title="끌어서 너비 조절 · 두 번 누르면 원래대로" data-t-title="sideGrip"></div>
   <button id="sheetGrip" aria-label="목록 펼치기·접기" data-t-aria="sheetGrip"><i></i></button>
   <div class="pane" id="list"></div>
@@ -550,7 +551,7 @@ const T = {
     activityLog: '활동 로그', activityLogSub: '세션끼리 주고받은 메시지', setNote: '설정은 이 브라우저에만 저장됩니다.',
     logNote: '승인·질문 창 대기도 잡는다. 3초마다 다시 읽는다.', pinTitle: '오른쪽 목록 맨 위에 고정', renameTitle: '세션 이름 바꾸기',
     taHint: '여기에 답을 쓰면 그 세션 입력창으로 들어갑니다 (Enter 보내기 · Shift+Enter 줄바꿈 · 이미지는 붙여넣기·끌어다 놓기)',
-    attach: '사진·파일 첨부', micTitle: '말로 입력 — 한 번 더 누르면 멈춤', listening: '듣는 중… 말하면 입력칸에 들어갑니다', micDenied: '마이크를 쓸 수 없습니다 — 브라우저의 마이크 권한을 확인해 주세요', micFail: '음성 입력이 멈췄습니다', micNet: '이 브라우저는 음성 인식 서버에 닿지 못합니다 — 크롬에서 열어 주세요', exit: '세션 끝내기', compactTitle: '지금까지 대화를 요약하고 이어 갑니다(/compact)', compact: '대화 정리하기', moreBtn: '대화 작업 ▾',
+    attach: '사진·파일 첨부', micTitle: '말로 입력 — 한 번 더 누르면 멈춤 · 입력칸에서 스페이스를 1초 넘게 누르고 있어도 됩니다', listening: '듣는 중… 말하면 입력칸에 들어갑니다', micDenied: '마이크를 쓸 수 없습니다 — 브라우저의 마이크 권한을 확인해 주세요', micFail: '음성 입력이 멈췄습니다', micNet: '이 브라우저는 음성 인식 서버에 닿지 못합니다 — 크롬에서 열어 주세요', exit: '세션 끝내기', compactTitle: '지금까지 대화를 요약하고 이어 갑니다(/compact)', compact: '대화 정리하기', moreBtn: '대화 작업 ▾',
     clearTitle: '지금 대화를 비우고 새로 시작합니다(/clear)', clear: '새로 시작', stop: '하던 일 중단하기', goTerm: '터미널로 가기', send: '보내기',
     sideGrip: '끌어서 너비 조절 · 두 번 누르면 원래대로', sheetGrip: '목록 펼치기·접기', sideFold: '오른쪽 목록 접기·펼치기 (])',
     now: '방금', min: (n) => `${n}분`, hour: (n) => `${n}시간`, day: (n) => `${n}일`, ago: (d) => `${d} 전`,
@@ -587,7 +588,7 @@ const T = {
     activityLog: 'Activity log', activityLogSub: 'Messages sessions sent each other', setNote: 'Settings are saved in this browser only.',
     logNote: 'Includes approval and question prompts. Refreshes every 3 seconds.', pinTitle: 'Pin to the top of the list', renameTitle: 'Rename session',
     taHint: 'Type a reply to send it to that session (Enter to send · Shift+Enter for a new line · paste or drop images)',
-    attach: 'Attach photo or file', micTitle: 'Speak to type — tap again to stop', listening: 'Listening… your words go into the box', micDenied: 'No microphone — check the browser\'s microphone permission', micFail: 'Voice input stopped', micNet: 'This browser can\'t reach a speech recognition service — try Chrome', exit: 'End session', compactTitle: 'Summarize the conversation so far and continue (/compact)', compact: 'Compact', moreBtn: 'Session ▾',
+    attach: 'Attach photo or file', micTitle: 'Speak to type — tap again to stop · or hold Space for over a second in the box', listening: 'Listening… your words go into the box', micDenied: 'No microphone — check the browser\'s microphone permission', micFail: 'Voice input stopped', micNet: 'This browser can\'t reach a speech recognition service — try Chrome', exit: 'End session', compactTitle: 'Summarize the conversation so far and continue (/compact)', compact: 'Compact', moreBtn: 'Session ▾',
     clearTitle: 'Clear this conversation and start over (/clear)', clear: 'Start over', stop: 'Stop', goTerm: 'Open terminal', send: 'Send',
     sideGrip: 'Drag to resize · double-click to reset', sheetGrip: 'Expand or collapse the list', sideFold: 'Collapse or expand the list (])',
     now: 'now', min: (n) => `${n}m`, hour: (n) => `${n}h`, day: (n) => `${n}d`, ago: (d) => d === 'now' ? 'just now' : `${d} ago`,
@@ -2850,8 +2851,8 @@ function micStop(drop = true) {
   msg.querySelector('.mic').classList.remove('on');
   const note = msg.querySelector('.note'); if (note.textContent === t('listening')) note.textContent = '';
 }
-msg.querySelector('.mic').addEventListener('click', () => {
-  if (rec) { micStop(false); return; }
+msg.querySelector('.mic').addEventListener('click', () => (rec ? micStop(false) : micStart()));
+function micStart() {
   const ta = msg.querySelector('textarea'), note = msg.querySelector('.note'), mic = msg.querySelector('.mic');
   const r = rec = new SR();
   r.lang = LANG === 'ko' ? 'ko-KR' : 'en-US'; r.continuous = true; r.interimResults = true;
@@ -2870,6 +2871,25 @@ msg.querySelector('.mic').addEventListener('click', () => {
   r.onend = () => { if (!r.dead) { ta.value = head + tail; growTa(); } if (rec === r) { rec = null; mic.classList.remove('on'); if (note.textContent === t('listening')) note.textContent = ''; } };
   try { r.start(); } catch { rec = null; note.textContent = t('micFail'); return; }
   mic.classList.add('on'); note.textContent = t('listening');
+}
+// 스페이스를 1초 넘게 누르고 있으면 그동안만 듣는다(무전기처럼 — 떼면 멈춤). 짧게 누르면 그냥 공백.
+// 꾹 누를 때 자동 반복으로 들어오는 공백은 막고, 마이크가 켜질 때 처음 들어간 공백 하나도 지운다
+const PTT_MS = 1000;
+let ptt = null; // { at: 누른 시각, end: 첫 공백 바로 뒤 커서, on: 듣는 중 }
+msg.querySelector('textarea').addEventListener('keydown', (e) => {
+  if (e.code !== 'Space' || e.ctrlKey || e.metaKey || e.altKey) return;
+  const ta = e.currentTarget, mic = msg.querySelector('.mic');
+  if (!e.repeat) { ptt = { at: performance.now() }; setTimeout(() => { if (ptt) ptt.end = ta.selectionStart; }); return; }
+  e.preventDefault();
+  if (!ptt || ptt.on || !SR || mic.hidden || ta.readOnly || rec || performance.now() - ptt.at < PTT_MS) return;
+  const i = (ptt.end ?? ta.selectionStart) - 1;
+  if (ta.value[i] === ' ') { ta.value = ta.value.slice(0, i) + ta.value.slice(i + 1); ta.setSelectionRange(i, i); growTa(); }
+  ptt.on = true; micStart();
+});
+msg.querySelector('textarea').addEventListener('keyup', (e) => {
+  if (e.code !== 'Space' || !ptt) return;
+  if (ptt.on) micStop(false);
+  ptt = null;
 });
 msg.addEventListener('close', () => micStop());
 // 이름 바꾸기 — 세션 입력창에 /rename 을 쳐 넣는다(일하는 중이면 끝난 뒤 처리된다)

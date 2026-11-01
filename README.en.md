@@ -50,7 +50,7 @@ Sessions started in other terminals (iTerm, Terminal.app) show up too, but read-
 
 ![The popup — recent conversation and a reply box](assets/popup.en.png)
 
-- **Click a cat or a list row** to fly to it and open the popup. Type and press **Enter** to send, **Shift+Enter** for a new line. Paste or drop images and files to attach them. Press **🎤** and speak to type into the box (press again to stop; you still press Send). **Esc** closes the popup
+- **Click a cat or a list row** to fly to it and open the popup. Type and press **Enter** to send, **Shift+Enter** for a new line. Paste or drop images and files to attach them. Press **🎤** and speak to type into the box (press again to stop; you still press Send). Or **hold Space for over a second** in the box to talk while it's held. **Esc** closes the popup
 - While a session is working you can still send (it reads between steps), or press **Stop** to interrupt it. **Compact** and **Start over** send `/compact` and `/clear`
 - **End session** sends `/exit` and closes only that terminal tab. It is disabled while the session is working or an approval prompt is open
 - **Open terminal** brings that session's terminal tab to the front (only when the page is opened on this Mac)
