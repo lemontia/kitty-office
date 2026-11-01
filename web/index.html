@@ -2419,12 +2419,15 @@ function renderPanel() {
   setHTML($('#log'), msgs.length ? msgs.map((m) => `<li><span class="tm">${hhmm(m.at)}</span><b>${esc(m.from)}</b> → <b>${esc(m.to)}</b><span class="sm">${esc(m.summary)}</span></li>`).join('') : `<li class="empty">${t('noMessages')}</li>`);
 }
 
-// 프로젝트별 — 폴더로 묶고, 묶음은 가장 급한 줄 순(결재 대기 가장 최근 폴더 → 보고 → 일하는 중 → 쉬는 중 → 퇴근, 같으면 최근 움직임). rest 는 이미 급한 순
+// 프로젝트별 — 폴더로 묶고, 결재·보고가 가장 최근에 올라온 폴더가 맨 위(올라올 때마다 바뀐다). 결재·보고가 없는 폴더는 그 아래 일하는 중 → 쉬는 중 → 퇴근, 같으면 최근 움직임
+// 폴더 안도 결재·보고는 올라온 순(최근 먼저), 나머지는 rest 순 그대로
+const handedAt = (s) => s.state === 'waiting' ? Date.parse(s.waitingSince || 0) : s.state === 'reported' ? Date.parse(s.lastActivity || 0) : 0;
 function projHTML(rest) {
   const g = new Map();
   for (const s of rest) { const k = zoneOf(s) || '?'; if (!g.has(k)) g.set(k, []); g.get(k).push(s); }
+  for (const l of g.values()) l.sort((a, b) => (!handedAt(a) - !handedAt(b)) || handedAt(b) - handedAt(a));
   const last = (l) => Math.max(...l.map((s) => Date.parse(s.lastActivity || 0)));
-  const groups = [...g].sort(([, a], [, b]) => (RANK[a[0].state] ?? 5) - (RANK[b[0].state] ?? 5) || (a[0].state === 'waiting' ? waitSort(b[0], a[0]) : last(b) - last(a)));
+  const groups = [...g].sort(([, a], [, b]) => handedAt(b[0]) - handedAt(a[0]) || (RANK[a[0].state] ?? 5) - (RANK[b[0].state] ?? 5) || last(b) - last(a));
   return groups.map(([k, l]) => {
     const w = l.filter((s) => s.state === 'waiting').length, r = l.filter((s) => s.state === 'reported').length, shut = folds.has(k);
     return `<section class="grp${shut ? ' shut' : ''}" style="--fc:${folderColor(l[0])}"><button class="gh" data-g="${esc(k)}"><i></i><b>${esc(k)}</b><small>${l.length}</small>${w ? `<span class="gw">${w}</span>` : ''}${r ? `<span class="gr">${r}</span>` : ''}<span class="chev">${shut ? '▸' : '▾'}</span></button>` +
