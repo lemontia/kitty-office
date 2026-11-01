@@ -302,10 +302,24 @@
   #msg footer button { border: 1px solid #5a3d28; background: #fff; color: #5a3d28; border-radius: 99px; padding: 5px 14px;
     font-weight: 700; cursor: pointer; }
   #msg footer button.send { background: #5a3d28; color: #fff3e0; }
+  #msg footer button.mic { display: inline-flex; align-items: center; justify-content: center; padding: 4px 10px; }
+  #msg footer button.mic svg { display: block; }
+  #msg footer button.mic[hidden] { display: none; }
+  #msg footer button.mic.on { background: var(--red); border-color: var(--red); color: #fff; }
   #msg footer button.stop { border-color: var(--red); color: var(--red); font-size: 12px; font-weight: 600; padding: 4px 10px; }
   #msg footer button.exit { border-color: var(--red); color: var(--red); font-size: 12px; font-weight: 600; padding: 4px 10px; }
   #msg footer button.exit.off { opacity: .4; cursor: not-allowed; }
   #msg footer button.cmp { font-size: 12px; font-weight: 600; padding: 4px 10px; }
+  /* 대화 작업 ▾ — 정리하기·새로 시작·세션 끝내기를 한 버튼 아래로(한 줄에 다 늘어놓으면 보내기가 다음 줄로 밀렸다). 안에 보일 게 없으면 버튼도 숨긴다 */
+  #msg footer .more { position: relative; }
+  #msg footer .more:not(:has(.menu > button:not([hidden]))) { display: none; }
+  #msg footer .moreBtn { font-size: 12px; font-weight: 600; padding: 4px 10px; }
+  #msg footer .menu { position: absolute; right: 0; bottom: calc(100% + 6px); z-index: 5; display: flex; flex-direction: column; gap: 4px; min-width: 150px;
+    padding: 6px; background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 6px 18px rgba(60, 40, 20, .18); }
+  #msg footer .menu[hidden] { display: none; }
+  #msg footer .menu button { width: 100%; text-align: left; border-radius: 8px; border-color: transparent; padding: 8px 12px; font-size: 13px; }
+  #msg footer .menu button:hover { background: #fff1e0; }
+  #msg footer .menu button.exit { border-color: transparent; border-top: 1px solid var(--line); border-radius: 0 0 8px 8px; }
   #msg footer button:disabled { opacity: .4; cursor: default; }
   /* 대화 찬 정도 — 팝업 머리 작은 막대 · 목록 줄 끝 점(85% 이상만, 결재 빨강보다 조용하게) */
   #msg header .ctx { --c: #a59a8c; display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); white-space: nowrap; }
@@ -454,6 +468,7 @@
     #msg footer .row { gap: 6px; }
     #msg footer button { min-height: 44px; padding: 0 14px; }
     #msg footer .clip:not([hidden]) { display: inline-block; min-width: 44px; padding: 0; font-size: 18px; }
+    #msg footer .mic { min-width: 44px; padding: 0; }
     /* 휴대폰 움직임 — 앱처럼 짧게(200ms, 12% 만). 키프레임은 이 미디어쿼리 안에만 있어 PC 에선 클래스가 붙어도 아무 일 없다.
        움직임 줄이기 설정이면 걸지 않는다. 끝나면 JS(motion)가 클래스를 뗀다 — transform 이 남으면 그 안 fixed 요소 기준이 바뀐다 */
     @media (prefers-reduced-motion: no-preference) {
@@ -509,7 +524,7 @@
 <dialog id="msg"><header><span class="pk"><img alt=""></span><b></b><span class="fl"></span><span class="t"></span><span class="ctx" hidden></span><button class="pin" title="오른쪽 목록 맨 위에 고정" data-t-title="pinTitle">📌</button><button class="ren" title="세션 이름 바꾸기" data-t-title="renameTitle">✎</button><button class="x" aria-label="닫기" data-t-aria="close">×</button></header><div class="body"></div>
   <footer><div class="opts"></div><textarea rows="2" data-t-ph="taHint" placeholder="여기에 답을 쓰면 그 세션 입력창으로 들어갑니다 (Enter 보내기 · Shift+Enter 줄바꿈 · 이미지는 붙여넣기·끌어다 놓기)"></textarea>
     <div class="att"></div>
-    <div class="row"><button class="clip" title="사진·파일 첨부" data-t-title="attach">📎</button><button class="exit" hidden data-t="exit">세션 끝내기</button><input type="file" id="pick" accept="image/*,application/pdf,text/*,.md,.csv,.json" multiple hidden><span class="note"></span><button class="cmp" data-cmd="/compact" hidden title="지금까지 대화를 요약하고 이어 갑니다(/compact)" data-t-title="compactTitle" data-t="compact">대화 정리하기</button><button class="cmp" data-cmd="/clear" hidden title="지금 대화를 비우고 새로 시작합니다(/clear)" data-t-title="clearTitle" data-t="clear">새로 시작</button><button class="stop" hidden data-t="stop">하던 일 중단하기</button><button class="go" data-t="goTerm">터미널로 가기</button><button class="send" data-t="send">보내기</button></div></footer></dialog>
+    <div class="row"><button class="clip" title="사진·파일 첨부" data-t-title="attach">📎</button><button class="mic" hidden title="말로 입력" data-t-title="micTitle" data-t-aria="micTitle" aria-label="말로 입력"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1M12 18v4M8 22h8"/></svg></button><input type="file" id="pick" accept="image/*,application/pdf,text/*,.md,.csv,.json" multiple hidden><span class="note"></span><span class="more"><button class="moreBtn" aria-haspopup="menu" aria-expanded="false" data-t="moreBtn">대화 작업 ▾</button><span class="menu" role="menu" hidden><button class="cmp" data-cmd="/compact" hidden title="지금까지 대화를 요약하고 이어 갑니다(/compact)" data-t-title="compactTitle" data-t="compact">대화 정리하기</button><button class="cmp" data-cmd="/clear" hidden title="지금 대화를 비우고 새로 시작합니다(/clear)" data-t-title="clearTitle" data-t="clear">새로 시작</button><button class="exit" hidden data-t="exit">세션 끝내기</button></span></span><button class="stop" hidden data-t="stop">하던 일 중단하기</button><button class="go" data-t="goTerm">터미널로 가기</button><button class="send" data-t="send">보내기</button></div></footer></dialog>
 <aside id="side"><button id="sideFold" data-t-title="sideFold" data-t-aria="sideFold"><span>›</span><b class="zero"></b></button><div id="sideGrip" title="끌어서 너비 조절 · 두 번 누르면 원래대로" data-t-title="sideGrip"></div>
   <button id="sheetGrip" aria-label="목록 펼치기·접기" data-t-aria="sheetGrip"><i></i></button>
   <div class="pane" id="list"></div>
@@ -522,6 +537,8 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 // 화면의 「지금」 — 보통은 이 컴퓨터 시계. 데모는 서버가 준 고정 시각(observedAt)에 맞춘다(녹화 때 기다린 시간·밤낮이 판마다 같게)
 let clockSkew = 0;
 const nowMs = () => Date.now() + clockSkew;
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition; // 말로 입력(🎤) — 없는 브라우저면 버튼을 숨긴다
+let rec = null;
 
 // ───────── 화면 글자 — 한국어·영어. 브라우저 언어가 ko 로 시작하면 ko, 아니면 en(주소 ?lang=ko|en 이 우선) ─────────
 const LANG = (() => { const q = new URLSearchParams(location.search).get('lang'); return q === 'ko' || q === 'en' ? q : /^ko/i.test(navigator.language || 'ko') ? 'ko' : 'en'; })();
@@ -533,7 +550,7 @@ const T = {
     activityLog: '활동 로그', activityLogSub: '세션끼리 주고받은 메시지', setNote: '설정은 이 브라우저에만 저장됩니다.',
     logNote: '승인·질문 창 대기도 잡는다. 3초마다 다시 읽는다.', pinTitle: '오른쪽 목록 맨 위에 고정', renameTitle: '세션 이름 바꾸기',
     taHint: '여기에 답을 쓰면 그 세션 입력창으로 들어갑니다 (Enter 보내기 · Shift+Enter 줄바꿈 · 이미지는 붙여넣기·끌어다 놓기)',
-    attach: '사진·파일 첨부', exit: '세션 끝내기', compactTitle: '지금까지 대화를 요약하고 이어 갑니다(/compact)', compact: '대화 정리하기',
+    attach: '사진·파일 첨부', micTitle: '말로 입력 — 한 번 더 누르면 멈춤', listening: '듣는 중… 말하면 입력칸에 들어갑니다', micDenied: '마이크를 쓸 수 없습니다 — 브라우저의 마이크 권한을 확인해 주세요', micFail: '음성 입력이 멈췄습니다', micNet: '이 브라우저는 음성 인식 서버에 닿지 못합니다 — 크롬에서 열어 주세요', exit: '세션 끝내기', compactTitle: '지금까지 대화를 요약하고 이어 갑니다(/compact)', compact: '대화 정리하기', moreBtn: '대화 작업 ▾',
     clearTitle: '지금 대화를 비우고 새로 시작합니다(/clear)', clear: '새로 시작', stop: '하던 일 중단하기', goTerm: '터미널로 가기', send: '보내기',
     sideGrip: '끌어서 너비 조절 · 두 번 누르면 원래대로', sheetGrip: '목록 펼치기·접기', sideFold: '오른쪽 목록 접기·펼치기 (])',
     now: '방금', min: (n) => `${n}분`, hour: (n) => `${n}시간`, day: (n) => `${n}일`, ago: (d) => `${d} 전`,
@@ -570,7 +587,7 @@ const T = {
     activityLog: 'Activity log', activityLogSub: 'Messages sessions sent each other', setNote: 'Settings are saved in this browser only.',
     logNote: 'Includes approval and question prompts. Refreshes every 3 seconds.', pinTitle: 'Pin to the top of the list', renameTitle: 'Rename session',
     taHint: 'Type a reply to send it to that session (Enter to send · Shift+Enter for a new line · paste or drop images)',
-    attach: 'Attach photo or file', exit: 'End session', compactTitle: 'Summarize the conversation so far and continue (/compact)', compact: 'Compact',
+    attach: 'Attach photo or file', micTitle: 'Speak to type — tap again to stop', listening: 'Listening… your words go into the box', micDenied: 'No microphone — check the browser\'s microphone permission', micFail: 'Voice input stopped', micNet: 'This browser can\'t reach a speech recognition service — try Chrome', exit: 'End session', compactTitle: 'Summarize the conversation so far and continue (/compact)', compact: 'Compact', moreBtn: 'Session ▾',
     clearTitle: 'Clear this conversation and start over (/clear)', clear: 'Start over', stop: 'Stop', goTerm: 'Open terminal', send: 'Send',
     sideGrip: 'Drag to resize · double-click to reset', sheetGrip: 'Expand or collapse the list', sideFold: 'Collapse or expand the list (])',
     now: 'now', min: (n) => `${n}m`, hour: (n) => `${n}h`, day: (n) => `${n}d`, ago: (d) => d === 'now' ? 'just now' : `${d} ago`,
@@ -828,6 +845,43 @@ function weatherFx(t) {
     else { g.beginPath(); g.arc(d.x, d.y, 3, 0, 7); g.fill(); }
   }
   skyTex.needsUpdate = true;
+}
+// 바깥 3D 비·눈 — 창밖 그림과 같은 날씨를 사무실 둘레에도. 사무실 안(지붕 없이 열린 바닥)에는 내리지 않는다.
+// 빗방울은 세계 좌표에 두고 화면 가운데(controls.target) 둘레 상자 밖으로 나가면 반대편으로 옮긴다 — 화면을 끌어도 비가 따라 미끄러지지 않게
+const PRECIP_N = 3200, PRECIP_TOP = 16;
+const precip = (() => {
+  const d = Array.from({ length: PRECIP_N }, () => ({ x: (Math.random() - 0.5) * 80, y: Math.random() * PRECIP_TOP, z: (Math.random() - 0.5) * 80, v: 0.8 + Math.random() * 0.4, ph: Math.random() * 7 }));
+  const rg = new THREE.BufferGeometry(); rg.setAttribute('position', new THREE.BufferAttribute(new Float32Array(PRECIP_N * 6), 3));
+  const rain = new THREE.LineSegments(rg, new THREE.LineBasicMaterial({ color: 0xf2f7ff, transparent: true, opacity: 0.8, depthWrite: false }));
+  const sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.BufferAttribute(new Float32Array(PRECIP_N * 3), 3));
+  const flake = canvasTex(32, 32, (g) => { const gr = g.createRadialGradient(16, 16, 2, 16, 16, 15); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, 32, 32); });
+  const snow = new THREE.Points(sg, new THREE.PointsMaterial({ map: flake, size: 8, sizeAttenuation: false, transparent: true, depthWrite: false }));
+  for (const m of [rain, snow]) { m.frustumCulled = false; m.visible = false; m.renderOrder = 20; scene.add(m); }
+  return { d, rain, snow, last: 0 };
+})();
+function precipFx(t) {
+  const { d, rain, snow } = precip, on = WEATHER === 'rain' ? rain : WEATHER === 'snow' ? snow : null;
+  rain.visible = on === rain; snow.visible = on === snow;
+  const dt = Math.min(0.1, t - precip.last); precip.last = t;
+  if (!on || !L) return;
+  // 보이는 땅을 덮을 만큼 — 멀리 빠질수록 넓게(빗방울 수는 그대로라 멀리선 성기다)
+  const R = Math.min(70, Math.max(camera.right, camera.top) / camera.zoom * 1.1), tx = controls.target.x, tz = controls.target.z;
+  const isRain = on === rain, a = on.geometry.attributes.position.array, LEN = 1.1, SX = -0.12;
+  // 사무실 앞 하늘의 방울도 화면에선 사무실 바닥 위에 겹쳐 보인다 — 눈길(카메라 방향)을 따라 땅에 닿는 곳이 사무실이면 숨긴다
+  const cx = camera.position.x - tx, cy = camera.position.y - controls.target.y, cz = camera.position.z - tz, gp = { x: 0, z: 0 };
+  for (let i = 0; i < PRECIP_N; i++) {
+    const p = d[i];
+    if (isRain) { p.y -= dt * 24 * p.v; p.x += dt * SX * 24; } else { p.y -= dt * 1.4 * p.v; p.x += dt * Math.sin(t * 0.9 + p.ph) * 0.5; p.z += dt * Math.cos(t * 0.7 + p.ph) * 0.3; }
+    if (p.y < 0) { p.y += PRECIP_TOP; p.x = tx + (Math.random() - 0.5) * 2 * R; p.z = tz + (Math.random() - 0.5) * 2 * R; }
+    if (p.x - tx > R) p.x -= 2 * R; else if (tx - p.x > R) p.x += 2 * R;
+    if (p.z - tz > R) p.z -= 2 * R; else if (tz - p.z > R) p.z += 2 * R;
+    gp.x = p.x - p.y * cx / cy; gp.z = p.z - p.y * cz / cy;
+    const hide = inOffice(p) || inOffice(gp) ? -999 : 0; // 사무실에 겹치는 방울은 땅 밑으로 치워 둔다(그리지 않음)
+    if (isRain) { const j = i * 6; a[j] = p.x; a[j + 1] = p.y + hide; a[j + 2] = p.z; a[j + 3] = p.x - SX * LEN; a[j + 4] = p.y + LEN + hide; a[j + 5] = p.z; }
+    else { const j = i * 3; a[j] = p.x; a[j + 1] = p.y + hide; a[j + 2] = p.z; }
+  }
+  on.geometry.attributes.position.needsUpdate = true;
+  on.material.opacity = isRain ? (dayPart() === 'night' ? 0.5 : 0.8) : 0.95;
 }
 // Open-Meteo 현재 날씨(키 없음) — 설정에 weather {lat, lon} 이 있을 때만 묻는다(없으면 밖으로 요청 없이 맑음). 실패하면 조용히 맑음
 async function fetchWeather() {
@@ -2679,6 +2733,7 @@ function openMsg(s) {
   if (!msg.open) { isPhone() ? msg.showModal() : msg.show(); placeMsg(); motion(msg, 'nav-push'); }
   const bd = msg.querySelector('.body'); bd.scrollTop = s.recent?.length || pend.has(s.id) || s.state === 'working' ? bd.scrollHeight : 0; // 대화면 가장 최근 답이 보이게
   msg.querySelector('.clip').hidden = !canAnswer;
+  msg.querySelector('.mic').hidden = !canAnswer || !SR; if (other) micStop();
   // 일하는 중·회의 중 — 답(「얼마나 걸려?」)은 그대로 보내고, 옆에 덜 눈에 띄는 「하던 일 중단하기」(Esc)
   busyButtons(s); drawOpts(s, true);
   for (const b of msg.querySelectorAll('.cmp, .stop')) b.disabled = false;
@@ -2773,7 +2828,7 @@ async function sendAnswer() {
   if (atts.length) text += (text ? '\n\n' : '') + t('attachedNote') + atts.map((a) => a.path).join(' ');
   if (!text || btn.disabled) return;
   // 보내는 동안엔 입력칸을 잠근다 — 보낸 뒤 고친 글이 세션에 들어간 글과 달라 보이지 않게, 두 번 보내지 않게
-  btn.disabled = ta.readOnly = true; ta.classList.add('sending');
+  micStop(); btn.disabled = ta.readOnly = true; ta.classList.add('sending');
   msg.querySelector('.note').textContent = t('sendingDots');
   // 보낸 사람을 잡아 둔다 — 보내는 1~2초 사이에 다른 고양이를 누르면 msgSid 가 바뀌어, 「보내는 중」이 엉뚱한 사람 대화에 붙었다(2026-10-31)
   const sid = msgSid, ok = await act('api/answer', { id: sid, text });
@@ -2787,6 +2842,36 @@ async function sendAnswer() {
   btn.disabled = ta.readOnly = false; ta.classList.remove('sending');
 }
 msg.querySelector('.send').addEventListener('click', sendAnswer);
+// 🎤 말로 입력 — 브라우저 음성 인식. 말한 글은 입력칸 커서 자리에 들어가고, 보내기는 사람이 누른다.
+// 크롬은 소리를 구글 서버로 보내 글로 바꾼다(MDN). 그래서 누를 때만 켜고, 보내거나 창을 닫거나 다른 세션으로 넘어가면 끈다
+// 멈춤 버튼은 stop(말한 끝까지 받아 넣는다). 보내기·창 닫기·세션 바꾸기는 drop — 늦게 온 글이 비운 입력칸이나 다른 세션 칸에 다시 들어가지 않게 버린다
+function micStop(drop = true) {
+  if (rec) { const r = rec; rec = null; if (drop) { r.dead = true; r.abort(); } else r.stop(); }
+  msg.querySelector('.mic').classList.remove('on');
+  const note = msg.querySelector('.note'); if (note.textContent === t('listening')) note.textContent = '';
+}
+msg.querySelector('.mic').addEventListener('click', () => {
+  if (rec) { micStop(false); return; }
+  const ta = msg.querySelector('textarea'), note = msg.querySelector('.note'), mic = msg.querySelector('.mic');
+  const r = rec = new SR();
+  r.lang = LANG === 'ko' ? 'ko-KR' : 'en-US'; r.continuous = true; r.interimResults = true;
+  // 커서 앞뒤를 잡아 두고, 말하는 동안엔 아직 확정 안 된 글까지 보여 준다
+  let head = ta.value.slice(0, ta.selectionStart), tail = ta.value.slice(ta.selectionEnd);
+  r.onresult = (e) => {
+    if (r.dead) return;
+    let fin = '', mid = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) (e.results[i].isFinal ? (fin += e.results[i][0].transcript) : (mid += e.results[i][0].transcript));
+    const sep = (x) => (x && head && !/\s$/.test(head) ? ' ' : '') + x;
+    if (fin) head += sep(fin.trim());
+    ta.value = head + (mid ? sep(mid.trim()) : '') + tail; growTa();
+  };
+  // 크로미움 기반이어도 구글 키가 없는 브라우저(Playwright 크로미움 등)는 소리를 받다가 network 오류로 멈춘다(2026-11-01 실측 — 크롬은 됨)
+  r.onerror = (e) => { if (rec !== r) return; note.textContent = e.error === 'not-allowed' || e.error === 'service-not-allowed' ? t('micDenied') : e.error === 'network' ? t('micNet') : e.error === 'no-speech' || e.error === 'aborted' ? '' : t('micFail') + ` (${e.error})`; };
+  r.onend = () => { if (!r.dead) { ta.value = head + tail; growTa(); } if (rec === r) { rec = null; mic.classList.remove('on'); if (note.textContent === t('listening')) note.textContent = ''; } };
+  try { r.start(); } catch { rec = null; note.textContent = t('micFail'); return; }
+  mic.classList.add('on'); note.textContent = t('listening');
+});
+msg.addEventListener('close', () => micStop());
 // 이름 바꾸기 — 세션 입력창에 /rename 을 쳐 넣는다(일하는 중이면 끝난 뒤 처리된다)
 msg.querySelector('.pin').addEventListener('click', (e) => {
   const s = (S.sessions || []).find((x) => x.id === msgSid); if (!s) return;
@@ -2837,6 +2922,14 @@ const CMP_ASK = {
   '/compact': t('compactAsk'),
   '/clear': t('clearAsk'),
 };
+// 대화 작업 ▾ — 누르면 메뉴, 항목을 누르거나 바깥을 누르거나 Esc 면 닫힌다(항목의 원래 동작·확인 창은 그대로)
+const more = msg.querySelector('.more'), moreMenu = more.querySelector('.menu'), moreBtn = more.querySelector('.moreBtn');
+const moreOpen = (on) => { moreMenu.hidden = !on; moreBtn.setAttribute('aria-expanded', on); };
+moreBtn.addEventListener('click', () => moreOpen(moreMenu.hidden));
+moreMenu.addEventListener('click', () => moreOpen(false));
+document.addEventListener('pointerdown', (e) => { if (!more.contains(e.target)) moreOpen(false); });
+msg.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !moreMenu.hidden) { e.preventDefault(); e.stopPropagation(); moreOpen(false); } });
+msg.addEventListener('close', () => moreOpen(false));
 for (const b of msg.querySelectorAll('.cmp')) b.addEventListener('click', async () => {
   const [ask, done] = CMP_ASK[b.dataset.cmd];
   if (!confirm(ask)) return;
@@ -3930,7 +4023,7 @@ function tick() {
   const near = PPU * camera.zoom >= NEAR_PPU;
   const far = PPU * camera.zoom < 20; // 기본 보기(26px)보다 더 멀어졌을 때만 이름 한 줄로
   if (far !== tick.far) { tick.far = far; $('#labels').classList.toggle('far', far); }
-  catTick(t, dt); petsTick(t, dt); waterTick(t); weatherFx(t); firesTick(t, near); if (gaze?.M.tick) gaze.M.tick(t, gaze.o);
+  catTick(t, dt); petsTick(t, dt); waterTick(t); weatherFx(t); precipFx(t); firesTick(t, near); if (gaze?.M.tick) gaze.M.tick(t, gaze.o);
   // 나가는 사람 — 정문까지 걸어가 흐려지며 사라진다
   for (const a of leavers) {
     if (a.walk) walkTick(a, t, dt);

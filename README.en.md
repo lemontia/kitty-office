@@ -13,7 +13,7 @@
 Run five or ten Claude Code sessions at once and you lose track of which one stopped to ask you something. They sit there, politely waiting, while you work in another tab.
 Kitty Office turns every session on this Mac into a cat in a small office. Cats that need your answer line up at the approvals desk, busy ones type at their desks, and you reply from a popup without hunting for the right terminal tab.
 It answers one question: **"How many things am I blocking right now, and where?"**
-Everything runs on this Mac. It reads Claude Code's own session files and never sends your conversations anywhere.
+Everything runs on this Mac. It reads Claude Code's own session files and never sends your conversations anywhere (the one exception is 🎤 voice input, when you press it — see below).
 
 ## Features
 
@@ -50,7 +50,7 @@ Sessions started in other terminals (iTerm, Terminal.app) show up too, but read-
 
 ![The popup — recent conversation and a reply box](assets/popup.en.png)
 
-- **Click a cat or a list row** to fly to it and open the popup. Type and press **Enter** to send, **Shift+Enter** for a new line. Paste or drop images and files to attach them. **Esc** closes the popup
+- **Click a cat or a list row** to fly to it and open the popup. Type and press **Enter** to send, **Shift+Enter** for a new line. Paste or drop images and files to attach them. Press **🎤** and speak to type into the box (press again to stop; you still press Send). **Esc** closes the popup
 - While a session is working you can still send (it reads between steps), or press **Stop** to interrupt it. **Compact** and **Start over** send `/compact` and `/clear`
 - **End session** sends `/exit` and closes only that terminal tab. It is disabled while the session is working or an approval prompt is open
 - **Open terminal** brings that session's terminal tab to the front (only when the page is opened on this Mac)
@@ -80,7 +80,7 @@ Sessions started in other terminals (iTerm, Terminal.app) show up too, but read-
 | Required | Claude Code (reads `~/.claude/sessions`) | no sessions to show |
 | Optional | one of cmux, Orca, herdr — only sessions started inside one can be jumped to or answered from the page | read-only (viewing still works) |
 | Optional | `terminal-notifier` — clicking a notification jumps to that session | plain macOS notification (no jump) |
-| External request | none by default. Only `api.open-meteo.com` (rain or snow outside the window), and only when `weather` is set in the config | |
+| External request | none by default. Only `api.open-meteo.com` (rain or snow outside the window), and only when `weather` is set in the config. And 🎤 voice input uses the browser's speech recognition — Chrome sends the audio to Google's servers to turn it into text. It listens only while on; browsers without speech recognition (e.g. Firefox) don't show the button | |
 
 ## Run
 
