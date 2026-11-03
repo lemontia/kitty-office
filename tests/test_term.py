@@ -53,6 +53,65 @@ class TestAnswer(unittest.TestCase):
         self.assertEqual(calls, [("paste", "--workspace", "ws1", "--surface", "sf9", "--submit", "--", "-v")])
 
 
+class TestReviveArgs(unittest.TestCase):
+    def test_keeps_only_safe_options(self):
+        self.assertEqual(term.claude_args("claude --dangerously-skip-permissions"), ["--dangerously-skip-permissions"])
+        self.assertEqual(term.claude_args('claude --resume abc --name x --dangerously-skip-permissions "hi"'),
+                         ["--dangerously-skip-permissions"])
+        self.assertEqual(term.claude_args("/opt/bin/claude -c -n 이름 --model opus --permission-mode=plan 고쳐줘"),
+                         ["--model", "opus", "--permission-mode=plan"])
+        self.assertEqual(term.claude_args("zsh"), [])
+
+
+class TestRevive(unittest.TestCase):
+    """끄기 → 줄 지우기 → 다시 열기 순서만 본다. os.kill·_run·ps 는 가짜 — 실제 프로세스·칸은 건드리지 않는다."""
+    def run_revive(self, tab, die_on=None):
+        import signal
+        calls, dead = [], [False]
+
+        def fake_kill(pid, sig):
+            calls.append(("kill", sig))
+            if sig == die_on:
+                dead[0] = True
+        ps = mock.Mock(stdout="claude --dangerously-skip-permissions --resume old --name 옛이름\n")
+        with mock.patch.object(term, "_run", lambda *a: calls.append(a[1:]) or ""), \
+             mock.patch.object(term.os, "kill", fake_kill), mock.patch.object(term, "alive", lambda pid: not dead[0]), \
+             mock.patch.object(term.time, "sleep", lambda s: None), mock.patch.object(term.subprocess, "run", lambda *a, **kw: ps), \
+             mock.patch.object(term, "_new_pid", lambda *a: 999), mock.patch.object(term, "_wait_gone", lambda pid, secs: dead[0]), \
+             mock.patch.object(term, "HERDR", "herdr"), mock.patch.object(term, "CMUX", "cmux"):
+            up = term.revive(tab, 4242, "sid-1", "전시 사령관")
+        return calls, up
+
+    def test_term_then_kill_then_clear_then_resume_then_enter(self):
+        import signal
+        calls, up = self.run_revive(("herdr", "w1:p7"), die_on=signal.SIGKILL)
+        self.assertEqual(calls, [("kill", signal.SIGTERM), ("kill", signal.SIGKILL),
+                                 ("pane", "send-text", "w1:p7", "\x15"),
+                                 ("pane", "send-text", "w1:p7", "claude --dangerously-skip-permissions --resume sid-1 --name '전시 사령관'"),
+                                 ("pane", "send-keys", "w1:p7", "enter")])
+        self.assertTrue(up)
+
+    def test_sigterm_enough_skips_sigkill(self):
+        import signal
+        calls, _ = self.run_revive(("herdr", "w1:p7"), die_on=signal.SIGTERM)
+        self.assertEqual(calls[:2], [("kill", signal.SIGTERM), ("pane", "send-text", "w1:p7", "\x15")])
+
+    def test_survivor_gets_no_keys(self):
+        calls = []
+        with mock.patch.object(term, "_run", lambda *a: calls.append(a)), mock.patch.object(term.os, "kill", lambda p, s: None), \
+             mock.patch.object(term, "alive", lambda pid: True), mock.patch.object(term, "_wait_gone", lambda pid, secs: False), \
+             mock.patch.object(term.subprocess, "run", lambda *a, **kw: mock.Mock(stdout="claude\n")):
+            with self.assertRaises(RuntimeError):
+                term.revive(("herdr", "w1:p7"), 4242, "sid-1")
+        self.assertEqual(calls, [])  # SIGKILL 로도 안 죽으면 칸에 아무것도 안 보낸다
+
+    def test_cmux_clears_with_raw_byte(self):
+        import signal
+        calls, _ = self.run_revive(("cmux", "ws1", "sf9"), die_on=signal.SIGTERM)
+        self.assertEqual(calls[1], ("send", "--force", "--workspace", "ws1", "--surface", "sf9", "--", "\x15"))
+        self.assertEqual(calls[2][0], "paste")
+
+
 if __name__ == "__main__":
     unittest.main()
 

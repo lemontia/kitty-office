@@ -390,3 +390,36 @@ class TestLockout(unittest.TestCase):
         for i in range(lk.TOTAL + 1):
             lk.fail(f"9.9.9.{i}", 200 + i)
         self.assertGreater(lk.blocked("3.3.3.3", 300), 0)
+
+
+class TestFrozenReason(unittest.TestCase):
+    """멈춤 증명 — 하나라도 아니면 끄지 않는다. 화면은 가짜 함수, 기다림은 0초."""
+    OLD = NOW.replace(hour=0, minute=50)  # 10분 전
+
+    def why(self, status="busy", last=OLD, screens=(["✽ Gusting… (22s)"], ["✽ Gusting… (22s)"])):
+        it = iter(screens)
+        return server.frozen_reason(status, last, NOW, lambda: next(it), gap=0)
+
+    def test_frozen_when_all_hold(self):
+        self.assertIsNone(self.why())
+
+    def test_refuses_when_screen_moves(self):
+        self.assertEqual(self.why(screens=(["✽ Gusting… (22s)"], ["✻ Gusting… (25s)"])), "screenMoving")
+
+    def test_refuses_when_screen_unreadable(self):
+        self.assertEqual(self.why(screens=(None, None)), "cantSee")
+        self.assertEqual(self.why(screens=(["a"], None)), "cantSee")
+        self.assertEqual(self.why(screens=(None, ["a"])), "cantSee")  # 첫 번째를 못 읽었으면 두 번째는 보지 않는다
+
+    def test_refuses_recent_activity(self):
+        self.assertEqual(self.why(last=NOW.replace(minute=58)), "recentActivity")
+        self.assertEqual(self.why(last=None), "noRecord")
+
+    def test_refuses_when_not_busy(self):
+        self.assertEqual(self.why(status="idle"), "notFrozen")
+        self.assertEqual(self.why(status="waiting"), "dialog")
+
+    def test_screen_read_error_refuses(self):
+        def boom():
+            raise RuntimeError("herdr 실패")
+        self.assertEqual(server.frozen_reason("busy", self.OLD, NOW, boom, gap=0), "cantSee")

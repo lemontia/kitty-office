@@ -7,9 +7,10 @@ import os
 import re
 import secrets
 import socketserver
+import subprocess
 import threading
 import time
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from functools import partial
 from http.cookies import CookieError, SimpleCookie
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -17,7 +18,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
 from office import config, demo, term, todo, watch
-from office.state import build_state, folders, load_sessions
+from office.state import _transcript, build_state, folders, load_sessions, load_tail
 
 PORT = int(os.environ.get("OFFICE_PORT", "5430"))
 DEMO = os.environ.get("KITTY_OFFICE_DEMO") == "1"  # 가짜 사무실(office/demo.py) — 실제 세션·설정·터미널을 건드리지 않는다
@@ -53,6 +54,15 @@ MSG = {
     "todoGone": ("이미 없는 항목이다", "That item is gone"),
     "todoOp": ("모르는 요청", "Unknown request"),
     "stillRunning": ("세션이 아직 안 끝났습니다 — 탭은 직접 닫으세요", "The session hasn't ended yet — close the tab yourself"),
+    "notFrozen": ("일하는 중인 세션이 아닙니다 — 멈춘 상태가 아닙니다", "This session isn't working — it isn't frozen"),
+    "recentActivity": ("최근 {n}분 안에 대화 기록이 늘었습니다 — 멈춘 게 아닐 수 있어 끄지 않았습니다", "The transcript changed in the last {n} min — it may not be frozen, so nothing was stopped"),
+    "noRecord": ("대화 기록을 찾지 못해 멈춤을 확인할 수 없습니다 — 끄지 않았습니다", "Couldn't find the transcript to confirm it's frozen — nothing was stopped"),
+    "cantSee": ("이 터미널에선 멈춤을 확인할 수 없습니다 — 탭으로 가서 직접 확인해 주세요", "Can't confirm it's frozen in this terminal — check it in the tab yourself"),
+    "screenMoving": ("화면이 움직이고 있습니다 — 멈춘 게 아니라 일하는 중이라 끄지 않았습니다", "The screen is changing — it's working, not frozen, so nothing was stopped"),
+    "killFailed": ("세션을 끄지 못했습니다 — 칸에는 아무것도 보내지 않았습니다", "Couldn't stop the session — nothing was sent to the tab"),
+    "notStarted": ("다시 열기 명령은 넣었는데 아직 뜬 걸 확인 못 했습니다 — 탭에서 확인해 주세요", "The reopen command was sent but the session isn't up yet — check the tab"),
+    "reopenFailed": ("세션은 껐지만 다시 열지 못했습니다({e}) — 그 탭에서 직접 치세요: {cmd}", "The session was stopped but couldn't be reopened ({e}) — type this in its tab: {cmd}"),
+    "noRevive": ("이 컴퓨터에선 되살리기를 지원하지 않습니다", "Reviving isn't supported on this computer"),
     "closeFailed": ("세션은 끝났지만 탭을 닫지 못했습니다({e}) — 탭은 직접 닫으세요", "The session ended but its tab didn't close ({e}) — close it yourself"),
 }
 _LOGIN = """<!doctype html><html lang={lang}><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
@@ -72,6 +82,47 @@ LOGIN = {
 # 토큰으로 처음 열면 쿠키를 심고 토큰 없는 주소로 넘긴다. 303 대신 페이지 안에서 넘기는 건,
 # 다른 앱의 링크로 열었을 때 SameSite=Strict 쿠키가 리다이렉트 다음 요청에 안 실리기 때문이다
 ENTER = b"<!doctype html><meta charset=utf-8><script>location.replace(location.pathname + location.hash)</script>"
+
+
+FROZEN_MINUTES = 3  # 대화 기록이 이만큼 안 늘었어야 「멈춤」 후보 — 긴 도구 실행도 기록은 보통 이보다 자주 는다
+SCREEN_GAP = 2.5  # 화면을 두 번 읽는 간격(초). 살아 있는 세션은 타이머·스피너가 1초마다 바뀐다
+
+
+def frozen_reason(status, last_at, now, read_screen, gap=SCREEN_GAP):
+    """멈춤 증명 — 전부 맞으면 None, 하나라도 아니면 MSG 키. 끄는 건 이 함수가 None 을 줬을 때뿐이다.
+    status 는 세션 파일의 status, last_at 은 대화 기록의 마지막 활동(없으면 None), read_screen 은 화면 줄 목록을 돌려주는 함수(못 읽으면 None)."""
+    if status == "waiting":
+        return "dialog"
+    if status != "busy":
+        return "notFrozen"
+    if not last_at:
+        return "noRecord"
+    if last_at > now - timedelta(minutes=FROZEN_MINUTES):
+        return "recentActivity"
+    try:
+        a = read_screen()
+        if not a:
+            return "cantSee"
+        time.sleep(gap)
+        b = read_screen()
+    except (OSError, RuntimeError, subprocess.SubprocessError):
+        return "cantSee"
+    if not b:
+        return "cantSee"
+    return None if a == b else "screenMoving"
+
+
+def last_activity(home, sid):
+    """대화 기록의 마지막 활동 — 기록 속 마지막 시각과 파일 수정 시각 중 늦은 쪽. 기록이 없으면 None."""
+    path = _transcript(home, sid)
+    if not path:
+        return None
+    try:
+        mtime = datetime.fromtimestamp(path.stat().st_mtime).astimezone()
+        at = load_tail(path).get("last_activity_at")
+    except OSError:
+        return None
+    return max(mtime, at) if at else mtime
 
 
 def save_upload(name, data):
@@ -252,7 +303,7 @@ class Handler(SimpleHTTPRequestHandler):
         if self._blocked():
             return
         path = self.path.split("?")[0]
-        if path not in ("/api/focus", "/api/answer", "/api/rename", "/api/upload", "/api/island", "/api/stop", "/api/exit", "/api/todo", "/api/clippaths", "/api/dialog", "/api/pick"):
+        if path not in ("/api/focus", "/api/answer", "/api/rename", "/api/upload", "/api/island", "/api/stop", "/api/revive", "/api/exit", "/api/todo", "/api/clippaths", "/api/dialog", "/api/pick"):
             return self._json(404, {"error": self._m("noPath")})
         # 다른 웹페이지가 브라우저를 통해 127.0.0.1 로 보내는 요청을 막는다(이 화면에서 온 것만)
         ok = {f"{scheme}://{h}" for h in self._hosts() for scheme in ("http", "https")}
@@ -316,6 +367,24 @@ class Handler(SimpleHTTPRequestHandler):
             if path == "/api/stop":  # 일하는 중인 세션의 지금 차례를 멈춘다(Esc)
                 term.stop(tab)
                 return self._json(200, {"ok": True})
+            if path == "/api/revive":  # 멈춘 세션 다시 열기 — 멈춤을 직접 증명한 뒤에만 끈다. 증명이 안 되면 아무것도 안 하고 이유만
+                if os.name == "nt":
+                    return self._json(409, {"error": self._m("noRevive")})
+                why = frozen_reason(s.get("status"), last_activity(Path.home(), s.get("sessionId")),
+                                    datetime.now().astimezone(), lambda: term._screen(tab))
+                if why:
+                    return self._json(409, {"error": self._m(why, n=FROZEN_MINUTES)})
+                try:  # 세션 파일의 이름 그대로(없으면 붙이지 않는다 — load_sessions 는 폴더 이름으로 채운다)
+                    name = json.loads((Path.home() / ".claude/sessions" / f"{int(s['pid'])}.json").read_text(encoding="utf-8")).get("name")
+                except (OSError, ValueError, TypeError, KeyError):
+                    name = None
+                try:
+                    up = term.revive(tab, s.get("pid"), s.get("sessionId"), name)
+                except term.ReopenFailed as e:
+                    return self._json(500, {"error": self._m("reopenFailed", e=e.args[0], cmd=e.args[1])})
+                except RuntimeError as e:
+                    return self._json(409 if str(e) in MSG else 500, {"error": self._m(str(e)) if str(e) in MSG else str(e)})
+                return self._json(200, {"ok": True, "note": None if up else self._m("notStarted")})
             if path == "/api/exit":  # 세션 끝내기 — /exit 후 그 탭만 닫는다. 화면이 막아도 여기서 한 번 더 막는다
                 if s.get("status") == "waiting":
                     return self._json(409, {"error": self._m("dialog")})

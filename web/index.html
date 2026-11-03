@@ -277,6 +277,9 @@
   #msg header button { border: 0; background: none; font-size: 22px; cursor: pointer; color: var(--muted); padding: 0 4px; }
   #msg header button.ren { font-size: 16px; }
   #msg header button.pin { font-size: 14px; opacity: .35; } #msg header button.pin.on { opacity: 1; }
+  /* 📌·✎ — 넓은 화면에선 머리줄에 그대로, 폰에선 ⋯ 메뉴 안으로(아래 폰 칸) */
+  #msg header .hm, #msg header .hmenu { display: contents; }
+  #msg header .hmBtn, #msg header .hmenu .lb { display: none; }
   #msg footer { border-top: 1px dashed var(--line); padding: 10px 18px 14px; }
   #msg footer textarea { width: 100%; font: inherit; font-size: 14px; padding: 12px 14px; border: 1px solid var(--line);
     border-radius: 10px; resize: none; box-sizing: border-box; line-height: 1.45; overflow-y: hidden; }
@@ -320,11 +323,12 @@
   #msg footer .menu button { width: 100%; text-align: left; border-radius: 8px; border-color: transparent; padding: 8px 12px; font-size: 13px; }
   #msg footer .menu button:hover { background: #fff1e0; }
   #msg footer .menu button.exit, #msg footer .menu button.cmp[data-cmd="/compact"] { border-color: transparent; border-top: 1px solid var(--line); border-radius: 0; } /* 가기·중단 | 정리·새로 | 끝내기 */
-  #msg footer .menu button.stop, #msg footer .menu button.exit { color: var(--red); font-weight: 700; }
+  #msg footer .menu button.stop, #msg footer .menu button.revive, #msg footer .menu button.exit { color: var(--red); font-weight: 700; }
   #msg footer button:disabled { opacity: .4; cursor: default; }
   /* 대화 찬 정도 — 팝업 머리 작은 막대 · 목록 줄 끝 점(85% 이상만, 결재 빨강보다 조용하게) */
   #msg header .ctx { --c: #a59a8c; display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); white-space: nowrap; }
   #msg header .ctx[hidden] { display: none; }
+  #msg header .ctx .cs { display: none; } /* 좁은 화면에선 막대·「대화 … 찼음」 대신 숫자만 */
   #msg header .ctx i { width: 44px; height: 5px; border-radius: 3px; background: #e9dfd0; overflow: hidden; }
   #msg header .ctx i s { display: block; height: 100%; background: var(--c); }
   #msg header .ctx.mid { --c: #e08a2e; color: var(--c); } #msg header .ctx.hi { --c: #c0503b; color: var(--c); }
@@ -459,10 +463,23 @@
     #msg header b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     #msg header .fl { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     #msg header .t { flex: none; }
-    #msg header b { min-width: 4.5em; }
+    #msg header b { min-width: 3em; } /* 4.5em 이면 폰 폭(약 411px)에서 × 까지 겨우 맞는다 — 이름은 … 으로 줄어든다 */
     #msg header .pk { display: block; flex: none; position: relative; width: 36px; height: 36px; overflow: hidden; border-radius: 50%; background: #fbf3e6; }
     #msg header .pk img { position: absolute; width: 80px; left: -20px; top: -29px; }
     #msg header button { min-width: 44px; min-height: 44px; }
+    /* 머리줄이 넘쳐도 닫기(×)가 밀려나지 않게 — 줄어드는 건 이름(…)뿐, 대화 양은 숫자만(2026-11-03 폰에서 × 가 화면 밖) */
+    #msg header button, #msg header .ctx { flex: none; }
+    #msg header .ctx i, #msg header .ctx .cl { display: none; } #msg header .ctx .cs { display: inline; }
+    /* 📌·✎ 를 ⋯ 하나로 접는다 — 대화 작업 ▾ 처럼 누르면 목록(2026-11-03, 머리줄 버튼 하나 자리를 비움) */
+    #msg header .hm { display: block; position: relative; flex: none; }
+    #msg header .hmBtn { display: inline-block; font-size: 20px; }
+    #msg header .hmenu { position: absolute; right: 0; top: calc(100% + 4px); z-index: 5; display: flex; flex-direction: column; gap: 4px; min-width: 190px;
+      padding: 6px; background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 6px 18px rgba(60, 40, 20, .18); }
+    #msg header .hmenu:not(.open) { display: none; }
+    #msg header .hmenu button { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 0 12px; border-radius: 8px; text-align: left; font-size: 16px; color: var(--ink); opacity: 1; }
+    #msg header .hmenu button:hover { background: #fff1e0; }
+    #msg header .hmenu .lb { display: inline; font-size: 15px; }
+    #msg header .hmenu .pin:not(.on) { color: var(--muted); } #msg header .hmenu .pin.on .lb::after { content: ' ✓'; color: var(--red); }
     #msg .body { font-size: 15px; padding: 14px 12px; }
     #msg footer { padding: 8px 10px calc(10px + env(safe-area-inset-bottom)); }
     #msg footer textarea { font-size: 16px; resize: none; }
@@ -522,10 +539,10 @@
 <dialog id="logDlg"><header><b data-t="activityLog">활동 로그</b><button class="x" aria-label="닫기" data-t-aria="close">×</button></header>
   <ul class="log" id="log"></ul><p class="setnote" data-t="logNote">승인·질문 창 대기도 잡는다. 3초마다 다시 읽는다.</p></dialog>
 <img id="perch" alt="" aria-hidden="true"><div id="perchSay" class="sayb"></div><div id="perchFx" aria-hidden="true"></div>
-<dialog id="msg"><header><span class="pk"><img alt=""></span><b></b><span class="fl"></span><span class="t"></span><span class="ctx" hidden></span><button class="pin" title="오른쪽 목록 맨 위에 고정" data-t-title="pinTitle">📌</button><button class="ren" title="세션 이름 바꾸기" data-t-title="renameTitle">✎</button><button class="x" aria-label="닫기" data-t-aria="close">×</button></header><div class="body"></div>
+<dialog id="msg"><header><span class="pk"><img alt=""></span><b></b><span class="fl"></span><span class="t"></span><span class="ctx" hidden></span><span class="hm"><button class="hmBtn" aria-haspopup="menu" aria-expanded="false" aria-label="고정·이름 바꾸기" data-t-aria="hmBtn">⋯</button><span class="hmenu" role="menu"><button class="pin" title="오른쪽 목록 맨 위에 고정" data-t-title="pinTitle">📌<span class="lb" data-t="pinLabel">목록 맨 위에 고정</span></button><button class="ren" title="세션 이름 바꾸기" data-t-title="renameTitle">✎<span class="lb" data-t="renameLabel">이름 바꾸기</span></button></span></span><button class="x" aria-label="닫기" data-t-aria="close">×</button></header><div class="body"></div>
   <footer><div class="opts"></div><textarea rows="2" data-t-ph="taHint" placeholder="여기에 답을 쓰면 그 세션 입력창으로 들어갑니다 (Enter 보내기 · Shift+Enter 줄바꿈 · 이미지는 붙여넣기·끌어다 놓기)"></textarea>
     <div class="att"></div>
-    <div class="row"><button class="clip" title="사진·파일 첨부" data-t-title="attach">📎</button><button class="mic" hidden title="말로 입력" data-t-title="micTitle" data-t-aria="micTitle" aria-label="말로 입력"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1M12 18v4M8 22h8"/></svg></button><span class="note"></span><input type="file" id="pick" accept="image/*,application/pdf,text/*,.md,.csv,.json" multiple hidden><span class="more"><button class="moreBtn" aria-haspopup="menu" aria-expanded="false" data-t="moreBtn">대화 작업 ▾</button><span class="menu" role="menu" hidden><button class="go" data-t="goTerm">터미널로 가기</button><button class="stop" hidden data-t="stop">하던 일 중단하기</button><button class="cmp" data-cmd="/compact" hidden title="지금까지 대화를 요약하고 이어 갑니다(/compact)" data-t-title="compactTitle" data-t="compact">대화 정리하기</button><button class="cmp" data-cmd="/clear" hidden title="지금 대화를 비우고 새로 시작합니다(/clear)" data-t-title="clearTitle" data-t="clear">새로 시작</button><button class="exit" hidden data-t="exit">세션 끝내기</button></span></span><button class="send" data-t="send">보내기</button></div></footer></dialog>
+    <div class="row"><button class="clip" title="사진·파일 첨부" data-t-title="attach">📎</button><button class="mic" hidden title="말로 입력" data-t-title="micTitle" data-t-aria="micTitle" aria-label="말로 입력"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1M12 18v4M8 22h8"/></svg></button><span class="note"></span><input type="file" id="pick" accept="image/*,application/pdf,text/*,.md,.csv,.json" multiple hidden><span class="more"><button class="moreBtn" aria-haspopup="menu" aria-expanded="false" data-t="moreBtn">대화 작업 ▾</button><span class="menu" role="menu" hidden><button class="go" data-t="goTerm">터미널로 가기</button><button class="stop" hidden data-t="stop">하던 일 중단하기</button><button class="revive" hidden data-t="revive">멈춘 세션 다시 열기</button><button class="cmp" data-cmd="/compact" hidden title="지금까지 대화를 요약하고 이어 갑니다(/compact)" data-t-title="compactTitle" data-t="compact">대화 정리하기</button><button class="cmp" data-cmd="/clear" hidden title="지금 대화를 비우고 새로 시작합니다(/clear)" data-t-title="clearTitle" data-t="clear">새로 시작</button><button class="exit" hidden data-t="exit">세션 끝내기</button></span></span><button class="send" data-t="send">보내기</button></div></footer></dialog>
 <aside id="side"><button id="sideFold" data-t-title="sideFold" data-t-aria="sideFold"><span>›</span><b class="zero"></b></button><div id="sideGrip" title="끌어서 너비 조절 · 두 번 누르면 원래대로" data-t-title="sideGrip"></div>
   <button id="sheetGrip" aria-label="목록 펼치기·접기" data-t-aria="sheetGrip"><i></i></button>
   <div class="pane" id="list"></div>
@@ -551,10 +568,10 @@ const T = {
     knockSound: '노크 효과음', knockSoundSub: '새로 결재 기다림이 생기면 「똑똑」 소리',
     msgReset: '대화창 원래 자리로', msgResetSub: '옮기거나 크기를 바꾼 대화창을 오른쪽 기본 자리·크기로',
     activityLog: '활동 로그', activityLogSub: '세션끼리 주고받은 메시지', setNote: '설정은 이 브라우저에만 저장됩니다.',
-    logNote: '승인·질문 창 대기도 잡는다. 3초마다 다시 읽는다.', pinTitle: '오른쪽 목록 맨 위에 고정', renameTitle: '세션 이름 바꾸기',
+    logNote: '승인·질문 창 대기도 잡는다. 3초마다 다시 읽는다.', pinTitle: '오른쪽 목록 맨 위에 고정', renameTitle: '세션 이름 바꾸기', hmBtn: '고정·이름 바꾸기', pinLabel: '목록 맨 위에 고정', renameLabel: '이름 바꾸기',
     taHint: '여기에 답을 쓰면 그 세션 입력창으로 들어갑니다 (Enter 보내기 · Shift+Enter 줄바꿈 · 이미지는 붙여넣기·끌어다 놓기)',
     attach: '사진·파일 첨부', micTitle: '말로 입력 — 한 번 더 누르면 멈춤 · 입력칸에서 스페이스를 1초 넘게 누르고 있어도 됩니다', listening: '듣는 중… 말하면 입력칸에 들어갑니다', micDenied: '마이크를 쓸 수 없습니다 — 브라우저의 마이크 권한을 확인해 주세요', micFail: '음성 입력이 멈췄습니다', micNet: '이 브라우저는 음성 인식 서버에 닿지 못합니다 — 크롬에서 열어 주세요', micNone: '이 브라우저는 말을 글로 바꿔 주지 않습니다 — 크롬에서 열어 주세요', micNo: (b) => `${b === 'Whale' ? '웨일' : b}에서는 음성 입력이 안 됩니다 — 크롬에서 열어 주세요`, exit: '세션 끝내기', compactTitle: '지금까지 대화를 요약하고 이어 갑니다(/compact)', compact: '대화 정리하기', moreBtn: '대화 작업 ▾',
-    clearTitle: '지금 대화를 비우고 새로 시작합니다(/clear)', clear: '새로 시작', stop: '하던 일 중단하기', goTerm: '터미널로 가기', send: '보내기',
+    clearTitle: '지금 대화를 비우고 새로 시작합니다(/clear)', clear: '새로 시작', stop: '하던 일 중단하기', revive: '멈춘 세션 다시 열기', goTerm: '터미널로 가기', send: '보내기',
     sideGrip: '끌어서 너비 조절 · 두 번 누르면 원래대로', sheetGrip: '목록 펼치기·접기', sideFold: '오른쪽 목록 접기·펼치기 (])',
     now: '방금', min: (n) => `${n}분`, hour: (n) => `${n}시간`, day: (n) => `${n}일`, ago: (d) => `${d} 전`,
     signWork: '작업실', signMeet: '회의', signBoss: '결재실', signBossPlate: '결재', signReport: '보고', signReportN: (n) => `보고 (${n})`, signStale: '묵은 질문', signLounge: '휴게실', signTodo: '오늘의 할 일: 없음', stamp: '완료',
@@ -575,6 +592,8 @@ const T = {
     attachedNote: '첨부한 파일을 열어서 봐 주세요: ', sendingDots: '보내는 중…', sent: '보냈습니다', newName: '새 세션 이름',
     renameSent: '이름 바꾸기를 보냈습니다 — 몇 초 뒤 화면에 반영됩니다', thisSession: '이 세션', stopAsk: (n) => `${n}의 하던 일을 중단할까요?`,
     stopping: '중단하는 중…', stopped: '중단했습니다',
+    reviveAsk: (n) => `‘${n}’ 세션이 멈춘 것 같으면 끄고 같은 칸에서 다시 엽니다. 이전 대화는 이어지지만, 멈춰 있는 동안 친 글은 전달되지 않았습니다. 진행할까요?`,
+    reviving: '멈춤 확인 중…(몇 초 걸립니다)', revived: '다시 열었습니다',
     exitAsk: (n) => `${n} 세션을 끝낼까요? 터미널 탭도 닫힙니다.\n대화는 그 폴더에서 claude --resume 으로 다시 열 수 있습니다.`,
     exiting: '끝내는 중…', exited: '끝냈습니다 — ',
     compactAsk: ['지금까지 대화를 요약하고 이어 갑니다(/compact). 할까요?', '정리 요청 보냄'],
@@ -588,10 +607,10 @@ const T = {
     knockSound: 'Knock sound', knockSoundSub: 'Plays a knock when someone new starts waiting for you',
     msgReset: 'Reset chat window', msgResetSub: 'Move a moved or resized chat window back to its default size and place',
     activityLog: 'Activity log', activityLogSub: 'Messages sessions sent each other', setNote: 'Settings are saved in this browser only.',
-    logNote: 'Includes approval and question prompts. Refreshes every 3 seconds.', pinTitle: 'Pin to the top of the list', renameTitle: 'Rename session',
+    logNote: 'Includes approval and question prompts. Refreshes every 3 seconds.', pinTitle: 'Pin to the top of the list', renameTitle: 'Rename session', hmBtn: 'Pin · rename', pinLabel: 'Pin to top of list', renameLabel: 'Rename',
     taHint: 'Type a reply to send it to that session (Enter to send · Shift+Enter for a new line · paste or drop images)',
     attach: 'Attach photo or file', micTitle: 'Speak to type — tap again to stop · or hold Space for over a second in the box', listening: 'Listening… your words go into the box', micDenied: 'No microphone — check the browser\'s microphone permission', micFail: 'Voice input stopped', micNet: 'This browser can\'t reach a speech recognition service — try Chrome', micNone: 'This browser doesn\'t turn speech into text — try Chrome', micNo: (b) => `Voice input doesn't work in ${b} — try Chrome`, exit: 'End session', compactTitle: 'Summarize the conversation so far and continue (/compact)', compact: 'Compact', moreBtn: 'Session ▾',
-    clearTitle: 'Clear this conversation and start over (/clear)', clear: 'Start over', stop: 'Stop', goTerm: 'Open terminal', send: 'Send',
+    clearTitle: 'Clear this conversation and start over (/clear)', clear: 'Start over', stop: 'Stop', revive: 'Revive frozen session', goTerm: 'Open terminal', send: 'Send',
     sideGrip: 'Drag to resize · double-click to reset', sheetGrip: 'Expand or collapse the list', sideFold: 'Collapse or expand the list (])',
     now: 'now', min: (n) => `${n}m`, hour: (n) => `${n}h`, day: (n) => `${n}d`, ago: (d) => d === 'now' ? 'just now' : `${d} ago`,
     signWork: 'Workroom', signMeet: 'Meeting', signBoss: 'Approvals', signBossPlate: 'Desk', signReport: 'Reports', signReportN: (n) => `Reports (${n})`, signStale: 'Old questions', signLounge: 'Lounge', signTodo: "Today's to-do: nothing", stamp: 'DONE',
@@ -612,6 +631,8 @@ const T = {
     attachedNote: 'Please open and look at the attached files: ', sendingDots: 'Sending…', sent: 'Sent', newName: 'New session name',
     renameSent: 'Rename sent — it shows up in a few seconds', thisSession: 'this session', stopAsk: (n) => `Stop what ${n} is doing?`,
     stopping: 'Stopping…', stopped: 'Stopped',
+    reviveAsk: (n) => `If ‘${n}’ looks frozen, it will be stopped and reopened in the same tab. The conversation continues, but anything typed while it was frozen was not delivered. Go ahead?`,
+    reviving: 'Checking whether it is frozen… (takes a few seconds)', revived: 'Reopened',
     exitAsk: (n) => `End ${n}? Its terminal tab closes too.\nYou can reopen the conversation with claude --resume in that folder.`,
     exiting: 'Ending…', exited: 'Ended — ',
     compactAsk: ['Summarize the conversation so far and continue (/compact)?', 'Compact requested'],
@@ -2625,10 +2646,13 @@ function bodyHTML(s) {
   }
   return h;
 }
+const FROZEN_MS = 3 * 60 * 1000; // 서버 FROZEN_MINUTES 와 같게
 // 일하는 중·회의 중이면 「하던 일 중단하기」, 한가하면 「대화 정리하기」·「새로 시작」(일하는 중엔 메시지로 줄 서서 뜻이 달라진다) — 상태가 바뀌면 다시 맞춘다
 function busyButtons(s) {
   const canAnswer = s.tab && !s.dialog, busy = canAnswer && (s.state === 'working' || s.state === 'meeting');
   msg.querySelector('.stop').hidden = !busy;
+  // 멈춘 세션 다시 열기 — 일하는 중인데 대화 기록이 3분 넘게 안 늘었을 때만 후보로 보인다(정말 멈췄나는 서버가 화면을 두 번 읽어 가린다)
+  msg.querySelector('.revive').hidden = !(busy && s.lastActivity && nowMs() - Date.parse(s.lastActivity) >= FROZEN_MS);
   // 세션 끝내기 — 일하는 중엔 막는다(누르면 안내만). 승인·선택 창이 떠 있어도 막는다(/exit 글자가 선택지를 누를 수 있다)
   const ex = msg.querySelector('.exit'), block = busy ? t('exitBusy') : s.dialog ? t('exitDialog') : '';
   ex.hidden = !s.tab; ex.classList.toggle('off', !!block); ex.dataset.block = block; ex.title = block || t('exitTitle');
@@ -2715,7 +2739,7 @@ function openMsg(s) {
   msg.querySelector('.fl').textContent = zoneOf(s) + (s.realName && s.realName !== s.name ? ' · ' + s.realName : '');
   msg.querySelector('.t').textContent = s.state === 'waiting' ? ago(s.waitingSince) : STATE_KO[s.state] || '';
   const cr = ctxOf(s), ce = msg.querySelector('.ctx'); ce.hidden = cr == null;
-  if (cr != null) { ce.className = 'ctx ' + ctxCls(cr); setHTML(ce, `<i><s style="width:${Math.round(cr * 100)}%"></s></i>${t('ctxFull', Math.round(cr * 100))}`); }
+  if (cr != null) { ce.className = 'ctx ' + ctxCls(cr); setHTML(ce, `<i><s style="width:${Math.round(cr * 100)}%"></s></i><span class="cl">${t('ctxFull', Math.round(cr * 100))}</span><span class="cs">${Math.round(cr * 100)}%</span>`); ce.title = t('ctxFull', Math.round(cr * 100)); }
   { const bd = msg.querySelector('.body'), h = bodyHTML(s); bd.innerHTML = h; bd._h = h; }
   // 답하기·터미널로 가기 — cmux·Orca·herdr 에서 뜬 세션만(herdr 는 가기 없음). 승인·선택 창이 떠 있으면 터미널로 가기만
   const other = msgSid !== s.id;  // 다른 사람으로 넘어가면 쓰던 답·첨부를 비운다(엉뚱한 세션에 보내지 않게)
@@ -2739,7 +2763,7 @@ function openMsg(s) {
   msg.querySelector('.mic').hidden = !canAnswer || !SR; if (other) micStop();
   // 일하는 중·회의 중 — 답(「얼마나 걸려?」)은 그대로 보내고, 옆에 덜 눈에 띄는 「하던 일 중단하기」(Esc)
   busyButtons(s); drawOpts(s, true);
-  for (const b of msg.querySelectorAll('.cmp, .stop')) b.disabled = false;
+  for (const b of msg.querySelectorAll('.cmp, .stop, .revive')) b.disabled = false;
   renderPanel(); // 오른쪽 목록에 「보는 중」
   if (canAnswer && !isPhone()) ta.focus(); // 폰은 키보드가 먼저 올라와 대화를 가리지 않게
 }
@@ -2904,6 +2928,14 @@ msg.querySelector('.pin').addEventListener('click', (e) => {
   pins.has(s.name) ? pins.delete(s.name) : pins.add(s.name);
   savePins(); e.currentTarget.classList.toggle('on', pins.has(s.name)); renderPanel();
 });
+// 폰의 ⋯ — 누르면 📌·✎ 목록, 항목·바깥·Esc 면 닫힌다(대화 작업 ▾ 와 같은 방식)
+const hm = msg.querySelector('.hm'), hmenu = hm.querySelector('.hmenu'), hmBtn = hm.querySelector('.hmBtn');
+const hmOpen = (on) => { hmenu.classList.toggle('open', on); hmBtn.setAttribute('aria-expanded', on); };
+hmBtn.addEventListener('click', () => hmOpen(!hmenu.classList.contains('open')));
+hmenu.addEventListener('click', () => hmOpen(false));
+document.addEventListener('pointerdown', (e) => { if (!hm.contains(e.target)) hmOpen(false); });
+msg.addEventListener('keydown', (e) => { if (e.key === 'Escape' && hmenu.classList.contains('open')) { e.preventDefault(); e.stopPropagation(); hmOpen(false); } });
+msg.addEventListener('close', () => hmOpen(false));
 msg.querySelector('.ren').addEventListener('click', async () => {
   const s = (S.sessions || []).find((x) => x.id === msgSid), name = prompt(t('newName'), s ? s.name : '');
   if (!name || !name.trim()) return;
@@ -2932,6 +2964,14 @@ msg.querySelector('.stop').addEventListener('click', async (e) => {
   b.disabled = true; msg.querySelector('.note').textContent = t('stopping');
   if (await act('api/stop', {})) msg.querySelector('.note').textContent = t('stopped');
   b.disabled = false;
+});
+msg.querySelector('.revive').addEventListener('click', async (e) => {
+  const s = (S.sessions || []).find((x) => x.id === msgSid), b = e.currentTarget, note = msg.querySelector('.note');
+  if (!confirm(t('reviveAsk', s ? s.name : t('thisSession')))) return;
+  b.disabled = true; note.textContent = t('reviving');
+  const j = await act('api/revive', {});
+  b.disabled = false;
+  if (j) note.textContent = t('revived') + (j.note ? ' — ' + j.note : ''); // 안 됐으면 note 에 오류(act)
 });
 msg.querySelector('.exit').addEventListener('click', async (e) => {
   const s = (S.sessions || []).find((x) => x.id === msgSid), b = e.currentTarget, note = msg.querySelector('.note');

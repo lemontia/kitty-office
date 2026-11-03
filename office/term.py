@@ -8,7 +8,9 @@ import functools
 import json
 import os
 import re
+import shlex
 import shutil
+import signal
 import subprocess
 import time
 from pathlib import Path
@@ -325,3 +327,103 @@ def exit_session(tab, pid=None, wait=8.0):
     except RuntimeError as e:
         return ("close_failed", str(e))
     return None
+
+
+# 멈춘 세션 다시 열기 — 원래 실행 인자 중 다시 넣어도 되는 것만 남긴다(허용 목록).
+# --resume·--continue·--name 과 프롬프트(위치 인자)는 뺀다 — 새로 붙인다. 모르는 옵션은 값까지 버린다(값이 있는지 모르니 뒤 위치 인자로 섞일 수 있다)
+KEEP_FLAGS = {"--dangerously-skip-permissions", "--allow-dangerously-skip-permissions", "--verbose", "--ide", "--chrome", "--no-chrome"}
+KEEP_OPTS = {"--permission-mode", "--model", "--fallback-model", "--effort", "--agent"}
+
+
+def claude_args(command):
+    """ps 의 명령줄 → 다시 열 때 그대로 넣을 옵션 목록. ps 는 따옴표를 지워 주므로 값에 빈칸이 있으면 쪼개진다 — 값 하나만 받는다."""
+    words = command.split()
+    at = next((i for i, w in enumerate(words) if os.path.basename(w) == "claude"), None)
+    words = words[at + 1:] if at is not None else []
+    out, i = [], 0
+    while i < len(words):
+        w = words[i]
+        key = w.split("=", 1)[0]
+        if w in KEEP_FLAGS:
+            out.append(w)
+        elif key in KEEP_OPTS and "=" in w:
+            out.append(w)
+        elif w in KEEP_OPTS and i + 1 < len(words) and not words[i + 1].startswith("-"):
+            out += [w, words[i + 1]]
+            i += 1
+        i += 1
+    return out
+
+
+def _wait_gone(pid, secs):
+    end = time.monotonic() + secs
+    while alive(pid) and time.monotonic() < end:
+        time.sleep(0.2)
+    return not alive(pid)
+
+
+def _clear_line(tab):
+    """셸 입력줄에 남은 글(kill 뒤 kitty 키 모드 찌꺼기·멈춘 동안 친 글)을 지운다 — Ctrl+U 바이트(\\x15)를 글자 그대로.
+    send-keys ctrl+u 는 키 인코딩을 거쳐 「9;5u」 같은 쓰레기로 들어갔다(2026-11-03 herdr). 남은 글을 Enter 로 흘려 보내지 않는다 — 명령으로 실행된다"""
+    if tab[0] == "herdr":
+        _run(HERDR, "pane", "send-text", tab[1], "\x15")
+    elif tab[0] == "cmux":  # paste 는 제어 문자를 빈칸으로 바꾼다 — 키 입력 쪽(send)으로. 실측 안 함
+        _, ws, sf = tab
+        _run(CMUX, "send", "--force", "--workspace", ws, "--surface", sf, "--", "\x15")
+    else:
+        raise RuntimeError("cantSee")
+
+
+def _new_pid(sid, old, home):
+    for f in (Path(home) / ".claude/sessions").glob("*.json"):
+        try:
+            s = json.loads(f.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if isinstance(s, dict) and s.get("sessionId") == sid and s.get("pid") != old and alive(s.get("pid")):
+            return s["pid"]
+    return None
+
+
+class ReopenFailed(RuntimeError):
+    """세션은 껐는데 다시 여는 명령을 칸에 넣지 못했다 — args = (오류, 직접 칠 명령)."""
+
+
+def revive(tab, pid, sid, name=None, home=None, wait=15.0):
+    """멈춘 세션을 끄고 같은 칸에서 claude --resume 으로 다시 연다. 멈춤 판정은 부르는 쪽(server.frozen_reason)이 먼저 한다.
+    인자는 끄기 전에 읽는다. 끝내 안 꺼지면 RuntimeError("killFailed") — 그땐 칸에 아무것도 안 보낸다.
+    새 프로세스가 그 sessionId 로 뜬 걸 봤으면 True, 기다려도 못 봤으면 False."""
+    pid = int(pid)
+    try:
+        cmd = subprocess.run(["ps", "-o", "command=", "-p", str(pid)], capture_output=True, encoding="utf-8",
+                             errors="replace", timeout=5).stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        cmd = ""
+    if not cmd:
+        raise RuntimeError("killFailed")  # 이미 없거나 못 읽음 — 남의 칸에 글을 넣지 않는다
+    keep = claude_args(cmd)
+    for sig in (signal.SIGTERM, signal.SIGKILL):
+        try:
+            os.kill(pid, sig)
+        except ProcessLookupError:
+            break
+        if _wait_gone(pid, 3.0):
+            break
+    else:
+        raise RuntimeError("killFailed")
+    if alive(pid):
+        raise RuntimeError("killFailed")
+    line = " ".join(shlex.quote(w) for w in ["claude", *keep, "--resume", sid] + (["--name", name] if name else []))
+    try:
+        time.sleep(0.5)  # 셸이 입력줄을 다시 그릴 틈
+        _clear_line(tab)
+        time.sleep(0.2)
+        answer(tab, line)
+    except RuntimeError as e:  # 끄기는 했다 — 사람이 칠 명령을 알려 준다
+        raise ReopenFailed(str(e), line) from e
+    end = time.monotonic() + wait
+    while time.monotonic() < end:
+        if _new_pid(sid, pid, home or Path.home()):
+            return True
+        time.sleep(0.5)
+    return False
