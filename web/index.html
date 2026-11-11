@@ -570,6 +570,7 @@ const T = {
     activityLog: '활동 로그', activityLogSub: '세션끼리 주고받은 메시지', setNote: '설정은 이 브라우저에만 저장됩니다.',
     logNote: '승인·질문 창 대기도 잡는다. 3초마다 다시 읽는다.', pinTitle: '오른쪽 목록 맨 위에 고정', renameTitle: '세션 이름 바꾸기', hmBtn: '고정·이름 바꾸기', pinLabel: '목록 맨 위에 고정', renameLabel: '이름 바꾸기',
     taHint: '여기에 답을 쓰면 그 세션 입력창으로 들어갑니다 (Enter 보내기 · Shift+Enter 줄바꿈 · 이미지는 붙여넣기·끌어다 놓기)',
+    taHintTouch: '여기에 답을 쓰면 그 세션 입력창으로 들어갑니다 (엔터는 줄바꿈 · 보내기 단추로 보내기)',
     attach: '사진·파일 첨부', micTitle: '말로 입력 — 한 번 더 누르면 멈춤 · 입력칸에서 스페이스를 1초 넘게 누르고 있어도 됩니다', listening: '듣는 중… 말하면 입력칸에 들어갑니다', micDenied: '마이크를 쓸 수 없습니다 — 브라우저의 마이크 권한을 확인해 주세요', micFail: '음성 입력이 멈췄습니다', micNet: '이 브라우저는 음성 인식 서버에 닿지 못합니다 — 크롬에서 열어 주세요', micNone: '이 브라우저는 말을 글로 바꿔 주지 않습니다 — 크롬에서 열어 주세요', micNo: (b) => `${b === 'Whale' ? '웨일' : b}에서는 음성 입력이 안 됩니다 — 크롬에서 열어 주세요`, exit: '세션 끝내기', compactTitle: '지금까지 대화를 요약하고 이어 갑니다(/compact)', compact: '대화 정리하기', moreBtn: '대화 작업 ▾',
     clearTitle: '지금 대화를 비우고 새로 시작합니다(/clear)', clear: '새로 시작', stop: '하던 일 중단하기', revive: '멈춘 세션 다시 열기', goTerm: '터미널로 가기', send: '보내기',
     sideGrip: '끌어서 너비 조절 · 두 번 누르면 원래대로', sheetGrip: '목록 펼치기·접기', sideFold: '오른쪽 목록 접기·펼치기 (])',
@@ -609,6 +610,7 @@ const T = {
     activityLog: 'Activity log', activityLogSub: 'Messages sessions sent each other', setNote: 'Settings are saved in this browser only.',
     logNote: 'Includes approval and question prompts. Refreshes every 3 seconds.', pinTitle: 'Pin to the top of the list', renameTitle: 'Rename session', hmBtn: 'Pin · rename', pinLabel: 'Pin to top of list', renameLabel: 'Rename',
     taHint: 'Type a reply to send it to that session (Enter to send · Shift+Enter for a new line · paste or drop images)',
+    taHintTouch: 'Type a reply to send it to that session (Return adds a new line · tap Send to send)',
     attach: 'Attach photo or file', micTitle: 'Speak to type — tap again to stop · or hold Space for over a second in the box', listening: 'Listening… your words go into the box', micDenied: 'No microphone — check the browser\'s microphone permission', micFail: 'Voice input stopped', micNet: 'This browser can\'t reach a speech recognition service — try Chrome', micNone: 'This browser doesn\'t turn speech into text — try Chrome', micNo: (b) => `Voice input doesn't work in ${b} — try Chrome`, exit: 'End session', compactTitle: 'Summarize the conversation so far and continue (/compact)', compact: 'Compact', moreBtn: 'Session ▾',
     clearTitle: 'Clear this conversation and start over (/clear)', clear: 'Start over', stop: 'Stop', revive: 'Revive frozen session', goTerm: 'Open terminal', send: 'Send',
     sideGrip: 'Drag to resize · double-click to reset', sheetGrip: 'Expand or collapse the list', sideFold: 'Collapse or expand the list (])',
@@ -2796,7 +2798,10 @@ msg.querySelector('.opts').addEventListener('click', async (e) => {
   if (await act('api/pick', { n: +b.dataset.n, label: b.dataset.label })) msg.querySelector('.note').textContent = t('picked');
   box._h = null; setTimeout(() => { const s = (S.sessions || []).find((x) => x.id === msgSid); if (s) drawOpts(s, true); }, 1200);
 });
-const TA_HINT = msg.querySelector('textarea').placeholder;
+// 손가락 화면(휴대폰·태블릿) 키보드엔 Shift+Enter 가 없다 — 엔터는 줄바꿈으로 두고 보내기 단추로 보낸다
+const TOUCH = matchMedia('(pointer: coarse)').matches;
+const TA_HINT = TOUCH ? t('taHintTouch') : msg.querySelector('textarea').placeholder;
+if (TOUCH) msg.querySelector('textarea').placeholder = TA_HINT;
 async function act(path, body) {
   const note = msg.querySelector('.note');
   try {
@@ -2955,8 +2960,10 @@ function growTa() {
 }
 msg.querySelector('textarea').addEventListener('input', growTa);
 // Enter = 보내기, Shift+Enter = 줄바꿈. 한글 조합 중(isComposing)의 Enter 는 글자 확정이라 보내지 않는다
+// 손가락 화면은 엔터 = 줄바꿈(보내기 단추로 보낸다). Ctrl/⌘+Enter 는 어디서든 보내기(외장 키보드)
 msg.querySelector('textarea').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); sendAnswer(); }
+  if (e.key !== 'Enter' || e.isComposing || e.keyCode === 229) return;
+  if (e.metaKey || e.ctrlKey || (!TOUCH && !e.shiftKey)) { e.preventDefault(); sendAnswer(); }
 });
 msg.querySelector('.stop').addEventListener('click', async (e) => {
   const s = (S.sessions || []).find((x) => x.id === msgSid), b = e.currentTarget;
